@@ -71,7 +71,7 @@ const MenuComponent: React.FC = () => {
             </View>
             <View>
               <Text className="text-base font-bold text-black dark:text-white ml-2">
-                Tag "SKIBIDI"
+                Tag &quot;SKIBIDI&quot;
               </Text>
               <Text className="text-xs text-gray-500 dark:text-gray-400 ml-2">
                 68 rue Gignac
