@@ -1,0 +1,68 @@
+name: Manual EAS Build
+
+on:
+    workflow_dispatch:
+        inputs:
+            platform:
+                description: "Plateforme (android | ios)"
+                required: true
+                default: android
+            profile:
+                description: "Profil EAS (ex: preview, production)"
+                required: true
+                default: preview
+            submit:
+                description: "Soumettre (apk/aab ou ipa) après build si configuré"
+                required: false
+                default: "false"
+
+concurrency:
+    group: eas-manual-${{ github.ref }}
+    cancel-in-progress: false
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        timeout-minutes: 45
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Install Expo & EAS CLI
+              run: npm i -g expo eas-cli
+
+            - name: Login EAS
+              if: ${{ secrets.EXPO_TOKEN }}
+              run: eas whoami || eas login --token "$EXPO_TOKEN"
+              env:
+                  EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+            - name: Build
+              run: >-
+                  eas build
+                  --platform ${{ inputs.platform }}
+                  --profile ${{ inputs.profile }}
+                  --non-interactive
+                  ${{ inputs.submit == 'true' && '--auto-submit' || '' }}
+              env:
+                  EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+            - name: Output hint
+              run: |
+                  echo "Consulte les builds: https://expo.dev/accounts"
+                  echo "Platform: ${{ inputs.platform }} | Profile: ${{ inputs.profile }}"
+                  echo "Submit: ${{ inputs.submit }}"
+
+            - name: Warn missing token
+              if: ${{ !secrets.EXPO_TOKEN }}
+              run: |
+                  echo 'EXPO_TOKEN manquant: ajoute le secret pour authentifier EAS.'
