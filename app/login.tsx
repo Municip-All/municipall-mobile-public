@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 
-
 const LoginScreen: React.FC = () => {
   const { theme } = useTheme();
   const currentTheme = theme === 'system' ? Appearance.getColorScheme() : theme;
@@ -35,57 +34,41 @@ const LoginScreen: React.FC = () => {
 
   const handleLogin = () => {
     if (!email || !password) {
-      alert("Veuillez entrer votre e-mail et votre mot de passe.");
+      alert('Veuillez entrer votre e-mail et votre mot de passe.');
       return;
     }
-    router.push("/dashboard");
+    router.push('/dashboard');
   };
 
   return (
     <ImageBackground
       source={backgroundImage}
-      className="flex-1 justify-start items-center"
-      resizeMode="cover"
-    >
-      <View className='flex-row items-center mt-20'>
-        <Image
-          source={logoSource}
-          className='w-4/12 h-24 mb-4'
-          resizeMode="contain"
-        />
-        {currentTheme === "dark" ? (
-          <MaskedView
-            maskElement={
-              <Text className='text-3xl font-inter-semibold'>Cleany®</Text>
-            }
-          >
+      className='flex-1 items-center justify-start'
+      resizeMode='cover'>
+      <View className='mt-20 flex-row items-center'>
+        <Image source={logoSource} className='mb-4 h-24 w-4/12' resizeMode='contain' />
+        {currentTheme === 'dark' ? (
+          <MaskedView maskElement={<Text className='font-inter-semibold text-3xl'>Cleany®</Text>}>
             <LinearGradient
               colors={['#06b6d4', '#3b82f6']}
               start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
-              <Text className='opacity-0 text-3xl font-inter-semibold'>
-                Cleany®
-              </Text>
+              end={{ x: 1, y: 0 }}>
+              <Text className='font-inter-semibold text-3xl opacity-0'>Cleany®</Text>
             </LinearGradient>
           </MaskedView>
         ) : (
-          <Text className='text-3xl font-inter-medium text-slate-100'>
-            Cleany®
-          </Text>
+          <Text className='font-inter-medium text-3xl text-slate-100'>Cleany®</Text>
         )}
       </View>
 
       <View className='mt-8 items-center'>
-        <Text className='text-7xl font-inter-semibold text-slate-100 mt-28'>
-          Bonjour
-        </Text>
-        <Text className='text-base font-inter-medium text-slate-100 mt-2'>
+        <Text className='font-inter-semibold mt-28 text-7xl text-slate-100'>Bonjour</Text>
+        <Text className='font-inter-medium mt-2 text-base text-slate-100'>
           Connectez-vous à votre compte
         </Text>
       </View>
 
-      <View className="w-10/12 mt-10">
+      <View className='mt-10 w-10/12'>
         {[
           {
             value: email,
@@ -101,54 +84,46 @@ const LoginScreen: React.FC = () => {
             icon: 'lock-closed-outline',
             secure: true,
           },
-        ].map(
-          (
-            { value, setter, placeholder, icon, keyboardType, secure },
-            index
-          ) => (
-            <View
-              key={index as any}
-              className="flex-row items-center w-10/12 mx-auto py-3 px-4 mb-4 rounded-full bg-slate-100"
-            >
-              <Ionicons
-                name={icon as any}
-                size={24}
-                color={currentTheme === "dark" ? "#888" : "#000"}
-                className="mr-2"
-              />
-              <TextInput
-                value={value}
-                onChangeText={setter}
-                placeholder={placeholder}
-                keyboardType={keyboardType as KeyboardTypeOptions}
-                secureTextEntry={secure}
-                autoCapitalize="none"
-                placeholderTextColor={currentTheme === "dark" ? "#888" : "#aaa"}
-                className="flex-1 text-black m-1"
-              />
-            </View>
-          )
-        )}
+        ].map(({ value, setter, placeholder, icon, keyboardType, secure }, index) => (
+          <View
+            key={index as any}
+            className='mx-auto mb-4 w-10/12 flex-row items-center rounded-full bg-slate-100 px-4 py-3'>
+            <Ionicons
+              name={icon as any}
+              size={24}
+              color={currentTheme === 'dark' ? '#888' : '#000'}
+              className='mr-2'
+            />
+            <TextInput
+              value={value}
+              onChangeText={setter}
+              placeholder={placeholder}
+              keyboardType={keyboardType as KeyboardTypeOptions}
+              secureTextEntry={secure}
+              autoCapitalize='none'
+              placeholderTextColor={currentTheme === 'dark' ? '#888' : '#aaa'}
+              className='m-1 flex-1 text-black'
+            />
+          </View>
+        ))}
 
-        <TouchableOpacity onPress={() => alert('Mot de passe oublié ?')} className='w-10/12 mx-auto'>
-          <Text className='text-sm text-gray-500 text-right mb-6'>
-            Mot de passe oublié ?
-          </Text>
+        <TouchableOpacity
+          onPress={() => alert('Mot de passe oublié ?')}
+          className='mx-auto w-10/12'>
+          <Text className='mb-6 text-right text-sm text-gray-500'>Mot de passe oublié ?</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={handleLogin}
-          className='flex-row items-center justify-center py-3 rounded-full bg-blue-500 w-2/12 ml-auto mr-7'
-        >
-          <Text className='text-white text-lg font-inter-semibold'>→</Text>
+          className='mr-7 ml-auto w-2/12 flex-row items-center justify-center rounded-full bg-blue-500 py-3'>
+          <Text className='font-inter-semibold text-lg text-white'>→</Text>
         </TouchableOpacity>
       </View>
 
       <TouchableOpacity
         onPress={() => router.push('/signup')}
-        className='absolute bottom-6 w-full items-center'
-      >
-        <Text className='font-inter-semibold text-white text-md'>
+        className='absolute bottom-6 w-full items-center'>
+        <Text className='font-inter-semibold text-md text-white'>
           Pas encore de compte ? <Text className='text-blue-500'>Créer</Text>
         </Text>
       </TouchableOpacity>

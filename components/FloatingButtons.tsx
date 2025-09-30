@@ -15,24 +15,17 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
   const router = useRouter();
 
   return (
-    <View className="absolute top-24 left-4 bg-gray-700 p-2 rounded-full">
+    <View className='absolute top-24 left-4 rounded-full bg-gray-700 p-2'>
       <TouchableOpacity
         onPress={() => router.push('/report')}
-        className="bg-white p-2 rounded-full mb-3"
-      >
-        <Ionicons name="megaphone-outline" size={20} color="#028CF3" />
+        className='mb-3 rounded-full bg-white p-2'>
+        <Ionicons name='megaphone-outline' size={20} color='#028CF3' />
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={centerOnUserLocation}
-        className="bg-white p-2 rounded-full mb-3"
-      >
-        <Ionicons name="locate-outline" size={20} color="#028CF3" />
+      <TouchableOpacity onPress={centerOnUserLocation} className='mb-3 rounded-full bg-white p-2'>
+        <Ionicons name='locate-outline' size={20} color='#028CF3' />
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={goToNearestCompost}
-        className="bg-white p-2 rounded-full"
-      >
-        <Ionicons name="leaf-outline" size={20} color="#028CF3" />
+      <TouchableOpacity onPress={goToNearestCompost} className='rounded-full bg-white p-2'>
+        <Ionicons name='leaf-outline' size={20} color='#028CF3' />
       </TouchableOpacity>
     </View>
   );

@@ -89,99 +89,94 @@ const SignalementPage: React.FC = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ImageBackground
         source={backgroundImage}
-        className="flex-1 justify-center items-center"
-        resizeMode="cover"
-      >
-        <View className="flex-1 px-6 py-10">
-          <TouchableOpacity
-            className="mb-4 mt-4 -ml-6"
-            onPress={() => router.back()}
-          >
+        className='flex-1 items-center justify-center'
+        resizeMode='cover'>
+        <View className='flex-1 px-6 py-10'>
+          <TouchableOpacity className='mt-4 mb-4 -ml-6' onPress={() => router.back()}>
             <Ionicons name='arrow-back' size={24} color='#FFFFFF' />
           </TouchableOpacity>
 
-          <View className="mb-4">
+          <View className='mb-4'>
             <Text
-              className={`text-4xl font-bold text-center ${theme === 'dark' ? 'text-blue-500' : 'text-white'
-                }`}
-            >
+              className={`text-center text-4xl font-bold ${
+                theme === 'dark' ? 'text-blue-500' : 'text-white'
+              }`}>
               SIGNALEMENT
             </Text>
             <View
-              className={`w-64 h-1 rounded-full mx-auto mt-2 ${theme === 'dark' ? 'bg-slate-400' : 'bg-white'
-                }`}
+              className={`mx-auto mt-2 h-1 w-64 rounded-full ${
+                theme === 'dark' ? 'bg-slate-400' : 'bg-white'
+              }`}
             />
           </View>
 
-          <View className="mb-8">
-            <Text className="text-base text-black dark:text-white mb-4 mx-4">
+          <View className='mb-8'>
+            <Text className='mx-4 mb-4 text-base text-black dark:text-white'>
               Que souhaitez-vous signaler ? :
             </Text>
-            <View className="flex-row items-center mb-2 mx-4">
-              <Checkbox value={isTagChecked} onValueChange={setIsTagChecked} color={isTagChecked ? '#028CF3' : undefined} />
-              <Text className="text-black dark:text-white ml-2">Un tag</Text>
+            <View className='mx-4 mb-2 flex-row items-center'>
+              <Checkbox
+                value={isTagChecked}
+                onValueChange={setIsTagChecked}
+                color={isTagChecked ? '#028CF3' : undefined}
+              />
+              <Text className='ml-2 text-black dark:text-white'>Un tag</Text>
             </View>
-            <View className="flex-row items-center mb-2 mx-4">
-              <Checkbox value={isWasteChecked} onValueChange={setIsWasteChecked} color={isWasteChecked ? '#028CF3' : undefined} />
-              <Text className="text-black dark:text-white ml-2">
-                Des déchets
-              </Text>
+            <View className='mx-4 mb-2 flex-row items-center'>
+              <Checkbox
+                value={isWasteChecked}
+                onValueChange={setIsWasteChecked}
+                color={isWasteChecked ? '#028CF3' : undefined}
+              />
+              <Text className='ml-2 text-black dark:text-white'>Des déchets</Text>
             </View>
-            <View className="flex-row items-center mx-4">
-              <Checkbox value={isOtherChecked} onValueChange={setIsOtherChecked} color={isOtherChecked ? '#028CF3' : undefined} />
-              <Text className="text-black dark:text-white ml-2">Autre</Text>
+            <View className='mx-4 flex-row items-center'>
+              <Checkbox
+                value={isOtherChecked}
+                onValueChange={setIsOtherChecked}
+                color={isOtherChecked ? '#028CF3' : undefined}
+              />
+              <Text className='ml-2 text-black dark:text-white'>Autre</Text>
             </View>
           </View>
 
-          <View className="mb-4">
-            <Text className="text-black dark:text-white mb-4 mx-4">
-              Adresse :
-            </Text>
+          <View className='mb-4'>
+            <Text className='mx-4 mb-4 text-black dark:text-white'>Adresse :</Text>
             <View
-              className={`flex-row items-center rounded-lg px-3 ${theme === 'dark' ? 'bg-slate-600' : 'bg-slate-700'
-                }`}
-            >
+              className={`flex-row items-center rounded-lg px-3 ${
+                theme === 'dark' ? 'bg-slate-600' : 'bg-slate-700'
+              }`}>
               <TextInput
                 value={address}
                 onChangeText={setAddress}
                 placeholder="Veuillez renseigner l'adresse"
                 placeholderTextColor='#FFFFFF'
-                className="flex-1 py-3 text-black dark:text-white"
+                className='flex-1 py-3 text-black dark:text-white'
               />
-              <TouchableOpacity onPress={getLocation} className="ml-2">
+              <TouchableOpacity onPress={getLocation} className='ml-2'>
                 <Ionicons name='location-outline' size={24} color='#FFFFFF' />
               </TouchableOpacity>
             </View>
           </View>
 
-          <View className="mb-4">
-            <Text className="text-black dark:text-white mb-4 mx-4">
-              Photo :
-            </Text>
+          <View className='mb-4'>
+            <Text className='mx-4 mb-4 text-black dark:text-white'>Photo :</Text>
             <TouchableOpacity
               onPress={pickImage}
-              className='w-full h-40 border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-lg flex items-center justify-center'
-            >
+              className='flex h-40 w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-400 dark:border-gray-600'>
               {selectedImage ? (
-                <Image
-                  source={{ uri: selectedImage }}
-                  className="w-full h-full rounded-lg"
-                />
+                <Image source={{ uri: selectedImage }} className='h-full w-full rounded-lg' />
               ) : (
-                <View className="flex items-center justify-center">
+                <View className='flex items-center justify-center'>
                   <Ionicons
                     name='image-outline'
                     size={50}
                     color={currentTheme === 'dark' ? '#028CF3' : '#FFFFFF'}
                   />
-                  <Text
-                    className={`${theme === 'dark' ? 'text-gray-500' : 'text-white'}`}
-                  >
+                  <Text className={`${theme === 'dark' ? 'text-gray-500' : 'text-white'}`}>
                     Déposez votre image ici, ou parcourez
                   </Text>
-                  <Text
-                    className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-white'}`}
-                  >
+                  <Text className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-white'}`}>
                     Supporté : JPG, JPEG, PNG
                   </Text>
                 </View>
@@ -189,28 +184,24 @@ const SignalementPage: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          <View className="mb-6">
-            <Text className="text-white mb-2 mx-4">
-              Souhaitez-vous ajouter quelque chose ? :
-            </Text>
+          <View className='mb-6'>
+            <Text className='mx-4 mb-2 text-white'>Souhaitez-vous ajouter quelque chose ? :</Text>
             <TextInput
               value={comments}
               onChangeText={setComments}
-              placeholder="Votre texte ici..."
-              placeholderTextColor="#888"
-              className={`w-full h-20 py-3 px-4 rounded-lg ${theme === 'dark' ? 'bg-slate-600' : 'bg-slate-700'
-                } text-white`}
+              placeholder='Votre texte ici...'
+              placeholderTextColor='#888'
+              className={`h-20 w-full rounded-lg px-4 py-3 ${
+                theme === 'dark' ? 'bg-slate-600' : 'bg-slate-700'
+              } text-white`}
               multiline
             />
           </View>
 
           <TouchableOpacity
             onPress={handleSubmit}
-            className='flex-row items-center justify-center py-4 rounded-full bg-blue-500'
-          >
-            <Text className="text-white text-lg font-semibold mr-2">
-              Signaler
-            </Text>
+            className='flex-row items-center justify-center rounded-full bg-blue-500 py-4'>
+            <Text className='mr-2 text-lg font-semibold text-white'>Signaler</Text>
             <Ionicons name='arrow-forward-outline' size={24} color='white' />
           </TouchableOpacity>
         </View>

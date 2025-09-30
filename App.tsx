@@ -30,7 +30,7 @@ export default function RootLayout() {
 
   if (!fontsLoaded) {
     return (
-      <View className='flex-1 justify-center items-center'>
+      <View className='flex-1 items-center justify-center'>
         <ActivityIndicator size='large' />
         <Text>Chargement des polices...</Text>
       </View>

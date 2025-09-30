@@ -20,25 +20,22 @@ const ProfilePage: React.FC = () => {
   const router = useRouter();
 
   return (
-    <ScrollView
-      className={`flex-1 ${theme === 'dark' ? 'bg-zinc-900' : 'bg-white'}`}
-    >
-      <View className="relative">
+    <ScrollView className={`flex-1 ${theme === 'dark' ? 'bg-zinc-900' : 'bg-white'}`}>
+      <View className='relative'>
         <ImageBackground
           source={require('../assets/images/background-blue.png')}
-          style={{ height: 160, overflow: "hidden" }}
+          style={{ height: 160, overflow: 'hidden' }}
         />
-        <View className="absolute items-center top-16 left-0 right-0">
+        <View className='absolute top-16 right-0 left-0 items-center'>
           <LinearGradient
             colors={['#06b6d4', '#3b82f6']}
             style={{
               width: 110,
               height: 110,
               borderRadius: 55,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
             <Image
               source={require('../assets/images/avatar.png')}
               style={{
@@ -46,111 +43,95 @@ const ProfilePage: React.FC = () => {
                 height: 100,
                 borderRadius: 50,
                 borderWidth: 2,
-                borderColor: "white",
+                borderColor: 'white',
               }}
             />
           </LinearGradient>
           <Text
-            className={`${theme === 'dark' ? 'text-white' : 'text-black'} text-lg font-bold mt-4`}
-          >
+            className={`${theme === 'dark' ? 'text-white' : 'text-black'} mt-4 text-lg font-bold`}>
             John Brown
           </Text>
-          <Text className="text-gray-400 text-sm">He/him</Text>
-          <View className="absolute top-[89%] right-[38%]">
-            <Ionicons name="checkmark-circle" size={18} color="#3b82f6" />
+          <Text className='text-sm text-gray-400'>He/him</Text>
+          <View className='absolute top-[89%] right-[38%]'>
+            <Ionicons name='checkmark-circle' size={18} color='#3b82f6' />
           </View>
         </View>
       </View>
 
-      <View className="p-4 mt-4 rounded-lg">
+      <View className='mt-4 rounded-lg p-4'>
         <Text
-          className={`text-xl font-bold mb-2 mt-16 ml-4 ${theme === 'dark' ? 'text-white' : 'text-black'}`}
-        >
+          className={`mt-16 mb-2 ml-4 text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
           Tous vos signalements
         </Text>
-        <View
-          className={`rounded-lg mx-4 ${theme === 'dark' ? 'bg-zinc-700' : 'bg-zinc-600'}`}
-        >
-          <TouchableOpacity className="flex-row justify-between items-center p-2 border-b border-gray-300 dark:border-slate-800">
-            <View className="flex-row items-center">
-              <View className="bg-blue-400 rounded-full p-2">
-                <Ionicons name="pricetag-outline" size={16} color="#fff" />
+        <View className={`mx-4 rounded-lg ${theme === 'dark' ? 'bg-zinc-700' : 'bg-zinc-600'}`}>
+          <TouchableOpacity className='flex-row items-center justify-between border-b border-gray-300 p-2 dark:border-slate-800'>
+            <View className='flex-row items-center'>
+              <View className='rounded-full bg-blue-400 p-2'>
+                <Ionicons name='pricetag-outline' size={16} color='#fff' />
               </View>
               <View>
-                <Text className='text-base font-bold ml-2 text-white'>
-                  Tag &quot;SKIBIDI&quot;
-                </Text>
-                <Text className="text-xs text-gray-400 ml-2">
-                  68 rue Gignac
-                </Text>
+                <Text className='ml-2 text-base font-bold text-white'>Tag &quot;SKIBIDI&quot;</Text>
+                <Text className='ml-2 text-xs text-gray-400'>68 rue Gignac</Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name='chevron-forward' size={20} color='#fff' />
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-row justify-between items-center p-2 border-b border-gray-300 dark:border-slate-800">
-            <View className="flex-row items-center">
-              <View className="bg-green-500 rounded-full p-2">
-                <Ionicons name="trash-outline" size={16} color="#fff" />
+          <TouchableOpacity className='flex-row items-center justify-between border-b border-gray-300 p-2 dark:border-slate-800'>
+            <View className='flex-row items-center'>
+              <View className='rounded-full bg-green-500 p-2'>
+                <Ionicons name='trash-outline' size={16} color='#fff' />
               </View>
               <View>
-                <Text className='text-base font-bold ml-2 text-white'>
-                  Déchets
-                </Text>
-                <Text className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                <Text className='ml-2 text-base font-bold text-white'>Déchets</Text>
+                <Text className='ml-2 text-xs text-gray-500 dark:text-gray-400'>
                   47 rue de Villier
                 </Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name='chevron-forward' size={20} color='#fff' />
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-row justify-between items-center p-2">
-            <View className="flex-row items-center">
-              <View className="bg-red-400 rounded-full p-2">
-                <Ionicons name="images-outline" size={16} color="#fff" />
+          <TouchableOpacity className='flex-row items-center justify-between p-2'>
+            <View className='flex-row items-center'>
+              <View className='rounded-full bg-red-400 p-2'>
+                <Ionicons name='images-outline' size={16} color='#fff' />
               </View>
               <View>
-                <Text className='text-base font-bold ml-2 text-white'>
-                  Autocollants
-                </Text>
-                <Text className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                <Text className='ml-2 text-base font-bold text-white'>Autocollants</Text>
+                <Text className='ml-2 text-xs text-gray-500 dark:text-gray-400'>
                   12 chemin de Papaille
                 </Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name='chevron-forward' size={20} color='#fff' />
           </TouchableOpacity>
         </View>
-        <Text className="text-sm text-gray-500 italic ml-4 mt-2">
-          Voir plus...
-        </Text>
+        <Text className='mt-2 ml-4 text-sm text-gray-500 italic'>Voir plus...</Text>
       </View>
 
-      <View className="p-4">
+      <View className='p-4'>
         <Text
-          className={`font-semibold text-lg mb-4 mx-auto ${theme === 'dark' ? 'text-white' : 'text-black'}`}
-        >
+          className={`mx-auto mb-4 text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
           Paramètres et confidentialité
         </Text>
-        <View className="flex-row items-center bg-gray-200 dark:bg-zinc-700 rounded-full px-3 py-2 -mb-4">
-          <Ionicons name="search" size={24} color="#888" className="mr-2" />
+        <View className='-mb-4 flex-row items-center rounded-full bg-gray-200 px-3 py-2 dark:bg-zinc-700'>
+          <Ionicons name='search' size={24} color='#888' className='mr-2' />
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Rechercher..."
-            placeholderTextColor="#888"
-            className="flex-1 text-base text-black dark:text-white px-2"
+            placeholder='Rechercher...'
+            placeholderTextColor='#888'
+            className='flex-1 px-2 text-base text-black dark:text-white'
           />
         </View>
       </View>
 
-      <View className="p-4">
-        <View className="flex-row items-center my-4">
-          <View className="flex-1 h-[1px] bg-gray-500 mr-4" />
+      <View className='p-4'>
+        <View className='my-4 flex-row items-center'>
+          <View className='mr-4 h-[1px] flex-1 bg-gray-500' />
           <Text
-            className={`text-base font-semibold mr-32 ${theme === 'dark' ? 'text-white' : 'text-black'}`}
-          >
+            className={`mr-32 text-base font-semibold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
             Votre compte
           </Text>
         </View>
@@ -158,148 +139,133 @@ const ProfilePage: React.FC = () => {
           colors={['#ffffff', '']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          className="rounded-full p-[2px] mx-4"
-        >
-          <TouchableOpacity className="flex-row justify-between items-center bg-gray-800 p-3 rounded-full mb-4">
-            <View className="flex-row items-center">
+          className='mx-4 rounded-full p-[2px]'>
+          <TouchableOpacity className='mb-4 flex-row items-center justify-between rounded-full bg-gray-800 p-3'>
+            <View className='flex-row items-center'>
               <Image
                 source={require('../assets/images/avatar.png')}
-                className="w-10 h-10 rounded-full mr-3"
+                className='mr-3 h-10 w-10 rounded-full'
               />
               <View>
-                <Text className="text-white text-sm font-bold">Mon compte</Text>
-                <Text className="text-gray-400 text-xs">
-                  Mot de passe, email, informations
-                </Text>
+                <Text className='text-sm font-bold text-white'>Mon compte</Text>
+                <Text className='text-xs text-gray-400'>Mot de passe, email, informations</Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="white" />
+            <Ionicons name='chevron-forward' size={20} color='white' />
           </TouchableOpacity>
         </LinearGradient>
 
-        <View className="flex-row items-center my-4">
-          <Text className={`text-base ml-32 mr-4 font-semibold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+        <View className='my-4 flex-row items-center'>
+          <Text
+            className={`mr-4 ml-32 text-base font-semibold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
             Votre application
           </Text>
-          <View className="flex-1 h-[1px] bg-gray-500" />
+          <View className='h-[1px] flex-1 bg-gray-500' />
         </View>
 
         <ThemeSelector />
 
-        <View className="mb-4">
+        <View className='mb-4'>
           <TouchableOpacity
-            className="flex-row justify-between items-center mt-4 rounded-lg"
-            onPress={() => router.push("/cgu")}
-          >
-            <View className="flex-row items-center">
+            className='mt-4 flex-row items-center justify-between rounded-lg'
+            onPress={() => router.push('/cgu')}>
+            <View className='flex-row items-center'>
               <Ionicons
-                name="document-text-outline"
+                name='document-text-outline'
                 size={24}
                 color={theme === 'dark' ? 'white' : 'black'}
-                className="mr-4"
+                className='mr-4'
               />
-              <Text
-                className={`${theme === 'dark' ? 'text-white' : 'text-black'} text-base ml-1`}
-              >
+              <Text className={`${theme === 'dark' ? 'text-white' : 'text-black'} ml-1 text-base`}>
                 Conditions générales d&apos;utilisation
               </Text>
             </View>
             <Ionicons
-              name="chevron-forward"
+              name='chevron-forward'
               size={24}
               color={theme === 'dark' ? 'white' : 'black'}
             />
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-row justify-between mt-4 items-center rounded-lg">
-            <View className="flex-row items-center">
+          <TouchableOpacity className='mt-4 flex-row items-center justify-between rounded-lg'>
+            <View className='flex-row items-center'>
               <Ionicons
-                name="language-outline"
+                name='language-outline'
                 size={24}
                 color={theme === 'dark' ? 'white' : 'black'}
-                className="mr-4"
+                className='mr-4'
               />
-              <Text
-                className={`${theme === 'dark' ? 'text-white' : 'text-black'} text-base ml-1`}
-              >
+              <Text className={`${theme === 'dark' ? 'text-white' : 'text-black'} ml-1 text-base`}>
                 Langue
               </Text>
             </View>
             <Ionicons
-              name="chevron-forward"
+              name='chevron-forward'
               size={24}
               color={theme === 'dark' ? 'white' : 'black'}
             />
           </TouchableOpacity>
         </View>
 
-        <View className="mb-4">
-          <View className="flex-row justify-between items-center mb-2">
-            <View className="border-b border-gray-500 flex-1 mr-2" />
+        <View className='mb-4'>
+          <View className='mb-2 flex-row items-center justify-between'>
+            <View className='mr-2 flex-1 border-b border-gray-500' />
             <Text
-              className={`font-semibold text-sm mr-36 ${theme === "dark" ? "text-white" : "text-black"
-                }`}
-            >
+              className={`mr-36 text-sm font-semibold ${
+                theme === 'dark' ? 'text-white' : 'text-black'
+              }`}>
               Assistance
             </Text>
           </View>
 
-          <TouchableOpacity className="flex-row justify-between items-center">
-            <View className="flex-row items-center">
+          <TouchableOpacity className='flex-row items-center justify-between'>
+            <View className='flex-row items-center'>
               <Ionicons
-                name="help-circle-outline"
+                name='help-circle-outline'
                 size={24}
                 color={theme === 'dark' ? 'white' : 'black'}
-                className="mr-4"
+                className='mr-4'
               />
-              <Text
-                className={`${theme === 'dark' ? 'text-white' : 'text-black'} text-base ml-1`}
-              >
+              <Text className={`${theme === 'dark' ? 'text-white' : 'text-black'} ml-1 text-base`}>
                 Aide
               </Text>
             </View>
             <Ionicons
-              name="chevron-forward"
+              name='chevron-forward'
               size={24}
               color={theme === 'dark' ? 'white' : 'black'}
             />
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-row justify-between items-center mt-4">
-            <View className="flex-row items-center">
+          <TouchableOpacity className='mt-4 flex-row items-center justify-between'>
+            <View className='flex-row items-center'>
               <Ionicons
-                name="information-circle-outline"
+                name='information-circle-outline'
                 size={24}
-                color={theme === "dark" ? "white" : "black"}
-                className="mr-4"
+                color={theme === 'dark' ? 'white' : 'black'}
+                className='mr-4'
               />
-              <Text
-                className={`${theme === "dark" ? "text-white" : "text-black"
-                  } text-base ml-1`}
-              >
+              <Text className={`${theme === 'dark' ? 'text-white' : 'text-black'} ml-1 text-base`}>
                 À propos
               </Text>
             </View>
             <Ionicons
-              name="chevron-forward"
+              name='chevron-forward'
               size={24}
-              color={theme === "dark" ? "white" : "black"}
+              color={theme === 'dark' ? 'white' : 'black'}
             />
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="flex-row justify-between items-center mt-12"
-            onPress={() => router.push('/')}
-          >
-            <View className="flex-row items-center">
-              <Text className="text-white text-base ml-1 text-red-600">
-                Se déconnecter
-              </Text>
+            className='mt-12 flex-row items-center justify-between'
+            onPress={() => router.push('/')}>
+            <View className='flex-row items-center'>
+              <Text className='ml-1 text-base text-red-600 text-white'>Se déconnecter</Text>
             </View>
             <Ionicons
-              name="chevron-forward"
+              name='chevron-forward'
               size={24}
-              color={theme === "dark" ? "white" : "black"}
+              color={theme === 'dark' ? 'white' : 'black'}
             />
           </TouchableOpacity>
         </View>

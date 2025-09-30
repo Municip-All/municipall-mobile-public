@@ -6,10 +6,10 @@
 // Temporary module declarations to silence missing type errors for nativewind preview version.
 // When nativewind publishes proper types for the used version, remove these.
 declare module 'nativewind' {
-    export interface UseColorSchemeResult {
-        colorScheme: 'light' | 'dark' | 'system';
-        setColorScheme: (value: 'light' | 'dark' | 'system') => void;
-        toggleColorScheme: () => void;
-    }
-    export function useColorScheme(): UseColorSchemeResult;
+  export interface UseColorSchemeResult {
+    colorScheme: 'light' | 'dark' | 'system';
+    setColorScheme: (value: 'light' | 'dark' | 'system') => void;
+    toggleColorScheme: () => void;
+  }
+  export function useColorScheme(): UseColorSchemeResult;
 }

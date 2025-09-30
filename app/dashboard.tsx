@@ -29,12 +29,12 @@ const Dashboard: React.FC = () => {
 
         <TouchableOpacity
           onPress={() => router.push('/profile')}
-          className={`absolute top-20 right-4 p-1 rounded-full ${currentTheme === 'dark' ? 'bg-sky-500' : 'bg-sky-400'
-            }`}
-        >
+          className={`absolute top-20 right-4 rounded-full p-1 ${
+            currentTheme === 'dark' ? 'bg-sky-500' : 'bg-sky-400'
+          }`}>
           <Image
             source={require('../assets/images/avatar.png')}
-            className="w-10 h-10 rounded-full"
+            className='h-10 w-10 rounded-full'
           />
         </TouchableOpacity>
 
@@ -42,19 +42,18 @@ const Dashboard: React.FC = () => {
           ref={modalizeRef}
           snapPoint={100}
           modalHeight={500}
-          handlePosition="inside"
+          handlePosition='inside'
           adjustToContentHeight={false}
           withHandle={true}
           alwaysOpen={90}
           handleStyle={{
-            backgroundColor: currentTheme === "dark" ? "#fff" : "#333",
+            backgroundColor: currentTheme === 'dark' ? '#fff' : '#333',
           }}
           modalStyle={{
-            backgroundColor: currentTheme === "dark" ? "#282828" : "#fff",
+            backgroundColor: currentTheme === 'dark' ? '#282828' : '#fff',
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
-          }}
-        >
+          }}>
           <MenuComponent />
         </Modalize>
       </View>
