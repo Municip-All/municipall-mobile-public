@@ -1,7 +1,7 @@
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import {
   Image,
   ImageBackground,
@@ -10,27 +10,27 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from "react-native";
-import ThemeSelector from "../components/ThemeSelector";
-import { useTheme } from "../context/ThemeContext";
+} from 'react-native';
+import ThemeSelector from '../components/ThemeSelector';
+import { useTheme } from '../context/ThemeContext';
 
 const ProfilePage: React.FC = () => {
   const { theme } = useTheme();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
 
   return (
     <ScrollView
-      className={`flex-1 ${theme === "dark" ? "bg-zinc-900" : "bg-white"}`}
+      className={`flex-1 ${theme === 'dark' ? 'bg-zinc-900' : 'bg-white'}`}
     >
       <View className="relative">
         <ImageBackground
-          source={require("../assets/images/background-blue.png")}
+          source={require('../assets/images/background-blue.png')}
           style={{ height: 160, overflow: "hidden" }}
         />
         <View className="absolute items-center top-16 left-0 right-0">
           <LinearGradient
-            colors={["#06b6d4", "#3b82f6"]}
+            colors={['#06b6d4', '#3b82f6']}
             style={{
               width: 110,
               height: 110,
@@ -40,7 +40,7 @@ const ProfilePage: React.FC = () => {
             }}
           >
             <Image
-              source={require("../assets/images/avatar.png")}
+              source={require('../assets/images/avatar.png')}
               style={{
                 width: 100,
                 height: 100,
@@ -51,8 +51,7 @@ const ProfilePage: React.FC = () => {
             />
           </LinearGradient>
           <Text
-            className={`${theme === "dark" ? "text-white" : "text-black"
-              } text-lg font-bold mt-4`}
+            className={`${theme === 'dark' ? 'text-white' : 'text-black'} text-lg font-bold mt-4`}
           >
             John Brown
           </Text>
@@ -65,14 +64,12 @@ const ProfilePage: React.FC = () => {
 
       <View className="p-4 mt-4 rounded-lg">
         <Text
-          className={`text-xl font-bold mb-2 mt-16 ml-4 ${theme === "dark" ? "text-white" : "text-black"
-            }`}
+          className={`text-xl font-bold mb-2 mt-16 ml-4 ${theme === 'dark' ? 'text-white' : 'text-black'}`}
         >
           Tous vos signalements
         </Text>
         <View
-          className={`rounded-lg mx-4 ${theme === "dark" ? "bg-zinc-700" : "bg-zinc-600"
-            }`}
+          className={`rounded-lg mx-4 ${theme === 'dark' ? 'bg-zinc-700' : 'bg-zinc-600'}`}
         >
           <TouchableOpacity className="flex-row justify-between items-center p-2 border-b border-gray-300 dark:border-slate-800">
             <View className="flex-row items-center">
@@ -80,7 +77,7 @@ const ProfilePage: React.FC = () => {
                 <Ionicons name="pricetag-outline" size={16} color="#fff" />
               </View>
               <View>
-                <Text className="text-base font-bold ml-2 text-white">
+                <Text className='text-base font-bold ml-2 text-white'>
                   Tag &quot;SKIBIDI&quot;
                 </Text>
                 <Text className="text-xs text-gray-400 ml-2">
@@ -97,7 +94,7 @@ const ProfilePage: React.FC = () => {
                 <Ionicons name="trash-outline" size={16} color="#fff" />
               </View>
               <View>
-                <Text className="text-base font-bold ml-2 text-white">
+                <Text className='text-base font-bold ml-2 text-white'>
                   Déchets
                 </Text>
                 <Text className="text-xs text-gray-500 dark:text-gray-400 ml-2">
@@ -114,7 +111,7 @@ const ProfilePage: React.FC = () => {
                 <Ionicons name="images-outline" size={16} color="#fff" />
               </View>
               <View>
-                <Text className="text-base font-bold ml-2 text-white">
+                <Text className='text-base font-bold ml-2 text-white'>
                   Autocollants
                 </Text>
                 <Text className="text-xs text-gray-500 dark:text-gray-400 ml-2">
@@ -132,8 +129,7 @@ const ProfilePage: React.FC = () => {
 
       <View className="p-4">
         <Text
-          className={`font-semibold text-lg mb-4 mx-auto ${theme === "dark" ? "text-white" : "text-black"
-            }`}
+          className={`font-semibold text-lg mb-4 mx-auto ${theme === 'dark' ? 'text-white' : 'text-black'}`}
         >
           Paramètres et confidentialité
         </Text>
@@ -153,14 +149,13 @@ const ProfilePage: React.FC = () => {
         <View className="flex-row items-center my-4">
           <View className="flex-1 h-[1px] bg-gray-500 mr-4" />
           <Text
-            className={`text-base font-semibold mr-32 ${theme === "dark" ? "text-white" : "text-black"
-              }`}
+            className={`text-base font-semibold mr-32 ${theme === 'dark' ? 'text-white' : 'text-black'}`}
           >
             Votre compte
           </Text>
         </View>
         <LinearGradient
-          colors={["#ffffff", ""]}
+          colors={['#ffffff', '']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           className="rounded-full p-[2px] mx-4"
@@ -168,7 +163,7 @@ const ProfilePage: React.FC = () => {
           <TouchableOpacity className="flex-row justify-between items-center bg-gray-800 p-3 rounded-full mb-4">
             <View className="flex-row items-center">
               <Image
-                source={require("../assets/images/avatar.png")}
+                source={require('../assets/images/avatar.png')}
                 className="w-10 h-10 rounded-full mr-3"
               />
               <View>
@@ -183,10 +178,7 @@ const ProfilePage: React.FC = () => {
         </LinearGradient>
 
         <View className="flex-row items-center my-4">
-          <Text
-            className={`text-base ml-32 mr-4 font-semibold ${theme === "dark" ? "text-white" : "text-black"
-              }`}
-          >
+          <Text className={`text-base ml-32 mr-4 font-semibold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
             Votre application
           </Text>
           <View className="flex-1 h-[1px] bg-gray-500" />
@@ -203,12 +195,11 @@ const ProfilePage: React.FC = () => {
               <Ionicons
                 name="document-text-outline"
                 size={24}
-                color={theme === "dark" ? "white" : "black"}
+                color={theme === 'dark' ? 'white' : 'black'}
                 className="mr-4"
               />
               <Text
-                className={`${theme === "dark" ? "text-white" : "text-black"
-                  } text-base ml-1`}
+                className={`${theme === 'dark' ? 'text-white' : 'text-black'} text-base ml-1`}
               >
                 Conditions générales d&apos;utilisation
               </Text>
@@ -216,7 +207,7 @@ const ProfilePage: React.FC = () => {
             <Ionicons
               name="chevron-forward"
               size={24}
-              color={theme === "dark" ? "white" : "black"}
+              color={theme === 'dark' ? 'white' : 'black'}
             />
           </TouchableOpacity>
 
@@ -225,12 +216,11 @@ const ProfilePage: React.FC = () => {
               <Ionicons
                 name="language-outline"
                 size={24}
-                color={theme === "dark" ? "white" : "black"}
+                color={theme === 'dark' ? 'white' : 'black'}
                 className="mr-4"
               />
               <Text
-                className={`${theme === "dark" ? "text-white" : "text-black"
-                  } text-base ml-1`}
+                className={`${theme === 'dark' ? 'text-white' : 'text-black'} text-base ml-1`}
               >
                 Langue
               </Text>
@@ -238,7 +228,7 @@ const ProfilePage: React.FC = () => {
             <Ionicons
               name="chevron-forward"
               size={24}
-              color={theme === "dark" ? "white" : "black"}
+              color={theme === 'dark' ? 'white' : 'black'}
             />
           </TouchableOpacity>
         </View>
@@ -259,12 +249,11 @@ const ProfilePage: React.FC = () => {
               <Ionicons
                 name="help-circle-outline"
                 size={24}
-                color={theme === "dark" ? "white" : "black"}
+                color={theme === 'dark' ? 'white' : 'black'}
                 className="mr-4"
               />
               <Text
-                className={`${theme === "dark" ? "text-white" : "text-black"
-                  } text-base ml-1`}
+                className={`${theme === 'dark' ? 'text-white' : 'text-black'} text-base ml-1`}
               >
                 Aide
               </Text>
@@ -272,7 +261,7 @@ const ProfilePage: React.FC = () => {
             <Ionicons
               name="chevron-forward"
               size={24}
-              color={theme === "dark" ? "white" : "black"}
+              color={theme === 'dark' ? 'white' : 'black'}
             />
           </TouchableOpacity>
 
@@ -300,7 +289,7 @@ const ProfilePage: React.FC = () => {
 
           <TouchableOpacity
             className="flex-row justify-between items-center mt-12"
-            onPress={() => router.push("/")}
+            onPress={() => router.push('/')}
           >
             <View className="flex-row items-center">
               <Text className="text-white text-base ml-1 text-red-600">

@@ -1,5 +1,5 @@
-import React from "react";
-import { ScrollView, Text } from "react-native";
+import React from 'react';
+import { ScrollView, Text } from 'react-native';
 
 const CGUPage: React.FC = () => {
   return (

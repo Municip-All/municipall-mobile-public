@@ -1,8 +1,8 @@
-import { Ionicons } from "@expo/vector-icons";
-import MaskedView from "@react-native-masked-view/masked-view";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { Ionicons } from '@expo/vector-icons';
+import MaskedView from '@react-native-masked-view/masked-view';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import {
   Appearance,
   Image,
@@ -12,18 +12,18 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from "react-native";
-import { useTheme } from "../context/ThemeContext";
+} from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 
-const HomeScreen: React.FC = () => {
+const SignupScreen: React.FC = () => {
   const { theme } = useTheme();
-  const currentTheme = theme === "system" ? Appearance.getColorScheme() : theme;
+  const currentTheme = theme === 'system' ? Appearance.getColorScheme() : theme;
   const router = useRouter();
 
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
 
   const logoSource =
     currentTheme === "dark"
@@ -167,4 +167,4 @@ const HomeScreen: React.FC = () => {
   );
 };
 
-export default HomeScreen;
+export default SignupScreen;

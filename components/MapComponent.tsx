@@ -1,15 +1,15 @@
-import axios from "axios";
-import * as Location from "expo-location";
+import axios from 'axios';
+import * as Location from 'expo-location';
 import React, {
     forwardRef,
     useEffect,
     useImperativeHandle,
     useRef,
     useState,
-} from "react";
-import { View, Text, Image } from "react-native";
-import MapView, { Marker } from "react-native-maps";
-import { useTheme } from "../context/ThemeContext";
+} from 'react';
+import { View, Text, Image } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import { useTheme } from '../context/ThemeContext';
 
 export interface MapComponentMethods {
     centerOnUserLocation: () => void;
@@ -67,7 +67,7 @@ const MapComponent = forwardRef<MapComponentMethods, object>((props, ref) => {
         const fetchCompostMarkers = async () => {
             try {
                 const response = await axios.get(
-                    "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/dechets-menagers-points-dapport-volontaire-composteurs/records?limit=30"
+                    'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/dechets-menagers-points-dapport-volontaire-composteurs/records?limit=30'
                 );
                 const compostData: Compost[] = response.data.results.map(
                     (record: any) => ({
@@ -81,7 +81,7 @@ const MapComponent = forwardRef<MapComponentMethods, object>((props, ref) => {
                 );
                 setCompostMarkers(compostData);
             } catch (error) {
-                console.error("Failed to fetch compost markers", error);
+                console.error('Failed to fetch compost markers', error);
             }
         };
 
@@ -93,8 +93,7 @@ const MapComponent = forwardRef<MapComponentMethods, object>((props, ref) => {
             try {
                 while (true) {
                     const response = await axios.get(
-                        `https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/sanisettesparis/records?limit=${limit}&offset=${page * limit
-                        }`
+                        `https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/sanisettesparis/records?limit=${limit}&offset=${page * limit}`
                     );
                     const data = response.data.results as any[];
 
@@ -115,7 +114,7 @@ const MapComponent = forwardRef<MapComponentMethods, object>((props, ref) => {
                 }
                 setToiletsMarkers(toilets);
             } catch (error) {
-                console.error("Failed to fetch toilets markers", error);
+                console.error('Failed to fetch toilets markers', error);
             }
         };
 
@@ -123,8 +122,8 @@ const MapComponent = forwardRef<MapComponentMethods, object>((props, ref) => {
             try {
                 let { status } =
                     await Location.requestForegroundPermissionsAsync();
-                if (status !== "granted") {
-                    console.error("Location permission not granted");
+                if (status !== 'granted') {
+                    console.error('Location permission not granted');
                     return;
                 }
 
@@ -134,7 +133,7 @@ const MapComponent = forwardRef<MapComponentMethods, object>((props, ref) => {
                 await fetchCompostMarkers();
                 await fetchToiletsMarkers();
             } catch (error) {
-                console.error("Error during data initialization", error);
+                console.error('Error during data initialization', error);
             }
         };
 

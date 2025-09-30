@@ -1,10 +1,10 @@
-import React from "react";
-import { Stack } from "expo-router";
-import { useFonts } from "expo-font";
-import { View, Text, ActivityIndicator } from "react-native";
-import { ThemeProvider } from "../context/ThemeContext";
+import React from 'react';
+import { Stack } from 'expo-router';
+import { useFonts } from 'expo-font';
+import { View, Text, ActivityIndicator } from 'react-native';
+import { ThemeProvider } from '../context/ThemeContext';
 
-import "../global.css";
+import '../global.css';
 
 import {
   Inter_100Thin,
@@ -16,7 +16,7 @@ import {
   Inter_700Bold,
   Inter_800ExtraBold,
   Inter_900Black,
-} from "@expo-google-fonts/inter";
+} from '@expo-google-fonts/inter';
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -33,8 +33,8 @@ export default function RootLayout() {
 
   if (!fontsLoaded) {
     return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" />
+      <View className='flex-1 justify-center items-center'>
+        <ActivityIndicator size='large' />
         <Text>Chargement des polices...</Text>
       </View>
     );
@@ -46,7 +46,7 @@ export default function RootLayout() {
         screenOptions={{
           headerShown: false,
           gestureEnabled: true,
-          animation: "slide_from_right",
+          animation: 'slide_from_right',
         }}
       />
     </ThemeProvider>

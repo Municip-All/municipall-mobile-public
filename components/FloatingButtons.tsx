@@ -1,7 +1,7 @@
-import React from "react";
-import { View, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import React from 'react';
+import { View, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 interface FloatingButtonsProps {
   centerOnUserLocation: () => void;
@@ -17,7 +17,7 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
   return (
     <View className="absolute top-24 left-4 bg-gray-700 p-2 rounded-full">
       <TouchableOpacity
-        onPress={() => router.push("/report")}
+        onPress={() => router.push('/report')}
         className="bg-white p-2 rounded-full mb-3"
       >
         <Ionicons name="megaphone-outline" size={20} color="#028CF3" />

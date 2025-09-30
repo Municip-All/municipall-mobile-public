@@ -1,18 +1,18 @@
-import React, { useRef } from "react";
-import { View, TouchableOpacity, Image, Appearance } from "react-native";
-import { Modalize } from "react-native-modalize";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import MapComponent from "../components/MapComponent";
-import type { MapComponentMethods } from "../components/MapComponent";
-import FloatingButtons from "../components/FloatingButtons";
-import MenuComponent from "../components/MenuComponent";
-import { useRouter } from "expo-router";
-import { useTheme } from "../context/ThemeContext";
+import React, { useRef } from 'react';
+import { View, TouchableOpacity, Image, Appearance } from 'react-native';
+import { Modalize } from 'react-native-modalize';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import MapComponent from '../components/MapComponent';
+import type { MapComponentMethods } from '../components/MapComponent';
+import FloatingButtons from '../components/FloatingButtons';
+import MenuComponent from '../components/MenuComponent';
+import { useRouter } from 'expo-router';
+import { useTheme } from '../context/ThemeContext';
 
 const Dashboard: React.FC = () => {
   const { theme } = useTheme();
   const systemTheme = Appearance.getColorScheme();
-  const currentTheme = theme === "system" ? systemTheme : theme;
+  const currentTheme = theme === 'system' ? systemTheme : theme;
   const modalizeRef = useRef<Modalize>(null);
   const mapRef = useRef<MapComponentMethods>(null);
   const router = useRouter();
@@ -28,12 +28,12 @@ const Dashboard: React.FC = () => {
         />
 
         <TouchableOpacity
-          onPress={() => router.push("/profile")}
-          className={`absolute top-20 right-4 p-1 rounded-full ${currentTheme === "dark" ? "bg-sky-500" : "bg-sky-400"
+          onPress={() => router.push('/profile')}
+          className={`absolute top-20 right-4 p-1 rounded-full ${currentTheme === 'dark' ? 'bg-sky-500' : 'bg-sky-400'
             }`}
         >
           <Image
-            source={require("../assets/images/avatar.png")}
+            source={require('../assets/images/avatar.png')}
             className="w-10 h-10 rounded-full"
           />
         </TouchableOpacity>
