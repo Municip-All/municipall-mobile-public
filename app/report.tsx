@@ -16,7 +16,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '@context/themecontext';
 
 const SignalementPage: React.FC = () => {
   const { theme } = useTheme();
@@ -82,8 +82,8 @@ const SignalementPage: React.FC = () => {
 
   const backgroundImage =
     currentTheme === 'dark'
-      ? require('../assets/images/background-grey.png')
-      : require('../assets/images/background-blue.png');
+      ? require('../assets/images/background_black.png')
+      : require('../assets/images/background_black.png');
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

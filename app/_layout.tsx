@@ -2,7 +2,8 @@ import React from 'react';
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { View, Text, ActivityIndicator } from 'react-native';
-import { ThemeProvider } from '../context/ThemeContext';
+import { ThemeProvider } from '@context/themecontext';
+import { AuthProvider } from '@context/authcontext';
 
 import '../global.css';
 
@@ -42,13 +43,15 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          gestureEnabled: true,
-          animation: 'slide_from_right',
-        }}
-      />
+      <AuthProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: 'slide_from_right',
+          }}
+        />
+      </AuthProvider>
     </ThemeProvider>
   );
 }

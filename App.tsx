@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { View, Text, ActivityIndicator } from 'react-native';
-import { ThemeProvider } from 'context/ThemeContext';
+import { ThemeProvider } from '@context/themecontext';
 
 import {
   Inter_100Thin,

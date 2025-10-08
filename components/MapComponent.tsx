@@ -3,7 +3,7 @@ import * as Location from 'expo-location';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { View, Text, Image } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '@context/themecontext';
 
 export interface MapComponentMethods {
   centerOnUserLocation: () => void;

@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '@context/themecontext';
 
 const SignupScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -27,12 +27,12 @@ const SignupScreen: React.FC = () => {
 
   const logoSource =
     currentTheme === 'dark'
-      ? require('../assets/images/logo-blue.png')
-      : require('../assets/images/logo-white.png');
+      ? require('../assets/images/logo_black.png')
+      : require('../assets/images/logo_white.png');
   const backgroundImage =
     currentTheme === 'dark'
-      ? require('../assets/images/background-grey.png')
-      : require('../assets/images/background-blue.png');
+      ? require('../assets/images/background_black.png')
+      : require('../assets/images/background_black.png');
 
   const handleRegister = () => {
     if (!email || !password || !username || !phone) {
@@ -51,16 +51,17 @@ const SignupScreen: React.FC = () => {
       <View className='mt-20 flex-row items-center'>
         <Image source={logoSource} className='mb-4 h-24 w-4/12' resizeMode='contain' />
         {currentTheme === 'dark' ? (
-          <MaskedView maskElement={<Text className='font-inter-semibold text-3xl'>Cleany®</Text>}>
+          <MaskedView
+            maskElement={<Text className='font-inter-semibold text-3xl'>Municip&apos;all®</Text>}>
             <LinearGradient
               colors={['#06b6d4', '#3b82f6']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}>
-              <Text className='font-inter-semibold text-3xl opacity-0'>Cleany®</Text>
+              <Text className='font-inter-semibold text-3xl opacity-0'>Municip&apos;all®</Text>
             </LinearGradient>
           </MaskedView>
         ) : (
-          <Text className='font-inter-medium text-3xl text-slate-100'>Cleany®</Text>
+          <Text className='font-inter-medium text-3xl text-slate-100'>Municip&apos;all®</Text>
         )}
       </View>
 
