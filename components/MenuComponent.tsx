@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '@context/themecontext';
 
 const MenuComponent: React.FC = () => {
   const { theme } = useTheme();
@@ -119,7 +119,7 @@ const MenuComponent: React.FC = () => {
 
       <Text
         className={`${theme === 'dark' ? 'text-white' : 'text-black'} mt-4 text-center font-bold`}>
-        Cleany®
+        Municip&apos;all®
       </Text>
     </ScrollView>
   );

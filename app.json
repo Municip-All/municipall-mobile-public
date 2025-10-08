@@ -21,14 +21,14 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "cleany.v2"
+      "bundleIdentifier": "municipall.v2"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "cleany.v2"
+      "package": "municipall.v2"
     }
   }
 }

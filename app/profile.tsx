@@ -11,8 +11,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import ThemeSelector from '../components/ThemeSelector';
-import { useTheme } from '../context/ThemeContext';
+import ThemeSelector from '@components/themeselector';
+import { useTheme } from '@context/themecontext';
 
 const ProfilePage: React.FC = () => {
   const { theme } = useTheme();
@@ -23,7 +23,7 @@ const ProfilePage: React.FC = () => {
     <ScrollView className={`flex-1 ${theme === 'dark' ? 'bg-zinc-900' : 'bg-white'}`}>
       <View className='relative'>
         <ImageBackground
-          source={require('../assets/images/background-blue.png')}
+          source={require('../assets/images/background_black.png')}
           style={{ height: 160, overflow: 'hidden' }}
         />
         <View className='absolute top-16 right-0 left-0 items-center'>

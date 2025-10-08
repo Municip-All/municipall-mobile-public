@@ -1,38 +1,64 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { useColorScheme } from 'nativewind';
 import { Appearance } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Le type pour la préférence de thème. NativeWind gère 'system' nativement.
 type ThemePreference = 'light' | 'dark' | 'system';
 
-// Le type pour notre contexte. On expose directement les fonctions de NativeWind.
 interface ThemeContextType {
-  theme: ThemePreference;
+  theme: ThemePreference; // user preference
   setTheme: (theme: ThemePreference) => void;
-  colorScheme: 'light' | 'dark';
+  colorScheme: 'light' | 'dark'; // resolved runtime scheme
 }
 
-// Création du contexte
 export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Le Provider qui va envelopper l'application
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // On utilise le hook de NativeWind qui est la SEULE source de vérité.
-  const { colorScheme, setColorScheme } = useColorScheme();
+const STORAGE_KEY = 'theme.preference';
 
-  const value: ThemeContextType = {
-    // On utilise `colorScheme` comme base pour la préférence, car c'est ce que NativeWind stocke.
-    theme: colorScheme as ThemePreference,
-    setTheme: setColorScheme,
-    // On expose le `colorScheme` actuel ('light' ou 'dark'), jamais 'system'.
-    // C'est utile pour savoir quel est le thème *réellement* appliqué.
-    colorScheme: colorScheme === 'system' ? (Appearance.getColorScheme() ?? 'light') : colorScheme,
-  };
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const nativewind = useColorScheme();
+  const [pref, setPref] = useState<ThemePreference>('system');
+
+  // Load persisted preference on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const saved = await AsyncStorage.getItem(STORAGE_KEY);
+        if (saved === 'light' || saved === 'dark' || saved === 'system') {
+          setPref(saved);
+          nativewind.setColorScheme(saved);
+        }
+      } catch {}
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const setTheme = useCallback(
+    async (t: ThemePreference) => {
+      try {
+        await AsyncStorage.setItem(STORAGE_KEY, t);
+      } catch {}
+      setPref(t);
+      nativewind.setColorScheme(t);
+    },
+    [nativewind]
+  );
+
+  const resolved: 'light' | 'dark' = useMemo(() => {
+    if (pref === 'system') {
+      return Appearance.getColorScheme() ?? 'light';
+    }
+    return pref;
+  }, [pref]);
+
+  const value: ThemeContextType = useMemo(
+    () => ({ theme: pref, setTheme, colorScheme: resolved }),
+    [pref, resolved, setTheme]
+  );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
-// Le hook personnalisé pour consommer le contexte
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
