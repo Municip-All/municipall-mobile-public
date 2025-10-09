@@ -16,11 +16,11 @@ const BottomBar: React.FC = () => {
   const labelColor = dark ? 'text-white' : 'text-black';
 
   return (
-    <View pointerEvents='box-none' className='absolute inset-x-0 bottom-4 items-center'>
+    <View pointerEvents='box-none' className='absolute inset-x-0 bottom-3 items-center'>
       <BlurView
         intensity={40}
         tint={dark ? 'dark' : 'light'}
-        className={`relative w-[92%] flex-row items-center justify-between overflow-hidden rounded-full px-4 py-3 shadow-lg`}
+        className={`relative w-[92%] flex-row items-center justify-between overflow-hidden rounded-full px-4 py-4 shadow-lg`}
         style={{
           shadowColor: '#000',
           shadowOpacity: 0.15,
