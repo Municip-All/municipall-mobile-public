@@ -1,277 +1,152 @@
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import {
-  Image,
-  ImageBackground,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import ThemeSelector from '@components/themeselector';
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
 import { useTheme } from '@context/themecontext';
+import { Ionicons } from '@expo/vector-icons';
+import BottomBar from '@components/bottombar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+// import { useAuth } from '@context/authcontext'; 
 
-const ProfilePage: React.FC = () => {
+export default function Profile() {
   const { theme } = useTheme();
-  const [searchQuery, setSearchQuery] = useState('');
+  const dark = theme === 'dark';
+  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   return (
-    <ScrollView className={`flex-1 ${theme === 'dark' ? 'bg-zinc-900' : 'bg-white'}`}>
-      <View className='relative'>
-        <ImageBackground
-          source={require('../assets/images/background_black.png')}
-          style={{ height: 160, overflow: 'hidden' }}
-        />
-        <View className='absolute top-16 right-0 left-0 items-center'>
-          <LinearGradient
-            colors={['#06b6d4', '#3b82f6']}
-            style={{
-              width: 110,
-              height: 110,
-              borderRadius: 55,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Image
-              source={require('../assets/images/avatar.png')}
-              style={{
-                width: 100,
-                height: 100,
-                borderRadius: 50,
-                borderWidth: 2,
-                borderColor: 'white',
-              }}
-            />
-          </LinearGradient>
-          <Text
-            className={`${theme === 'dark' ? 'text-white' : 'text-black'} mt-4 text-lg font-bold`}>
-            John Brown
-          </Text>
-          <Text className='text-sm text-gray-400'>He/him</Text>
-          <View className='absolute top-[89%] right-[38%]'>
-            <Ionicons name='checkmark-circle' size={18} color='#3b82f6' />
+    <View className={`flex-1 ${dark ? 'bg-zinc-950' : 'bg-[#F8FAFC]'}`}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }} bounces={false} showsVerticalScrollIndicator={false}>
+        
+        {/* Header Background */}
+        <View 
+          className="bg-[#1D4ED8] w-full px-6 pb-20 items-center pt-8"
+          style={{ paddingTop: Math.max(insets.top, 32), borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}
+        >
+          <View className="flex-row items-center w-full">
+            <View className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/40 items-center justify-center mr-4 overflow-hidden">
+               {/* Replace with User Image */}
+               <Ionicons name="person" size={40} color="rgba(255,255,255,0.7)" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-white text-2xl font-bold tracking-tight">Marie Dupont</Text>
+              <Text className="text-blue-100 text-sm mt-0.5">marie.dupont@email.fr</Text>
+            </View>
           </View>
         </View>
-      </View>
 
-      <View className='mt-4 rounded-lg p-4'>
-        <Text
-          className={`mt-16 mb-2 ml-4 text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
-          Tous vos signalements
-        </Text>
-        <View className={`mx-4 rounded-lg ${theme === 'dark' ? 'bg-zinc-700' : 'bg-zinc-600'}`}>
-          <TouchableOpacity className='flex-row items-center justify-between border-b border-gray-300 p-2 dark:border-slate-800'>
-            <View className='flex-row items-center'>
-              <View className='rounded-full bg-blue-400 p-2'>
-                <Ionicons name='pricetag-outline' size={16} color='#fff' />
-              </View>
-              <View>
-                <Text className='ml-2 text-base font-bold text-white'>Tag &quot;SKIBIDI&quot;</Text>
-                <Text className='ml-2 text-xs text-gray-400'>68 rue Gignac</Text>
-              </View>
+        {/* Stats Card */}
+        <View className="px-5 -mt-12 mb-8">
+          <View className={`rounded-[24px] px-6 py-5 flex-row justify-between shadow-xl ${dark ? 'bg-zinc-900 border border-zinc-800' : 'bg-white border border-gray-100'}`}
+                style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 20 }}>
+            <View className="items-center">
+              <Text className="text-2xl font-bold text-[#2563EB]">12</Text>
+              <Text className={`text-[11px] mt-1 font-medium ${dark ? 'text-gray-400' : 'text-slate-500'}`}>Signalements</Text>
             </View>
-            <Ionicons name='chevron-forward' size={20} color='#fff' />
-          </TouchableOpacity>
-
-          <TouchableOpacity className='flex-row items-center justify-between border-b border-gray-300 p-2 dark:border-slate-800'>
-            <View className='flex-row items-center'>
-              <View className='rounded-full bg-green-500 p-2'>
-                <Ionicons name='trash-outline' size={16} color='#fff' />
-              </View>
-              <View>
-                <Text className='ml-2 text-base font-bold text-white'>Déchets</Text>
-                <Text className='ml-2 text-xs text-gray-500 dark:text-gray-400'>
-                  47 rue de Villier
-                </Text>
-              </View>
+            <View className={`w-px h-full ${dark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+            <View className="items-center">
+              <Text className="text-2xl font-bold text-[#10B981]">8</Text>
+              <Text className={`text-[11px] mt-1 font-medium ${dark ? 'text-gray-400' : 'text-slate-500'}`}>Résolus</Text>
             </View>
-            <Ionicons name='chevron-forward' size={20} color='#fff' />
-          </TouchableOpacity>
-
-          <TouchableOpacity className='flex-row items-center justify-between p-2'>
-            <View className='flex-row items-center'>
-              <View className='rounded-full bg-red-400 p-2'>
-                <Ionicons name='images-outline' size={16} color='#fff' />
-              </View>
-              <View>
-                <Text className='ml-2 text-base font-bold text-white'>Autocollants</Text>
-                <Text className='ml-2 text-xs text-gray-500 dark:text-gray-400'>
-                  12 chemin de Papaille
-                </Text>
-              </View>
+            <View className={`w-px h-full ${dark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+            <View className="items-center">
+              <Text className="text-2xl font-bold text-[#2563EB]">5</Text>
+              <Text className={`text-[11px] mt-1 font-medium ${dark ? 'text-gray-400' : 'text-slate-500'}`}>Événements</Text>
             </View>
-            <Ionicons name='chevron-forward' size={20} color='#fff' />
-          </TouchableOpacity>
-        </View>
-        <Text className='mt-2 ml-4 text-sm text-gray-500 italic'>Voir plus...</Text>
-      </View>
-
-      <View className='p-4'>
-        <Text
-          className={`mx-auto mb-4 text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
-          Paramètres et confidentialité
-        </Text>
-        <View className='-mb-4 flex-row items-center rounded-full bg-gray-200 px-3 py-2 dark:bg-zinc-700'>
-          <Ionicons name='search' size={24} color='#888' className='mr-2' />
-          <TextInput
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholder='Rechercher...'
-            placeholderTextColor='#888'
-            className='flex-1 px-2 text-base text-black dark:text-white'
-          />
-        </View>
-      </View>
-
-      <View className='p-4'>
-        <View className='my-4 flex-row items-center'>
-          <View className='mr-4 h-[1px] flex-1 bg-gray-500' />
-          <Text
-            className={`mr-32 text-base font-semibold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
-            Votre compte
-          </Text>
-        </View>
-        <LinearGradient
-          colors={['#ffffff', '']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          className='mx-4 rounded-full p-[2px]'>
-          <TouchableOpacity className='mb-4 flex-row items-center justify-between rounded-full bg-gray-800 p-3'>
-            <View className='flex-row items-center'>
-              <Image
-                source={require('../assets/images/avatar.png')}
-                className='mr-3 h-10 w-10 rounded-full'
-              />
-              <View>
-                <Text className='text-sm font-bold text-white'>Mon compte</Text>
-                <Text className='text-xs text-gray-400'>Mot de passe, email, informations</Text>
-              </View>
-            </View>
-            <Ionicons name='chevron-forward' size={20} color='white' />
-          </TouchableOpacity>
-        </LinearGradient>
-
-        <View className='my-4 flex-row items-center'>
-          <Text
-            className={`mr-4 ml-32 text-base font-semibold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
-            Votre application
-          </Text>
-          <View className='h-[1px] flex-1 bg-gray-500' />
-        </View>
-
-        <ThemeSelector />
-
-        <View className='mb-4'>
-          <TouchableOpacity
-            className='mt-4 flex-row items-center justify-between rounded-lg'
-            onPress={() => router.push('/cgu')}>
-            <View className='flex-row items-center'>
-              <Ionicons
-                name='document-text-outline'
-                size={24}
-                color={theme === 'dark' ? 'white' : 'black'}
-                className='mr-4'
-              />
-              <Text className={`${theme === 'dark' ? 'text-white' : 'text-black'} ml-1 text-base`}>
-                Conditions générales d&apos;utilisation
-              </Text>
-            </View>
-            <Ionicons
-              name='chevron-forward'
-              size={24}
-              color={theme === 'dark' ? 'white' : 'black'}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity className='mt-4 flex-row items-center justify-between rounded-lg'>
-            <View className='flex-row items-center'>
-              <Ionicons
-                name='language-outline'
-                size={24}
-                color={theme === 'dark' ? 'white' : 'black'}
-                className='mr-4'
-              />
-              <Text className={`${theme === 'dark' ? 'text-white' : 'text-black'} ml-1 text-base`}>
-                Langue
-              </Text>
-            </View>
-            <Ionicons
-              name='chevron-forward'
-              size={24}
-              color={theme === 'dark' ? 'white' : 'black'}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <View className='mb-4'>
-          <View className='mb-2 flex-row items-center justify-between'>
-            <View className='mr-2 flex-1 border-b border-gray-500' />
-            <Text
-              className={`mr-36 text-sm font-semibold ${
-                theme === 'dark' ? 'text-white' : 'text-black'
-              }`}>
-              Assistance
-            </Text>
           </View>
+        </View>
 
-          <TouchableOpacity className='flex-row items-center justify-between'>
-            <View className='flex-row items-center'>
-              <Ionicons
-                name='help-circle-outline'
-                size={24}
-                color={theme === 'dark' ? 'white' : 'black'}
-                className='mr-4'
-              />
-              <Text className={`${theme === 'dark' ? 'text-white' : 'text-black'} ml-1 text-base`}>
-                Aide
-              </Text>
-            </View>
-            <Ionicons
-              name='chevron-forward'
-              size={24}
-              color={theme === 'dark' ? 'white' : 'black'}
-            />
-          </TouchableOpacity>
+        {/* Mon compte List */}
+        <View className="px-5 mb-8">
+          <Text className={`text-base font-bold mb-3 ${dark ? 'text-white' : 'text-slate-800'}`}>Mon compte</Text>
+          
+          <View className={`rounded-[24px] overflow-hidden shadow-sm border ${dark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-gray-100'}`}>
+            <TouchableOpacity className={`flex-row items-center justify-between p-4 border-b ${dark ? 'border-zinc-800' : 'border-gray-50'}`}>
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 items-center justify-center mr-3">
+                  <Ionicons name="person-outline" size={20} color={dark ? '#60A5FA' : '#2563EB'} />
+                </View>
+                <Text className={`text-[15px] font-medium ${dark ? 'text-gray-200' : 'text-slate-700'}`}>Informations personnelles</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={dark ? '#9CA3AF' : '#94A3B8'} />
+            </TouchableOpacity>
 
-          <TouchableOpacity className='mt-4 flex-row items-center justify-between'>
-            <View className='flex-row items-center'>
-              <Ionicons
-                name='information-circle-outline'
-                size={24}
-                color={theme === 'dark' ? 'white' : 'black'}
-                className='mr-4'
-              />
-              <Text className={`${theme === 'dark' ? 'text-white' : 'text-black'} ml-1 text-base`}>
-                À propos
-              </Text>
-            </View>
-            <Ionicons
-              name='chevron-forward'
-              size={24}
-              color={theme === 'dark' ? 'white' : 'black'}
-            />
-          </TouchableOpacity>
+            <TouchableOpacity className={`flex-row items-center justify-between p-4 border-b ${dark ? 'border-zinc-800' : 'border-gray-50'}`}>
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 items-center justify-center mr-3">
+                  <Ionicons name="location-outline" size={20} color={dark ? '#60A5FA' : '#2563EB'} />
+                </View>
+                <Text className={`text-[15px] font-medium ${dark ? 'text-gray-200' : 'text-slate-700'}`}>Adresse par défaut</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={dark ? '#9CA3AF' : '#94A3B8'} />
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            className='mt-12 flex-row items-center justify-between'
-            onPress={() => router.push('/')}>
-            <View className='flex-row items-center'>
-              <Text className='ml-1 text-base text-red-600 text-white'>Se déconnecter</Text>
-            </View>
-            <Ionicons
-              name='chevron-forward'
-              size={24}
-              color={theme === 'dark' ? 'white' : 'black'}
-            />
+            <TouchableOpacity className="flex-row items-center justify-between p-4">
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 items-center justify-center mr-3">
+                  <Ionicons name="notifications-outline" size={20} color={dark ? '#60A5FA' : '#2563EB'} />
+                </View>
+                <Text className={`text-[15px] font-medium ${dark ? 'text-gray-200' : 'text-slate-700'}`}>Notifications</Text>
+              </View>
+              <View className="flex-row items-center">
+                <View className="w-6 h-6 rounded-full bg-[#1D4ED8] items-center justify-center mr-2">
+                  <Text className="text-white text-[10px] font-bold">3</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={dark ? '#9CA3AF' : '#94A3B8'} />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Paramètres List */}
+        <View className="px-5 mb-8">
+          <Text className={`text-base font-bold mb-3 ${dark ? 'text-white' : 'text-slate-800'}`}>Paramètres</Text>
+          
+          <View className={`rounded-[24px] overflow-hidden shadow-sm border ${dark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-gray-100'}`}>
+            <TouchableOpacity className={`flex-row items-center justify-between p-4 border-b ${dark ? 'border-zinc-800' : 'border-gray-50'}`}>
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-900/30 items-center justify-center mr-3">
+                  <Ionicons name="shield-checkmark-outline" size={20} color={dark ? '#818CF8' : '#4F46E5'} />
+                </View>
+                <Text className={`text-[15px] font-medium ${dark ? 'text-gray-200' : 'text-slate-700'}`}>Confidentialité et sécurité</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={dark ? '#9CA3AF' : '#94A3B8'} />
+            </TouchableOpacity>
+
+            <TouchableOpacity className="flex-row items-center justify-between p-4">
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-900/30 items-center justify-center mr-3">
+                  <Ionicons name="settings-outline" size={20} color={dark ? '#818CF8' : '#4F46E5'} />
+                </View>
+                <Text className={`text-[15px] font-medium ${dark ? 'text-gray-200' : 'text-slate-700'}`}>Préférences</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={dark ? '#9CA3AF' : '#94A3B8'} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Support */}
+        <View className="px-5">
+          <Text className={`text-base font-bold mb-3 ${dark ? 'text-white' : 'text-slate-800'}`}>Support</Text>
+          
+          <View className={`rounded-[24px] overflow-hidden shadow-sm border ${dark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-gray-100'}`}>
+            <TouchableOpacity className="flex-row items-center justify-between p-4">
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 items-center justify-center mr-3">
+                  <Ionicons name="help-buoy-outline" size={20} color={dark ? '#60A5FA' : '#2563EB'} />
+                </View>
+                <Text className={`text-[15px] font-medium ${dark ? 'text-gray-200' : 'text-slate-700'}`}>Centre d'aide</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={dark ? '#9CA3AF' : '#94A3B8'} />
+            </TouchableOpacity>
+          </View>
+          
+          <TouchableOpacity className="mt-8 mb-6 mx-auto">
+            <Text className="text-red-500 font-semibold text-base">Se déconnecter</Text>
           </TouchableOpacity>
         </View>
-      </View>
-    </ScrollView>
+
+      </ScrollView>
+      <BottomBar />
+    </View>
   );
-};
-
-export default ProfilePage;
+}
