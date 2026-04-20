@@ -1,20 +1,17 @@
 import React, { forwardRef, useImperativeHandle } from 'react';
 import { View, Text } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '@context/themecontext';
 
-// Même interface publique que la version native
 export interface MapComponentMethods {
   centerOnUserLocation: () => void;
   goToNearestCompost: () => Promise<void> | void;
 }
 
-// Fallback web léger sans dépendances natives
 const MapComponent = forwardRef<MapComponentMethods, object>((_props, ref) => {
   const { theme } = useTheme();
 
   useImperativeHandle(ref, () => ({
     centerOnUserLocation: () => {
-      // no-op sur web
       console.info('[MapComponent.web] centerOnUserLocation() noop');
     },
     goToNearestCompost: async () => {

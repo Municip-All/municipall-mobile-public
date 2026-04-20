@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 # Annule les runs précédents sur la même ref (évite surcharge)
 concurrency:
@@ -139,7 +139,7 @@ jobs:
 
   preview-pr:
     name: PR Preview Comment
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     needs: build-web
     permissions:

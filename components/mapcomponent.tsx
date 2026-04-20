@@ -3,7 +3,7 @@ import * as Location from 'expo-location';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { View, Text, Image } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '@context/themecontext';
 
 export interface MapComponentMethods {
   centerOnUserLocation: () => void;
@@ -21,7 +21,13 @@ type GeoPoint = { lat: number; lon: number };
 type Compost = { operateur?: string; adresse?: string; geo_point_2d: GeoPoint };
 type Toilet = { adresse?: string; geo_point_2d: GeoPoint };
 
-const MapComponent = forwardRef<MapComponentMethods, object>((props, ref) => {
+interface MapComponentProps {
+  showComposts?: boolean;
+  showToilets?: boolean;
+}
+
+const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, ref) => {
+  const { showComposts = true, showToilets = true } = props || {};
   const { theme } = useTheme();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [compostMarkers, setCompostMarkers] = useState<Compost[]>([]);
@@ -185,38 +191,40 @@ const MapComponent = forwardRef<MapComponentMethods, object>((props, ref) => {
             longitudeDelta: 0.0421,
           }}
           showsUserLocation>
-          {compostMarkers.map((marker, index) => (
-            <Marker
-              key={`compost-${index}`}
-              coordinate={{
-                latitude: marker.geo_point_2d.lat,
-                longitude: marker.geo_point_2d.lon,
-              }}
-              title={marker.operateur || 'Composteur'}
-              description={marker.adresse}>
-              <Image
-                source={require('../assets/images/ping_composte.png')}
-                style={{ width: 40, height: 40 }}
-                resizeMode='contain'
-              />
-            </Marker>
-          ))}
-          {toiletsMarkers.map((marker, index) => (
-            <Marker
-              key={`toilet-${index}`}
-              coordinate={{
-                latitude: marker.geo_point_2d.lat,
-                longitude: marker.geo_point_2d.lon,
-              }}
-              title='Toilette publique'
-              description={marker.adresse}>
-              <Image
-                source={require('../assets/images/ping_toilet.png')}
-                style={{ width: 40, height: 40 }}
-                resizeMode='contain'
-              />
-            </Marker>
-          ))}
+          {showComposts &&
+            compostMarkers.map((marker, index) => (
+              <Marker
+                key={`compost-${index}`}
+                coordinate={{
+                  latitude: marker.geo_point_2d.lat,
+                  longitude: marker.geo_point_2d.lon,
+                }}
+                title={marker.operateur || 'Composteur'}
+                description={marker.adresse}>
+                <Image
+                  source={require('../assets/images/ping_composte.png')}
+                  style={{ width: 40, height: 40 }}
+                  resizeMode='contain'
+                />
+              </Marker>
+            ))}
+          {showToilets &&
+            toiletsMarkers.map((marker, index) => (
+              <Marker
+                key={`toilet-${index}`}
+                coordinate={{
+                  latitude: marker.geo_point_2d.lat,
+                  longitude: marker.geo_point_2d.lon,
+                }}
+                title='Toilette publique'
+                description={marker.adresse}>
+                <Image
+                  source={require('../assets/images/ping_toilet.png')}
+                  style={{ width: 40, height: 40 }}
+                  resizeMode='contain'
+                />
+              </Marker>
+            ))}
         </MapView>
       ) : (
         <View className='flex-1 items-center justify-center'>

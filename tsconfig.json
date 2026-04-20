@@ -4,9 +4,15 @@
     "strict": true,
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
+    "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["src/*"]
+      "@/*": ["*"],
+      "@app/*": ["app/*"],
+      "@components/*": ["components/*"],
+      "@context/*": ["context/*"],
+      "@assets/*": ["assets/*"],
+      "@constants/*": ["constants/*"]
     }
   }
 }
