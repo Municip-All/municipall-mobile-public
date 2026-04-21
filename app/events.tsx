@@ -1,161 +1,258 @@
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useTheme } from '@context/themecontext';
+import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
 import BottomBar from '@components/bottombar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-type EventItem = {
-  id: string;
-  title: string;
-  date: string; // ISO date or display
-  time?: string;
-  location: string;
-  tags?: string[];
-  description?: string;
-};
-
-const Tag: React.FC<{ label: string }> = ({ label }) => (
-  <View className='mr-2 rounded-full bg-black/5 px-2 py-0.5 dark:bg-white/10'>
-    <Text className='text-xs text-gray-700 dark:text-gray-200'>{label}</Text>
-  </View>
-);
-
-const EventCard: React.FC<{ item: EventItem; dark: boolean }> = ({ item, dark }) => {
-  return (
-    <View
-      className={`mx-3 mb-4 rounded-2xl p-4 shadow-sm ${dark ? 'bg-zinc-800' : 'bg-white'}`}
-      style={{
-        shadowColor: '#000',
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 3 },
-      }}>
-      <View className='flex-row items-center justify-between'>
-        <Text className={`flex-1 text-base font-semibold ${dark ? 'text-white' : 'text-black'}`}>
-          {item.title}
-        </Text>
-        <View className='ml-2 rounded-full bg-blue-500/10 px-2 py-1'>
-          <Text className='text-xs font-medium text-blue-600 dark:text-blue-400'>
-            {item.date}
-            {item.time ? ` • ${item.time}` : ''}
-          </Text>
-        </View>
-      </View>
-
-      {!!item.tags?.length && (
-        <View className='mt-2 flex-row flex-wrap'>
-          {item.tags.map((t) => (
-            <Tag key={t} label={t} />
-          ))}
-        </View>
-      )}
-
-      <View className='mt-3 flex-row items-center'>
-        <Ionicons name='location-outline' size={16} color={dark ? '#cbd5e1' : '#475569'} />
-        <Text className={`ml-1 text-[13px] ${dark ? 'text-gray-300' : 'text-slate-600'}`}>
-          {item.location}
-        </Text>
-      </View>
-
-      {!!item.description && (
-        <Text className={`mt-3 text-[13px] leading-5 ${dark ? 'text-gray-200' : 'text-slate-700'}`}>
-          {item.description}
-        </Text>
-      )}
-
-      <View className='mt-4 flex-row justify-end space-x-3'>
-        <TouchableOpacity
-          className='rounded-full bg-blue-500/10 px-3 py-1.5'
-          accessibilityRole='button'
-          accessibilityLabel={`Ajouter ${item.title} au calendrier`}>
-          <Text className='text-xs font-medium text-blue-600 dark:text-blue-400'>Calendrier</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className='rounded-full bg-emerald-500/10 px-3 py-1.5'
-          accessibilityRole='button'
-          accessibilityLabel={`Participer à ${item.title}`}>
-          <Text className='text-xs font-medium text-emerald-600 dark:text-emerald-400'>
-            Je participe
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
-
-const EventsScreen: React.FC = () => {
+export default function Events() {
   const { theme } = useTheme();
+  const { config } = useCity();
   const dark = theme === 'dark';
+  const insets = useSafeAreaInsets();
+  const [activeFilter, setActiveFilter] = useState('Tous');
 
-  const data = useMemo<EventItem[]>(
-    () => [
-      {
-        id: '1',
-        title: 'Atelier compostage - Quartier Est',
-        date: 'Sam. 15 Nov',
-        time: '10:00',
-        location: 'Parc des Lilas, 12e',
-        tags: ['Compost', 'Atelier'],
-        description:
-          'Rejoignez-nous pour un atelier pratique sur le compostage : tri, bonnes pratiques et astuces.',
-      },
-      {
-        id: '2',
-        title: 'Journée propreté & sensibilisation',
-        date: 'Dim. 23 Nov',
-        time: '14:00',
-        location: 'Place de la République',
-        tags: ['Sensibilisation', 'Propreté'],
-        description:
-          'Stand d’information, distribution de kits, échanges avec les habitants et bénévoles.',
-      },
-      {
-        id: '3',
-        title: 'Visite site de tri - Portes ouvertes',
-        date: 'Mer. 3 Déc',
-        location: 'Centre de tri Ivry',
-        tags: ['Tri', 'Découverte'],
-      },
-    ],
-    []
-  );
+  const primaryColor = config?.theme.primaryColor || '#1D4ED8';
+  const filters = ['Tous', 'Mairie', 'Associations', 'Sports'];
 
   return (
-    <View className={`flex-1 ${dark ? 'bg-zinc-900' : 'bg-slate-50'}`}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }} className='px-4 pt-6'>
-        <View className='mx-4 my-16 mb-4 flex-row items-center justify-between'>
-          <View>
-            <Text className={`text-xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
-              Évènements
-            </Text>
-            <Text className={`mt-1 text-xs ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
-              Prochains rendez-vous municipaux et citoyens
-            </Text>
-          </View>
-          <View className='flex-row items-center space-x-2'>
-            <TouchableOpacity className='rounded-full bg-white p-2 shadow dark:bg-zinc-800'>
-              <Ionicons name='filter-outline' size={18} color={dark ? '#e5e7eb' : '#0f172a'} />
-            </TouchableOpacity>
-            <TouchableOpacity className='rounded-full bg-white p-2 shadow dark:bg-zinc-800'>
-              <Ionicons name='search-outline' size={18} color={dark ? '#e5e7eb' : '#0f172a'} />
-            </TouchableOpacity>
-          </View>
+    <View className={`flex-1 ${dark ? 'bg-zinc-950' : 'bg-[#F8FAFC]'}`}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 120 }}
+        bounces={false}
+        showsVerticalScrollIndicator={false}>
+        {/* Header Background */}
+        <View
+          className='mb-6 w-full px-6 pb-6'
+          style={{
+            backgroundColor: primaryColor,
+            paddingTop: Math.max(insets.top, 40),
+            borderBottomLeftRadius: 32,
+            borderBottomRightRadius: 32,
+          }}>
+          <Text className='text-3xl font-bold tracking-tight text-white'>Agenda Citoyen</Text>
+          <Text className='mt-1 text-sm font-medium text-white/80'>
+            Événements et réunions locales
+          </Text>
         </View>
 
-        {data.map((item) => (
-          <EventCard key={item.id} item={item} dark={dark} />
-        ))}
+        {/* Filters Overlaying Header */}
+        <View className='px-5'>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingRight: 20 }}>
+            {filters.map((filter) => {
+              const isActive = filter === activeFilter;
+              return (
+                <TouchableOpacity
+                  key={filter}
+                  onPress={() => setActiveFilter(filter)}
+                  className={`mr-3 flex-row items-center rounded-full border px-5 py-2.5 shadow-sm ${dark ? 'border-zinc-800' : 'border-gray-200'}`}
+                  style={
+                    isActive
+                      ? { backgroundColor: primaryColor, borderColor: primaryColor }
+                      : { backgroundColor: dark ? '#18181b' : '#FFFFFF' }
+                  }>
+                  {filter === 'Mairie' && (
+                    <Ionicons
+                      name='business'
+                      size={14}
+                      color={isActive ? '#FFF' : dark ? '#CBD5E1' : '#475569'}
+                      style={{ marginRight: 6 }}
+                    />
+                  )}
+                  {filter === 'Associations' && (
+                    <Ionicons
+                      name='people'
+                      size={14}
+                      color={isActive ? '#FFF' : dark ? '#CBD5E1' : '#475569'}
+                      style={{ marginRight: 6 }}
+                    />
+                  )}
+                  {filter === 'Sports' && (
+                    <Ionicons
+                      name='football'
+                      size={14}
+                      color={isActive ? '#FFF' : dark ? '#CBD5E1' : '#475569'}
+                      style={{ marginRight: 6 }}
+                    />
+                  )}
+                  <Text
+                    className={`text-[13px] font-medium ${
+                      isActive ? 'text-white' : dark ? 'text-gray-300' : 'text-slate-700'
+                    }`}>
+                    {filter}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
 
-        <View className='mt-6 items-center'>
-          <Text className={`text-xs ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
-            Plus d’évènements bientôt…
-          </Text>
+        {/* Events List */}
+        <View className='mt-6 px-5'>
+          {/* Card 1 */}
+          <View
+            className={`mb-5 rounded-[24px] border p-5 shadow-sm ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-gray-100 bg-white'}`}>
+            <View className='mb-4 flex-row'>
+              <View
+                className='mr-4 h-14 w-14 items-center justify-center rounded-2xl'
+                style={{ backgroundColor: `${primaryColor}15` }}>
+                <Ionicons name='business' size={28} color={dark ? '#60A5FA' : primaryColor} />
+              </View>
+              <View className='flex-1 justify-center'>
+                <Text
+                  className={`text-lg leading-tight font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>
+                  Conseil Municipal
+                </Text>
+                <Text className={`mt-0.5 text-[13px] ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
+                  Mairie
+                </Text>
+              </View>
+            </View>
+
+            <View className='mb-5 space-y-2'>
+              <View className='flex-row items-center'>
+                <Ionicons
+                  name='calendar-outline'
+                  size={16}
+                  color={dark ? '#9CA3AF' : '#64748B'}
+                  className='mr-2'
+                />
+                <Text
+                  className={`ml-2 text-[13px] font-medium ${dark ? 'text-gray-300' : 'text-slate-700'}`}>
+                  25 avril 2026 • 18h30
+                </Text>
+              </View>
+              <View className='flex-row items-center'>
+                <Ionicons
+                  name='location-outline'
+                  size={16}
+                  color={dark ? '#9CA3AF' : '#64748B'}
+                  className='mr-2'
+                />
+                <Text
+                  className={`ml-2 text-[13px] font-medium ${dark ? 'text-gray-300' : 'text-slate-700'}`}>
+                  Hôtel de Ville
+                </Text>
+              </View>
+              <View className='flex-row items-center'>
+                <Ionicons
+                  name='people-outline'
+                  size={16}
+                  color={dark ? '#9CA3AF' : '#64748B'}
+                  className='mr-2'
+                />
+                <Text
+                  className={`ml-2 text-[13px] font-medium ${dark ? 'text-gray-300' : 'text-slate-700'}`}>
+                  45 participants
+                </Text>
+              </View>
+            </View>
+
+            <View className='flex-row items-center justify-between border-t border-gray-100 pt-4 dark:border-zinc-800'>
+              <View
+                className='rounded-full px-3 py-1.5'
+                style={{ backgroundColor: `${primaryColor}15` }}>
+                <Text className='text-xs font-semibold' style={{ color: primaryColor }}>
+                  Mairie
+                </Text>
+              </View>
+              <TouchableOpacity className='flex-row items-center rounded-full bg-gray-50 px-4 py-2 dark:bg-zinc-800'>
+                <Ionicons
+                  name='notifications-outline'
+                  size={14}
+                  color={dark ? '#E2E8F0' : '#1E293B'}
+                />
+                <Text
+                  className={`ml-1.5 text-[13px] font-semibold ${dark ? 'text-gray-200' : 'text-slate-900'}`}>
+                  Me rappeler
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Card 2 */}
+          <View
+            className={`mb-5 rounded-[24px] border p-5 shadow-sm ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-gray-100 bg-white'}`}>
+            <View className='mb-4 flex-row'>
+              <View className='mr-4 h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 dark:bg-orange-900/30'>
+                <Ionicons name='basket' size={28} color={dark ? '#FDBA74' : '#EA580C'} />
+              </View>
+              <View className='flex-1 justify-center'>
+                <Text
+                  className={`text-lg leading-tight font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>
+                  Marché des Producteurs Locaux
+                </Text>
+                <Text className={`mt-0.5 text-[13px] ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
+                  Association des Commerçants
+                </Text>
+              </View>
+            </View>
+
+            <View className='mb-5 space-y-2'>
+              <View className='flex-row items-center'>
+                <Ionicons
+                  name='calendar-outline'
+                  size={16}
+                  color={dark ? '#9CA3AF' : '#64748B'}
+                  className='mr-2'
+                />
+                <Text
+                  className={`ml-2 text-[13px] font-medium ${dark ? 'text-gray-300' : 'text-slate-700'}`}>
+                  27 avril 2026 • 09h00 - 13h00
+                </Text>
+              </View>
+              <View className='flex-row items-center'>
+                <Ionicons
+                  name='location-outline'
+                  size={16}
+                  color={dark ? '#9CA3AF' : '#64748B'}
+                  className='mr-2'
+                />
+                <Text
+                  className={`ml-2 text-[13px] font-medium ${dark ? 'text-gray-300' : 'text-slate-700'}`}>
+                  Place du Marché
+                </Text>
+              </View>
+              <View className='flex-row items-center'>
+                <Ionicons
+                  name='people-outline'
+                  size={16}
+                  color={dark ? '#9CA3AF' : '#64748B'}
+                  className='mr-2'
+                />
+                <Text
+                  className={`ml-2 text-[13px] font-medium ${dark ? 'text-gray-300' : 'text-slate-700'}`}>
+                  120 participants
+                </Text>
+              </View>
+            </View>
+
+            <View className='flex-row items-center justify-between border-t border-gray-100 pt-4 dark:border-zinc-800'>
+              <View className='rounded-full bg-purple-100 px-3 py-1.5 dark:bg-purple-900/40'>
+                <Text className='text-xs font-semibold text-purple-700 dark:text-purple-400'>
+                  Association
+                </Text>
+              </View>
+              <TouchableOpacity className='flex-row items-center rounded-full bg-gray-50 px-4 py-2 dark:bg-zinc-800'>
+                <Ionicons
+                  name='notifications-outline'
+                  size={14}
+                  color={dark ? '#E2E8F0' : '#1E293B'}
+                />
+                <Text
+                  className={`ml-1.5 text-[13px] font-semibold ${dark ? 'text-gray-200' : 'text-slate-900'}`}>
+                  Me rappeler
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </ScrollView>
-
       <BottomBar />
     </View>
   );
-};
-
-export default EventsScreen;
+}

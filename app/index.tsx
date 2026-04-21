@@ -4,8 +4,8 @@ import { useRouter } from 'expo-router';
 const IndexRedirect: React.FC = () => {
   const router = useRouter();
   useEffect(() => {
-    // Start app on the map (dashboard) for everyone
-    router.replace('/dashboard');
+    // Start app on the home screen
+    router.replace('/home');
   }, [router]);
   return null;
 };

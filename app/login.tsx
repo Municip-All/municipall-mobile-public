@@ -1,143 +1,239 @@
-import { Ionicons } from '@expo/vector-icons';
-import MaskedView from '@react-native-masked-view/masked-view';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Appearance,
-  Image,
-  ImageBackground,
-  KeyboardTypeOptions,
+  View,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@context/themecontext';
 import { useAuth } from '@context/authcontext';
+import { useCity } from '@context/citycontext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
+import BottomBar from '@components/bottombar';
+import apiClient from '../services/apiClient';
 
 const LoginScreen: React.FC = () => {
   const { theme } = useTheme();
-  const currentTheme = theme === 'system' ? Appearance.getColorScheme() : theme;
+  const { config } = useCity();
+  const dark = theme === 'dark';
   const router = useRouter();
-  const { redirectTo } = useLocalSearchParams<{ redirectTo?: string }>();
   const { login } = useAuth();
+  const { redirectTo } = useLocalSearchParams<{ redirectTo?: string }>();
+  const insets = useSafeAreaInsets();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const logoSource =
-    currentTheme === 'dark'
-      ? require('../assets/images/logo_black.png')
-      : require('../assets/images/logo_white.png');
+  const primaryColor = config?.theme.primaryColor || '#1D4ED8';
+  const secondaryColor = config?.theme.secondaryColor || '#3B82F6';
+  const useGradient = config?.theme.useGradient ?? false;
+  const appName = config?.name || "Municip'All";
 
-  const backgroundImage =
-    currentTheme === 'dark'
-      ? require('../assets/images/background_black.png')
-      : require('../assets/images/background_black.png');
-
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
-      alert('Veuillez entrer votre e-mail et votre mot de passe.');
+      Alert.alert('Erreur', 'Veuillez entrer votre e-mail et votre mot de passe.');
       return;
     }
-    login();
-    // If we have a redirect target (e.g., profile/report), go there; else to map
-    if (redirectTo && typeof redirectTo === 'string') {
-      router.replace(redirectTo);
-    } else {
-      router.replace('/dashboard');
+
+    setIsSubmitting(true);
+    try {
+      const response = await apiClient.post('/auth/login', {
+        email,
+        password,
+      });
+
+      const { access_token, user } = response.data;
+      await login(access_token, user); // Update context state and persist
+
+      if (redirectTo && typeof redirectTo === 'string') {
+        router.replace(redirectTo);
+      } else {
+        router.replace('/home');
+      }
+    } catch (error: any) {
+      console.error('Login error', error);
+      Alert.alert('Échec de la connexion', 'Identifiants incorrects ou serveur indisponible.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <ImageBackground
-      source={backgroundImage}
-      className='flex-1 items-center justify-start'
-      resizeMode='cover'>
-      <View className='mt-20 flex-row items-center'>
-        <Image source={logoSource} className='mb-4 h-24 w-4/12' resizeMode='contain' />
-        {currentTheme === 'dark' ? (
-          <MaskedView
-            maskElement={<Text className='font-inter-semibold text-3xl'>Municip&apos;all®</Text>}>
-            <LinearGradient
-              colors={['#06b6d4', '#3b82f6']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}>
-              <Text className='font-inter-semibold text-3xl opacity-0'>Municip&apos;all®</Text>
-            </LinearGradient>
-          </MaskedView>
-        ) : (
-          <Text className='font-inter-medium text-3xl text-slate-100'>Municip&apos;all®</Text>
-        )}
-      </View>
+    <View className='flex-1 bg-[#F8FAFC] px-6 dark:bg-zinc-950'>
+      <LinearGradient
+        colors={[
+          dark ? '#000000' : useGradient ? '#E0E7FF' : '#F8FAFC',
+          dark ? '#18181b' : '#F8FAFC',
+        ]}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
 
-      <View className='mt-8 items-center'>
-        <Text className='font-inter-semibold mt-28 text-7xl text-slate-100'>Bonjour</Text>
-        <Text className='font-inter-medium mt-2 text-base text-slate-100'>
-          Connectez-vous à votre compte
-        </Text>
-      </View>
-
-      <View className='mt-10 w-10/12'>
-        {[
-          {
-            value: email,
-            setter: setEmail,
-            placeholder: 'Email',
-            icon: 'mail-outline',
-            keyboardType: 'email-address',
-          },
-          {
-            value: password,
-            setter: setPassword,
-            placeholder: 'Mot de passe',
-            icon: 'lock-closed-outline',
-            secure: true,
-          },
-        ].map(({ value, setter, placeholder, icon, keyboardType, secure }, index) => (
+      {/* Decorative Brand Circles representing White Label custom color */}
+      {useGradient && (
+        <>
           <View
-            key={index as any}
-            className='mx-auto mb-4 w-10/12 flex-row items-center rounded-full bg-slate-100 px-4 py-3'>
-            <Ionicons
-              name={icon as any}
-              size={24}
-              color={currentTheme === 'dark' ? '#888' : '#000'}
-              className='mr-2'
-            />
-            <TextInput
-              value={value}
-              onChangeText={setter}
-              placeholder={placeholder}
-              keyboardType={keyboardType as KeyboardTypeOptions}
-              secureTextEntry={secure}
-              autoCapitalize='none'
-              placeholderTextColor={currentTheme === 'dark' ? '#888' : '#aaa'}
-              className='m-1 flex-1 text-black'
-            />
+            className='absolute rounded-full opacity-40 blur-3xl'
+            style={{
+              top: -100,
+              right: -100,
+              width: 300,
+              height: 300,
+              backgroundColor: secondaryColor,
+              shadowColor: primaryColor,
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 1,
+              shadowRadius: 50,
+            }}
+          />
+          <View
+            className='absolute rounded-full opacity-20 blur-3xl'
+            style={{
+              bottom: -50,
+              left: -50,
+              width: 200,
+              height: 200,
+              backgroundColor: primaryColor,
+            }}
+          />
+        </>
+      )}
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className='relative flex-1 justify-center'
+        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+        <View className='mb-10 items-center justify-center'>
+          <View
+            className='mb-6 h-20 w-20 items-center justify-center rounded-[28px] shadow-xl'
+            style={{
+              backgroundColor: primaryColor,
+              shadowColor: primaryColor,
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.3,
+              shadowRadius: 20,
+            }}>
+            <Ionicons name='business' size={40} color='#FFFFFF' />
           </View>
-        ))}
+          <Text
+            className={`mb-2 text-4xl font-extrabold tracking-tight ${dark ? 'text-white' : 'text-slate-900'}`}>
+            Bienvenue.
+          </Text>
+          <Text className={`text-base font-medium ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
+            Connectez-vous à {appName}
+          </Text>
+        </View>
+
+        <View className='w-full items-center'>
+          {/* Glassmorphic Container for the form */}
+          <BlurView
+            intensity={dark ? 20 : 60}
+            tint={dark ? 'dark' : 'light'}
+            className='w-full overflow-hidden rounded-[32px] border border-white/20 p-6 dark:border-white/10'>
+            <View className='pointer-events-none absolute inset-0 bg-white/40 dark:bg-black/20' />
+
+            <View className='mb-4'>
+              <Text
+                className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
+                IDENTIFIANT / EMAIL
+              </Text>
+              <View
+                className={`flex-row items-center rounded-2xl border px-4 py-3 ${dark ? 'border-white/10 bg-black/50' : 'border-blue-50 bg-white'}`}>
+                <Ionicons
+                  name='mail-outline'
+                  size={20}
+                  color={dark ? '#9CA3AF' : '#64748B'}
+                  className='mr-2'
+                />
+                <TextInput
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder='votre@email.fr'
+                  keyboardType='email-address'
+                  autoCapitalize='none'
+                  placeholderTextColor={dark ? '#6B7280' : '#94A3B8'}
+                  className={`ml-2 flex-1 text-base ${dark ? 'text-white' : 'text-slate-900'}`}
+                />
+              </View>
+            </View>
+
+            <View className='mb-4'>
+              <Text
+                className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
+                MOT DE PASSE
+              </Text>
+              <View
+                className={`flex-row items-center rounded-2xl border px-4 py-3 ${dark ? 'border-white/10 bg-black/50' : 'border-blue-50 bg-white'}`}>
+                <Ionicons
+                  name='lock-closed-outline'
+                  size={20}
+                  color={dark ? '#9CA3AF' : '#64748B'}
+                  className='mr-2'
+                />
+                <TextInput
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder='••••••••'
+                  secureTextEntry
+                  autoCapitalize='none'
+                  placeholderTextColor={dark ? '#6B7280' : '#94A3B8'}
+                  className={`ml-2 flex-1 px-0 text-base ${dark ? 'text-white' : 'text-slate-900'}`}
+                />
+              </View>
+            </View>
+
+            <TouchableOpacity className='mt-1 mb-8 self-end pr-1'>
+              <Text className={`text-sm font-semibold`} style={{ color: primaryColor }}>
+                Mot de passe oublié ?
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={handleLogin}
+              disabled={isSubmitting}
+              activeOpacity={0.8}
+              className='w-full flex-row items-center justify-center rounded-[20px] py-4 shadow-xl'
+              style={{
+                backgroundColor: primaryColor,
+                shadowColor: primaryColor,
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.3,
+                shadowRadius: 15,
+              }}>
+              {isSubmitting ? (
+                <ActivityIndicator color='#fff' />
+              ) : (
+                <>
+                  <Text className='mr-2 text-lg font-bold text-white'>Se connecter</Text>
+                  <Ionicons name='arrow-forward' size={20} color='#FFFFFF' />
+                </>
+              )}
+            </TouchableOpacity>
+          </BlurView>
+        </View>
 
         <TouchableOpacity
-          onPress={() => alert('Mot de passe oublié ?')}
-          className='mx-auto w-10/12'>
-          <Text className='mb-6 text-right text-sm text-gray-500'>Mot de passe oublié ?</Text>
+          onPress={() => router.push('/signup')}
+          className='absolute bottom-28 w-full flex-row justify-center bg-[#F8FAFC]/80 py-4 backdrop-blur-sm dark:bg-zinc-950/80'>
+          <Text className={`text-[15px] font-medium ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
+            Nouveau citoyen ?{' '}
+            <Text className='font-bold' style={{ color: primaryColor }}>
+              Créer un compte
+            </Text>
+          </Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={handleLogin}
-          className='mr-7 ml-auto w-2/12 flex-row items-center justify-center rounded-full bg-blue-500 py-3'>
-          <Text className='font-inter-semibold text-lg text-white'>→</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity
-        onPress={() => router.push('/signup')}
-        className='absolute bottom-6 w-full items-center'>
-        <Text className='font-inter-semibold text-md text-white'>
-          Pas encore de compte ? <Text className='text-blue-500'>Créer</Text>
-        </Text>
-      </TouchableOpacity>
-    </ImageBackground>
+      </KeyboardAvoidingView>
+      <BottomBar />
+    </View>
   );
 };
 
