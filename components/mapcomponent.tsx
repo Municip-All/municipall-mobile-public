@@ -6,7 +6,6 @@ import MapView, { Marker, Callout } from 'react-native-maps';
 import { useTheme } from '@context/themecontext';
 import { useCity } from '@context/citycontext';
 import { reportService, Report } from '../services/reportService';
-import { Ionicons } from '@expo/vector-icons';
 
 export interface MapComponentMethods {
   centerOnUserLocation: () => void;
@@ -99,7 +98,7 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
 
     const fetchToiletsMarkers = async () => {
       let toilets: Toilet[] = [];
-      let page = 0;
+
       const limit = 50; // Reduced limit for faster dev loading
 
       try {
@@ -134,11 +133,7 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
         const userLocation = await Location.getCurrentPositionAsync({});
         setLocation(userLocation);
 
-        await Promise.all([
-          fetchCompostMarkers(),
-          fetchToiletsMarkers(),
-          fetchCitizenReports()
-        ]);
+        await Promise.all([fetchCompostMarkers(), fetchToiletsMarkers(), fetchCitizenReports()]);
       } catch (error) {
         console.error('Error during data initialization', error);
       }
@@ -149,10 +144,14 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'En attente': return '#f97316'; // orange
-      case 'En cours': return '#3b82f6'; // blue
-      case 'Résolu': return '#22c55e'; // green
-      default: return '#9ca3af';
+      case 'En attente':
+        return '#f97316'; // orange
+      case 'En cours':
+        return '#3b82f6'; // blue
+      case 'Résolu':
+        return '#22c55e'; // green
+      default:
+        return '#9ca3af';
     }
   };
 
@@ -212,7 +211,6 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
             longitudeDelta: 0.05,
           }}
           showsUserLocation>
-          
           {/* Public Infrastructure */}
           {showComposts &&
             compostMarkers.map((marker, index) => (
@@ -231,7 +229,7 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
                 />
               </Marker>
             ))}
-          
+
           {showToilets &&
             toiletsMarkers.map((marker, index) => (
               <Marker
@@ -258,24 +256,24 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
                 latitude: report.lat,
                 longitude: report.lon,
               }}
-              pinColor={getStatusColor(report.status)}
-            >
+              pinColor={getStatusColor(report.status)}>
               <Callout>
-                <View className="p-2 min-w-[150px]">
-                  <Text className="font-bold text-slate-900">{report.category}</Text>
-                  <Text className="text-xs text-slate-600 mt-1">{report.description}</Text>
-                  <Text className="text-[10px] font-bold mt-2" style={{ color: getStatusColor(report.status) }}>
+                <View className='min-w-[150px] p-2'>
+                  <Text className='font-bold text-slate-900'>{report.category}</Text>
+                  <Text className='mt-1 text-xs text-slate-600'>{report.description}</Text>
+                  <Text
+                    className='mt-2 text-[10px] font-bold'
+                    style={{ color: getStatusColor(report.status) }}>
                     {report.status.toUpperCase()}
                   </Text>
                 </View>
               </Callout>
             </Marker>
           ))}
-          
         </MapView>
       ) : (
         <View className='flex-1 items-center justify-center'>
-          <ActivityIndicator size="large" color={primaryColor} />
+          <ActivityIndicator size='large' color={primaryColor} />
           <Text className={`mt-4 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
             Chargement de la carte...
           </Text>

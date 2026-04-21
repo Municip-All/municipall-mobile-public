@@ -32,11 +32,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const token = await AsyncStorage.getItem('user_token');
         const storedUser = await AsyncStorage.getItem('user_data');
-        
+
         if (token && storedUser) {
           setUser(JSON.parse(storedUser));
           setIsAuthenticated(true);
-          
+
           // Verify token and refresh user data from server in background
           try {
             const response = await apiClient.get('auth/me');
@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       logout,
       updateUser,
     }),
-    [isAuthenticated, isLoading, user]
+    [isAuthenticated, isLoading, user, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -30,10 +30,7 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
     fetchCityConfig();
   }, [tenantId]);
 
-  const value = useMemo(
-    () => ({ config, loading, tenantId }),
-    [config, loading, tenantId]
-  );
+  const value = useMemo(() => ({ config, loading, tenantId }), [config, loading, tenantId]);
 
   return <CityContext.Provider value={value}>{children}</CityContext.Provider>;
 };

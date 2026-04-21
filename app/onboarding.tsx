@@ -88,7 +88,7 @@ export default function Onboarding() {
             />
           ))}
         </View>
-        <View className='w-full flex-row justify-between items-center'>
+        <View className='w-full flex-row items-center justify-between'>
           <TouchableOpacity onPress={onSkip} accessibilityRole='button' accessibilityLabel='Passer'>
             <Text className={`text-sm ${dark ? 'text-gray-300' : 'text-slate-600'}`}>Passer</Text>
           </TouchableOpacity>
