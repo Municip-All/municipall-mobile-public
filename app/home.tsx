@@ -6,6 +6,8 @@ import { useTheme } from '@context/themecontext';
 import { useCity } from '@context/citycontext';
 import BottomBar from '@components/bottombar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Location from 'expo-location';
+import apiClient from '../services/apiClient';
 
 export default function Home() {
   const { theme } = useTheme();
@@ -16,6 +18,40 @@ export default function Home() {
 
   const primaryColor = config?.theme.primaryColor || '#244EE5';
   const appName = config?.name || "Municip'All";
+  const [weatherData, setWeatherData] = React.useState<any>(null);
+  const [weatherLoading, setWeatherLoading] = React.useState(false);
+
+  const weatherEnabled = config?.features?.includes('weather');
+
+  React.useEffect(() => {
+    if (weatherEnabled) {
+      fetchWeather();
+    }
+  }, [weatherEnabled]);
+
+  const fetchWeather = async () => {
+    setWeatherLoading(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.warn('Permission to access location was denied');
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      const response = await apiClient.get('/weather', {
+        params: {
+          lat: location.coords.latitude,
+          lon: location.coords.longitude,
+        },
+      });
+      setWeatherData(response.data);
+    } catch (error) {
+      console.error('Error fetching weather:', error);
+    } finally {
+      setWeatherLoading(false);
+    }
+  };
 
   return (
     <View className={`flex-1 ${dark ? 'bg-zinc-950' : 'bg-[#F8FAFC]'}`}>
@@ -56,33 +92,41 @@ export default function Home() {
 
             <View className='p-2'>
               {/* Météo */}
-              <TouchableOpacity
-                className={`flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800/50' : 'bg-transparent'}`}>
-                <View
-                  className='mr-4 h-12 w-12 items-center justify-center rounded-full'
-                  style={{ backgroundColor: `${primaryColor}15` }}>
-                  <Ionicons
-                    name='cloud-outline'
-                    size={24}
-                    color={dark ? '#60A5FA' : primaryColor}
-                  />
-                </View>
-                <View className='flex-1'>
-                  <Text
-                    className={`text-xs font-medium ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
-                    Météo
-                  </Text>
-                  <Text
-                    className={`text-base font-semibold ${dark ? 'text-white' : 'text-slate-900'}`}>
-                    Ensoleillé, 18°C
-                  </Text>
-                  <Text className={`mt-0.5 text-xs ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
-                    Ciel dégagé toute la journée
-                  </Text>
-                </View>
-              </TouchableOpacity>
+              {weatherEnabled && (
+                <>
+                  <TouchableOpacity
+                    onPress={fetchWeather}
+                    disabled={weatherLoading}
+                    className={`flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800/50' : 'bg-transparent'}`}>
+                    <View
+                      className='mr-4 h-12 w-12 items-center justify-center rounded-full'
+                      style={{ backgroundColor: `${primaryColor}15` }}>
+                      <Ionicons
+                        name={weatherData?.icon ? 'cloud-outline' : 'partly-sunny-outline'}
+                        size={24}
+                        color={dark ? '#60A5FA' : primaryColor}
+                      />
+                    </View>
+                    <View className='flex-1'>
+                      <Text
+                        className={`text-xs font-medium ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
+                        Météo locale
+                      </Text>
+                      <Text
+                        className={`text-base font-semibold ${dark ? 'text-white' : 'text-slate-900'}`}>
+                        {weatherLoading ? 'Chargement...' : 
+                         weatherData ? `${weatherData.temp}°C, ${weatherData.description.charAt(0).toUpperCase() + weatherData.description.slice(1)}` : 
+                         'Données indisponibles'}
+                      </Text>
+                      <Text className={`mt-0.5 text-xs ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
+                        {weatherData?.city || 'Position actuelle'}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
 
-              <View className={`h-[1px] w-full ${dark ? 'bg-zinc-800' : 'bg-gray-100'} my-1`} />
+                  <View className={`h-[1px] w-full ${dark ? 'bg-zinc-800' : 'bg-gray-100'} my-1`} />
+                </>
+              )}
 
               {/* Circulation */}
               <TouchableOpacity
