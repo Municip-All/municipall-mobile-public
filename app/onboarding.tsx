@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@context/themecontext';
+import { useCity } from '@context/citycontext';
 
 const ONBOARDING_KEY = 'onboarding_completed_v1';
 
@@ -31,9 +32,12 @@ const steps = [
 export default function Onboarding() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { config } = useCity();
   const dark = theme === 'dark';
   const [index, setIndex] = useState(0);
   const total = steps.length;
+
+  const primaryColor = config?.theme.primaryColor || '#2563EB';
 
   const nextLabel = useMemo(
     () => (index < total - 1 ? 'Suivant' : "C'est parti !"),
@@ -44,7 +48,7 @@ export default function Onboarding() {
     try {
       await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
     } catch {}
-    router.replace('/dashboard');
+    router.replace('/home');
   };
 
   const onNext = async () => {
@@ -79,19 +83,19 @@ export default function Onboarding() {
           {steps.map((_, i) => (
             <View
               key={i}
-              className={`mx-1 h-2 w-8 rounded-full ${
-                i === index ? 'bg-blue-500' : dark ? 'bg-zinc-700' : 'bg-slate-200'
-              }`}
+              className={`mx-1 h-2 w-8 rounded-full ${dark ? 'bg-zinc-700' : 'bg-slate-200'}`}
+              style={i === index ? { backgroundColor: primaryColor, width: 32 } : {}}
             />
           ))}
         </View>
-        <View className='w-full flex-row justify-between'>
+        <View className='w-full flex-row items-center justify-between'>
           <TouchableOpacity onPress={onSkip} accessibilityRole='button' accessibilityLabel='Passer'>
             <Text className={`text-sm ${dark ? 'text-gray-300' : 'text-slate-600'}`}>Passer</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={onNext}
-            className='rounded-xl bg-blue-500 px-5 py-3'
+            className='rounded-xl px-8 py-3'
+            style={{ backgroundColor: primaryColor }}
             accessibilityRole='button'
             accessibilityLabel={nextLabel}>
             <Text className='font-semibold text-white'>{nextLabel}</Text>

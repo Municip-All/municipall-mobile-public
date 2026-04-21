@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { ThemeProvider } from '@context/themecontext';
 import { AuthProvider } from '@context/authcontext';
+import { CityProvider } from '@context/citycontext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import '../global.css';
@@ -67,16 +68,18 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <AuthProvider>
-        {needsOnboarding && pathname !== '/onboarding' ? <Redirect href='/onboarding' /> : null}
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            gestureEnabled: true,
-            animation: 'slide_from_right',
-          }}
-        />
-      </AuthProvider>
+      <CityProvider>
+        <AuthProvider>
+          {needsOnboarding && pathname !== '/onboarding' ? <Redirect href='/onboarding' /> : null}
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              gestureEnabled: true,
+              animation: 'slide_from_right',
+            }}
+          />
+        </AuthProvider>
+      </CityProvider>
     </ThemeProvider>
   );
 }

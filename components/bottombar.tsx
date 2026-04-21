@@ -2,32 +2,35 @@ import React from 'react';
 import { View, Pressable, Text, Platform } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { useTheme } from '@context/themecontext';
+import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@context/authcontext';
-import { BlurView } from 'expo-blur';
 
 const BottomBar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { theme } = useTheme();
+  const { config } = useCity();
   const { isAuthenticated } = useAuth();
   const dark = theme === 'dark';
 
+  const primaryColor = config?.theme.primaryColor || '#2563EB';
+
   const getIconColor = (path: string) => {
-    if (pathname === path) return '#2563EB'; // Ethereal Blue
+    if (pathname === path) return primaryColor;
     return dark ? '#9CA3AF' : '#64748B';
   };
 
-  const getLabelColor = (path: string) => {
-    if (pathname === path) return 'text-blue-600 dark:text-blue-500';
-    return dark ? 'text-gray-400' : 'text-slate-500';
+  const getLabelStyle = (path: string) => {
+    if (pathname === path) return { color: primaryColor };
+    return {};
   };
 
   return (
     <View pointerEvents='box-none' className='absolute inset-x-0 bottom-0'>
       <View
-        className={`flex-row justify-between px-2 pt-3 pb-8 sm:pb-4 border-t ${
-          dark ? 'bg-[#18181b]/95 border-zinc-800' : 'bg-white/95 border-gray-100'
+        className={`flex-row justify-between border-t px-2 pt-3 pb-8 sm:pb-4 ${
+          dark ? 'border-zinc-800 bg-[#18181b]/95' : 'border-gray-100 bg-white/95'
         }`}
         style={Platform.OS === 'ios' ? { paddingBottom: 32 } : { paddingBottom: 16 }}>
         {/* Accueil */}
@@ -35,8 +38,16 @@ const BottomBar: React.FC = () => {
           accessibilityRole='button'
           onPress={() => router.replace('/home')}
           className='flex-1 items-center'>
-          <Ionicons name={pathname === '/home' ? 'home' : 'home-outline'} size={24} color={getIconColor('/home')} />
-          <Text className={`mt-1 text-[11px] font-medium ${getLabelColor('/home')}`}>Accueil</Text>
+          <Ionicons
+            name={pathname === '/home' ? 'home' : 'home-outline'}
+            size={24}
+            color={getIconColor('/home')}
+          />
+          <Text
+            style={getLabelStyle('/home')}
+            className={`mt-1 text-[11px] font-medium ${pathname !== '/home' ? (dark ? 'text-gray-400' : 'text-slate-500') : ''}`}>
+            Accueil
+          </Text>
         </Pressable>
 
         {/* Carte */}
@@ -44,8 +55,16 @@ const BottomBar: React.FC = () => {
           accessibilityRole='button'
           onPress={() => router.replace('/carte')}
           className='flex-1 items-center'>
-          <Ionicons name={pathname === '/carte' ? 'map' : 'map-outline'} size={24} color={getIconColor('/carte')} />
-          <Text className={`mt-1 text-[11px] font-medium ${getLabelColor('/carte')}`}>Carte</Text>
+          <Ionicons
+            name={pathname === '/carte' ? 'map' : 'map-outline'}
+            size={24}
+            color={getIconColor('/carte')}
+          />
+          <Text
+            style={getLabelStyle('/carte')}
+            className={`mt-1 text-[11px] font-medium ${pathname !== '/carte' ? (dark ? 'text-gray-400' : 'text-slate-500') : ''}`}>
+            Carte
+          </Text>
         </Pressable>
 
         {/* Demandes */}
@@ -53,8 +72,16 @@ const BottomBar: React.FC = () => {
           accessibilityRole='button'
           onPress={() => router.replace('/demandes')}
           className='flex-1 items-center'>
-          <Ionicons name={pathname === '/demandes' ? 'document-text' : 'document-text-outline'} size={24} color={getIconColor('/demandes')} />
-          <Text className={`mt-1 text-[11px] font-medium ${getLabelColor('/demandes')}`}>Demandes</Text>
+          <Ionicons
+            name={pathname === '/demandes' ? 'document-text' : 'document-text-outline'}
+            size={24}
+            color={getIconColor('/demandes')}
+          />
+          <Text
+            style={getLabelStyle('/demandes')}
+            className={`mt-1 text-[11px] font-medium ${pathname !== '/demandes' ? (dark ? 'text-gray-400' : 'text-slate-500') : ''}`}>
+            Demandes
+          </Text>
         </Pressable>
 
         {/* Agenda */}
@@ -62,8 +89,16 @@ const BottomBar: React.FC = () => {
           accessibilityRole='button'
           onPress={() => router.replace('/events')}
           className='flex-1 items-center'>
-          <Ionicons name={pathname === '/events' ? 'calendar' : 'calendar-outline'} size={24} color={getIconColor('/events')} />
-          <Text className={`mt-1 text-[11px] font-medium ${getLabelColor('/events')}`}>Agenda</Text>
+          <Ionicons
+            name={pathname === '/events' ? 'calendar' : 'calendar-outline'}
+            size={24}
+            color={getIconColor('/events')}
+          />
+          <Text
+            style={getLabelStyle('/events')}
+            className={`mt-1 text-[11px] font-medium ${pathname !== '/events' ? (dark ? 'text-gray-400' : 'text-slate-500') : ''}`}>
+            Agenda
+          </Text>
         </Pressable>
 
         {/* Profil */}
@@ -77,8 +112,16 @@ const BottomBar: React.FC = () => {
             }
           }}
           className='flex-1 items-center'>
-          <Ionicons name={pathname === '/profile' ? 'person' : 'person-outline'} size={24} color={getIconColor('/profile')} />
-          <Text className={`mt-1 text-[11px] font-medium ${getLabelColor('/profile')}`}>Profil</Text>
+          <Ionicons
+            name={pathname === '/profile' ? 'person' : 'person-outline'}
+            size={24}
+            color={getIconColor('/profile')}
+          />
+          <Text
+            style={getLabelStyle('/profile')}
+            className={`mt-1 text-[11px] font-medium ${pathname !== '/profile' ? (dark ? 'text-gray-400' : 'text-slate-500') : ''}`}>
+            Profil
+          </Text>
         </Pressable>
       </View>
     </View>
