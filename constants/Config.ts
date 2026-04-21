@@ -1,5 +1,8 @@
 export const Config = {
-  // Production VPS Backend
-  API_BASE_URL: 'http://213.156.133.80:3001/api/v1/',
+  // Bascule automatique entre Dev et Prod
+  API_BASE_URL: __DEV__
+    ? 'https://dev.api.municipall.dev/api/v1/'
+    : 'https://api.municipall.dev/api/v1/',
+
   DEFAULT_TENANT_ID: 'city-1',
 };
