@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiClient from '../services/apiClient';
 
@@ -63,27 +63,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     initializeAuth();
   }, []);
 
-  const login = async (token: string, userData: User) => {
+  const login = useCallback(async (token: string, userData: User) => {
     await AsyncStorage.setItem('user_token', token);
     await AsyncStorage.setItem('user_data', JSON.stringify(userData));
     setUser(userData);
     setIsAuthenticated(true);
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await AsyncStorage.removeItem('user_token');
     await AsyncStorage.removeItem('user_data');
     setUser(null);
     setIsAuthenticated(false);
-  };
+  }, []);
 
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      const newUser = { ...user, ...userData };
-      setUser(newUser);
-      AsyncStorage.setItem('user_data', JSON.stringify(newUser));
-    }
-  };
+  const updateUser = useCallback((userData: Partial<User>) => {
+    setUser((currentUser) => {
+      if (currentUser) {
+        const newUser = { ...currentUser, ...userData };
+        AsyncStorage.setItem('user_data', JSON.stringify(newUser));
+        return newUser;
+      }
+      return currentUser;
+    });
+  }, []);
 
   const value = useMemo<AuthContextType>(
     () => ({

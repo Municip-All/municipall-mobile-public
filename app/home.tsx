@@ -1,42 +1,70 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@context/themecontext';
 import { useCity } from '@context/citycontext';
 import BottomBar from '@components/bottombar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Home() {
   const { theme } = useTheme();
-  const { config } = useCity();
+  const { config, weatherData, weatherLoading, fetchWeather } = useCity();
   const dark = theme === 'dark';
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const primaryColor = config?.theme.primaryColor || '#244EE5';
-  const appName = config?.name || "Municip'All";
+  const MUNICIPALL_COLORS = {
+    blue: '#34518E',
+    darkBlue: '#1F2D44',
+    white: '#F5F7FA',
+    black: '#333333',
+  };
+
+  const primaryColor = config?.theme.primaryColor || MUNICIPALL_COLORS.blue;
+  const appName = "Municip'All";
+  const cityName = weatherData?.city || config?.name || 'Ville non détectée';
+  const colors = config?.theme.useGradient
+    ? [config.theme.primaryColor, config.theme.secondaryColor || config.theme.primaryColor]
+    : [MUNICIPALL_COLORS.darkBlue, MUNICIPALL_COLORS.blue];
+
+  const logo = config?.theme.logoUrl
+    ? { uri: config.theme.logoUrl }
+    : require('../assets/images/logo_white.png');
 
   return (
-    <View className={`flex-1 ${dark ? 'bg-zinc-950' : 'bg-[#F8FAFC]'}`}>
+    <View className={`flex-1 ${dark ? 'bg-zinc-950' : 'bg-[#F5F7FA]'}`}>
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }} bounces={false}>
         {/* Header Background */}
-        <View
-          className='mb-6 w-full px-6 pb-8'
+        <LinearGradient
+          colors={colors as [string, string]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
           style={{
-            backgroundColor: primaryColor,
-            paddingTop: Math.max(insets.top, 40),
-            borderBottomLeftRadius: 32,
-            borderBottomRightRadius: 32,
+            paddingTop: Math.max(insets.top, 20),
+            borderBottomLeftRadius: 24,
+            borderBottomRightRadius: 24,
+            paddingBottom: 24,
+            paddingHorizontal: 24,
           }}>
-          <Text className='text-3xl font-bold tracking-tight text-white'>{appName}</Text>
-          <Text className='mt-1 text-base font-medium text-white/80 italic'>
-            Votre ville à portée de main
-          </Text>
-        </View>
+          <View className='flex-row items-center'>
+            <Image
+              source={logo}
+              style={{ width: 48, height: 48, marginRight: 16 }}
+              resizeMode='contain'
+            />
+            <View className='flex-1'>
+              <Text className='text-2xl font-black tracking-tight text-white'>{appName}</Text>
+              <Text className='text-sm font-semibold text-white/90'>{cityName}</Text>
+              <Text className='mt-0.5 text-[10px] leading-tight font-medium text-white/60 italic'>
+                Votre ville à portée de main
+              </Text>
+            </View>
+          </View>
+        </LinearGradient>
 
         {/* Floating Main Card */}
-        <View className='px-4'>
+        <View className='mt-6 px-4'>
           <View
             className={`overflow-hidden rounded-[24px] shadow-xl ${dark ? 'border border-zinc-800 bg-zinc-900' : 'border border-gray-100 bg-white'}`}
             style={{
@@ -56,33 +84,44 @@ export default function Home() {
 
             <View className='p-2'>
               {/* Météo */}
-              <TouchableOpacity
-                className={`flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800/50' : 'bg-transparent'}`}>
-                <View
-                  className='mr-4 h-12 w-12 items-center justify-center rounded-full'
-                  style={{ backgroundColor: `${primaryColor}15` }}>
-                  <Ionicons
-                    name='cloud-outline'
-                    size={24}
-                    color={dark ? '#60A5FA' : primaryColor}
-                  />
-                </View>
-                <View className='flex-1'>
-                  <Text
-                    className={`text-xs font-medium ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
-                    Météo
-                  </Text>
-                  <Text
-                    className={`text-base font-semibold ${dark ? 'text-white' : 'text-slate-900'}`}>
-                    Ensoleillé, 18°C
-                  </Text>
-                  <Text className={`mt-0.5 text-xs ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
-                    Ciel dégagé toute la journée
-                  </Text>
-                </View>
-              </TouchableOpacity>
+              {config?.features?.includes('weather') && (
+                <>
+                  <TouchableOpacity
+                    onPress={fetchWeather}
+                    disabled={weatherLoading}
+                    className={`flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800/50' : 'bg-transparent'}`}>
+                    <View
+                      className='mr-4 h-12 w-12 items-center justify-center rounded-full'
+                      style={{ backgroundColor: `${primaryColor}15` }}>
+                      <Ionicons
+                        name={weatherData?.icon ? 'cloud-outline' : 'partly-sunny-outline'}
+                        size={24}
+                        color={dark ? '#60A5FA' : primaryColor}
+                      />
+                    </View>
+                    <View className='flex-1'>
+                      <Text
+                        className={`text-xs font-medium ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
+                        Météo locale
+                      </Text>
+                      <Text
+                        className={`text-base font-semibold ${dark ? 'text-white' : 'text-slate-900'}`}>
+                        {weatherLoading
+                          ? 'Chargement...'
+                          : weatherData
+                            ? `${weatherData.temp}°C, ${weatherData.description.charAt(0).toUpperCase() + weatherData.description.slice(1)}`
+                            : 'Données indisponibles'}
+                      </Text>
+                      <Text
+                        className={`mt-0.5 text-xs ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
+                        {weatherData?.city || 'Position actuelle'}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
 
-              <View className={`h-[1px] w-full ${dark ? 'bg-zinc-800' : 'bg-gray-100'} my-1`} />
+                  <View className={`h-[1px] w-full ${dark ? 'bg-zinc-800' : 'bg-gray-100'} my-1`} />
+                </>
+              )}
 
               {/* Circulation */}
               <TouchableOpacity

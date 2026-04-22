@@ -5,7 +5,6 @@ import { useCity } from '@context/citycontext';
 import BottomBar from '@components/bottombar';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 
 export default function Demandes() {
   const { theme } = useTheme();
