@@ -6,8 +6,6 @@ import { useCity } from '@context/citycontext';
 import BottomBar from '@components/bottombar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Location from 'expo-location';
-import apiClient from '../services/apiClient';
 
 export default function Home() {
   const { theme } = useTheme();
@@ -20,17 +18,19 @@ export default function Home() {
     blue: '#34518E',
     darkBlue: '#1F2D44',
     white: '#F5F7FA',
-    black: '#333333'
+    black: '#333333',
   };
 
   const primaryColor = config?.theme.primaryColor || MUNICIPALL_COLORS.blue;
   const appName = "Municip'All";
-  const cityName = weatherData?.city || config?.name || "Ville non détectée";
-  const colors = config?.theme.useGradient ?
-    [config.theme.primaryColor, config.theme.secondaryColor || config.theme.primaryColor] :
-    [MUNICIPALL_COLORS.darkBlue, MUNICIPALL_COLORS.blue];
+  const cityName = weatherData?.city || config?.name || 'Ville non détectée';
+  const colors = config?.theme.useGradient
+    ? [config.theme.primaryColor, config.theme.secondaryColor || config.theme.primaryColor]
+    : [MUNICIPALL_COLORS.darkBlue, MUNICIPALL_COLORS.blue];
 
-  const logo = config?.theme.logoUrl ? { uri: config.theme.logoUrl } : require('../assets/images/logo_white.png');
+  const logo = config?.theme.logoUrl
+    ? { uri: config.theme.logoUrl }
+    : require('../assets/images/logo_white.png');
 
   return (
     <View className={`flex-1 ${dark ? 'bg-zinc-950' : 'bg-[#F5F7FA]'}`}>
@@ -46,20 +46,17 @@ export default function Home() {
             borderBottomRightRadius: 24,
             paddingBottom: 24,
             paddingHorizontal: 24,
-          }}
-        >
-          <View className="flex-row items-center">
+          }}>
+          <View className='flex-row items-center'>
             <Image
               source={logo}
               style={{ width: 48, height: 48, marginRight: 16 }}
-              resizeMode="contain"
+              resizeMode='contain'
             />
-            <View className="flex-1">
+            <View className='flex-1'>
               <Text className='text-2xl font-black tracking-tight text-white'>{appName}</Text>
-              <Text className='text-sm font-semibold text-white/90'>
-                {cityName}
-              </Text>
-              <Text className='text-[10px] font-medium text-white/60 italic mt-0.5 leading-tight'>
+              <Text className='text-sm font-semibold text-white/90'>{cityName}</Text>
+              <Text className='mt-0.5 text-[10px] leading-tight font-medium text-white/60 italic'>
                 Votre ville à portée de main
               </Text>
             </View>
@@ -67,7 +64,7 @@ export default function Home() {
         </LinearGradient>
 
         {/* Floating Main Card */}
-        <View className='px-4 mt-6'>
+        <View className='mt-6 px-4'>
           <View
             className={`overflow-hidden rounded-[24px] shadow-xl ${dark ? 'border border-zinc-800 bg-zinc-900' : 'border border-gray-100 bg-white'}`}
             style={{
@@ -109,11 +106,14 @@ export default function Home() {
                       </Text>
                       <Text
                         className={`text-base font-semibold ${dark ? 'text-white' : 'text-slate-900'}`}>
-                        {weatherLoading ? 'Chargement...' :
-                          weatherData ? `${weatherData.temp}°C, ${weatherData.description.charAt(0).toUpperCase() + weatherData.description.slice(1)}` :
-                            'Données indisponibles'}
+                        {weatherLoading
+                          ? 'Chargement...'
+                          : weatherData
+                            ? `${weatherData.temp}°C, ${weatherData.description.charAt(0).toUpperCase() + weatherData.description.slice(1)}`
+                            : 'Données indisponibles'}
                       </Text>
-                      <Text className={`mt-0.5 text-xs ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
+                      <Text
+                        className={`mt-0.5 text-xs ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
                         {weatherData?.city || 'Position actuelle'}
                       </Text>
                     </View>

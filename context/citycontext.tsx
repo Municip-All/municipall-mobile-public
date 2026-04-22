@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { Config } from '../constants/Config';
 import { cityService, CityConfig } from '../services/cityService';
 import * as Location from 'expo-location';
@@ -22,9 +22,9 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
   const [weatherLoading, setWeatherLoading] = useState(false);
   const tenantId = Config.DEFAULT_TENANT_ID;
 
-  const fetchWeather = async () => {
+  const fetchWeather = useCallback(async () => {
     if (!config?.features?.includes('weather')) return;
-    
+
     setWeatherLoading(true);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -43,13 +43,13 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
     } finally {
       setWeatherLoading(false);
     }
-  };
+  }, [config?.features]);
 
   useEffect(() => {
     if (config?.features?.includes('weather')) {
       fetchWeather();
     }
-  }, [config]);
+  }, [config?.features, fetchWeather]);
 
   useEffect(() => {
     const fetchCityConfig = async () => {
@@ -66,14 +66,17 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
     fetchCityConfig();
   }, [tenantId]);
 
-  const value = useMemo(() => ({ 
-    config, 
-    loading, 
-    tenantId, 
-    weatherData, 
-    weatherLoading,
-    fetchWeather 
-  }), [config, loading, tenantId, weatherData, weatherLoading]);
+  const value = useMemo(
+    () => ({
+      config,
+      loading,
+      tenantId,
+      weatherData,
+      weatherLoading,
+      fetchWeather,
+    }),
+    [config, loading, tenantId, weatherData, weatherLoading, fetchWeather]
+  );
 
   return <CityContext.Provider value={value}>{children}</CityContext.Provider>;
 };

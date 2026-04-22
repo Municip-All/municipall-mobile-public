@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  Dimensions,
   ActivityIndicator,
   Alert,
 } from 'react-native';
