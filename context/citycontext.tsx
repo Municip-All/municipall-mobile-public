@@ -20,7 +20,7 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [weatherData, setWeatherData] = useState<any | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
-  const tenantId = Config.DEFAULT_TENANT_ID;
+  const [tenantId, setTenantId] = useState(Config.DEFAULT_TENANT_ID);
 
   const fetchWeather = useCallback(async () => {
     if (!config?.features?.includes('weather')) return;
@@ -52,19 +52,48 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
   }, [config?.features, fetchWeather]);
 
   useEffect(() => {
-    const fetchCityConfig = async () => {
+    const initializeCity = async () => {
+      setLoading(true);
       try {
-        const data = await cityService.getCityConfig(tenantId);
-        setConfig(data);
+        // 1. Get GPS Location
+        const { status } = await Location.requestForegroundPermissionsAsync();
+
+        if (status === 'granted') {
+          const location = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          });
+
+          // 2. Try to detect city via Backend PostGIS
+          const detectedCity = await cityService.detectCity(
+            location.coords.latitude,
+            location.coords.longitude
+          );
+
+          if (detectedCity && detectedCity.id) {
+            console.log(`CityContext: Detected city ${detectedCity.name} (${detectedCity.id})`);
+            setTenantId(detectedCity.id);
+            setConfig(detectedCity);
+            setLoading(false);
+            return;
+          }
+        }
       } catch (error) {
-        console.error('Failed to fetch city config from backend', error);
+        console.log('CityContext: Automatic detection failed, using fallback.', error);
+      }
+
+      // 3. Fallback to default city if detection fails or permission denied
+      try {
+        const fallbackConfig = await cityService.getCityConfig(Config.DEFAULT_TENANT_ID);
+        setConfig(fallbackConfig);
+      } catch (error) {
+        console.error('CityContext: Failed to fetch fallback config', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCityConfig();
-  }, [tenantId]);
+    initializeCity();
+  }, []);
 
   const value = useMemo(
     () => ({

@@ -27,6 +27,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const login = useCallback(async (token: string, userData: User) => {
+    await AsyncStorage.setItem('user_token', token);
+    await AsyncStorage.setItem('user_data', JSON.stringify(userData));
+    setUser(userData);
+    setIsAuthenticated(true);
+  }, []);
+
+  const logout = useCallback(async () => {
+    await AsyncStorage.removeItem('user_token');
+    await AsyncStorage.removeItem('user_data');
+    setUser(null);
+    setIsAuthenticated(false);
+  }, []);
+
+  const updateUser = useCallback((userData: Partial<User>) => {
+    setUser((currentUser) => {
+      if (currentUser) {
+        const newUser = { ...currentUser, ...userData };
+        AsyncStorage.setItem('user_data', JSON.stringify(newUser));
+        return newUser;
+      }
+      return currentUser;
+    });
+  }, []);
+
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -61,32 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     initializeAuth();
-  }, []);
-
-  const login = useCallback(async (token: string, userData: User) => {
-    await AsyncStorage.setItem('user_token', token);
-    await AsyncStorage.setItem('user_data', JSON.stringify(userData));
-    setUser(userData);
-    setIsAuthenticated(true);
-  }, []);
-
-  const logout = useCallback(async () => {
-    await AsyncStorage.removeItem('user_token');
-    await AsyncStorage.removeItem('user_data');
-    setUser(null);
-    setIsAuthenticated(false);
-  }, []);
-
-  const updateUser = useCallback((userData: Partial<User>) => {
-    setUser((currentUser) => {
-      if (currentUser) {
-        const newUser = { ...currentUser, ...userData };
-        AsyncStorage.setItem('user_data', JSON.stringify(newUser));
-        return newUser;
-      }
-      return currentUser;
-    });
-  }, []);
+  }, [logout]);
 
   const value = useMemo<AuthContextType>(
     () => ({
@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       logout,
       updateUser,
     }),
-    [isAuthenticated, isLoading, user, updateUser]
+    [isAuthenticated, isLoading, user, login, logout, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
