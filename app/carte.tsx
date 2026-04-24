@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -23,16 +23,19 @@ import { Modalize } from 'react-native-modalize';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { reportService } from '../services/reportService';
+import { useLocalSearchParams } from 'expo-router';
+import { BlurView } from 'expo-blur';
 
 export default function Carte() {
   const mapRef = useRef<MapComponentMethods>(null);
   const modalizeRef = useRef<Modalize>(null);
-  const { theme } = useTheme();
+  const { colorScheme } = useTheme();
   const { config } = useCity();
-  const dark = theme === 'dark';
+  const dark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
+  const { action } = useLocalSearchParams();
 
-  const primaryColor = config?.theme.primaryColor || '#1D4ED8';
+  const primaryColor = config?.theme.primaryColor || '#0B0080';
 
   const [address, setAddress] = useState('');
   const [comments, setComments] = useState('');
@@ -46,13 +49,16 @@ export default function Carte() {
     modalizeRef.current?.open();
   };
 
+  useEffect(() => {
+    if (action === 'report') {
+      onOpenReport();
+    }
+  }, [action]);
+
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(
-        'Permission refusée',
-        "Nous avons besoin de l'accès à vos photos pour joindre une preuve."
-      );
+      Alert.alert('Permission refusée', 'Accès aux photos nécessaire.');
       return;
     }
 
@@ -76,7 +82,6 @@ export default function Carte() {
     setIsSubmitting(true);
     try {
       const location = await Location.getCurrentPositionAsync({});
-
       await reportService.createReport({
         category,
         description: comments,
@@ -86,16 +91,13 @@ export default function Carte() {
         status: 'En attente',
       });
 
-      Alert.alert('Merci !', 'Votre signalement a été enregistré avec succès.');
+      Alert.alert('Merci !', 'Votre signalement a été enregistré.');
       modalizeRef.current?.close();
-
       setCategory(null);
       setComments('');
       setSelectedImage(null);
-      setAddress('');
-    } catch (error) {
-      console.error('Submission error', error);
-      Alert.alert('Erreur', "Impossible d'envoyer le signalement. Vérifiez votre connexion.");
+    } catch {
+      Alert.alert('Erreur', "Impossible d'envoyer le signalement.");
     } finally {
       setIsSubmitting(false);
     }
@@ -103,109 +105,108 @@ export default function Carte() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View className={`flex-1 ${dark ? 'bg-zinc-950' : 'bg-white'}`}>
+      <View className={`flex-1 ${dark ? 'bg-black' : 'bg-[#F2F2F7]'}`}>
         {/* Map Container */}
-        <View className='absolute inset-0 flex-1'>
+        <View className='absolute inset-0'>
           <MapComponent ref={mapRef} showComposts={true} showToilets={true} />
         </View>
 
-        {/* Floating Header */}
+        {/* Floating Apple-style Header */}
         <View
-          className='z-10 w-full rounded-b-[24px] p-5 shadow-lg'
-          style={{ paddingTop: Math.max(insets.top, 40), backgroundColor: primaryColor }}>
-          <View className='flex-row items-center justify-between'>
+          className='absolute top-0 right-0 left-0 z-20 px-4'
+          style={{ paddingTop: insets.top + 10 }}>
+          <BlurView
+            intensity={dark ? 40 : 80}
+            tint={dark ? 'dark' : 'light'}
+            className='flex-row items-center justify-between rounded-[24px] border border-white/20 p-4 shadow-lg dark:border-zinc-800/50'>
             <View>
-              <Text className='text-xl font-semibold text-white'>Carte Interactive</Text>
-              <Text className='mt-1 text-xs text-blue-100'>Signalements autour de vous</Text>
-            </View>
-            <View className='rounded-full bg-white/20 p-2'>
-              <Ionicons name='layers' size={20} color='#fff' />
-            </View>
-          </View>
-        </View>
-
-        {/* Floating Controls Overlay */}
-        <View className='absolute top-42 left-4 z-10'>
-          <View
-            className={`rounded-[20px] p-4 shadow-sm ${dark ? 'border border-zinc-800 bg-zinc-900' : 'border border-gray-100 bg-white'}`}
-            style={{
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.1,
-              shadowRadius: 12,
-            }}>
-            <View className='mb-2 flex-row items-center'>
-              <View className='mr-2 h-3 w-3 rounded-full bg-orange-500' />
-              <Text className={`text-xs ${dark ? 'text-gray-300' : 'text-slate-700'}`}>
-                En attente
+              <Text
+                className={`text-sm font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
+                {config?.name || 'Carte Interactive'}
+              </Text>
+              <Text className={`text-[10px] font-bold ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                Explorez votre ville
               </Text>
             </View>
-            <View className='mb-2 flex-row items-center'>
-              <View className='mr-2 h-3 w-3 rounded-full bg-blue-500' />
-              <Text className={`text-xs ${dark ? 'text-gray-300' : 'text-slate-700'}`}>
-                En cours
+            <TouchableOpacity className='h-10 w-10 items-center justify-center rounded-full bg-zinc-200/50 dark:bg-zinc-800/50'>
+              <Ionicons name='layers' size={20} color={dark ? '#FFF' : '#3F3F46'} />
+            </TouchableOpacity>
+          </BlurView>
+        </View>
+
+        {/* Status Legend (Pill style) */}
+        <View className='absolute top-[130px] left-4 z-10 flex-row'>
+          <BlurView
+            intensity={dark ? 60 : 90}
+            tint={dark ? 'dark' : 'light'}
+            className='flex-row items-center rounded-full border border-white/10 px-4 py-2 shadow-sm'>
+            <View className='mr-4 flex-row items-center'>
+              <View className='mr-2 h-2 w-2 rounded-full bg-orange-500' />
+              <Text className={`text-[10px] font-bold ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                Attente
+              </Text>
+            </View>
+            <View className='mr-4 flex-row items-center'>
+              <View className='mr-2 h-2 w-2 rounded-full bg-blue-500' />
+              <Text className={`text-[10px] font-bold ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                Cours
               </Text>
             </View>
             <View className='flex-row items-center'>
-              <View className='mr-2 h-3 w-3 rounded-full bg-green-500' />
-              <Text className={`text-xs ${dark ? 'text-gray-300' : 'text-slate-700'}`}>Résolu</Text>
+              <View className='mr-2 h-2 w-2 rounded-full bg-green-500' />
+              <Text className={`text-[10px] font-bold ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                Résolu
+              </Text>
             </View>
-          </View>
+          </BlurView>
         </View>
 
-        <View className='absolute top-64 right-4 z-10'>
-          <View
-            className={`overflow-hidden rounded-[24px] shadow-lg ${dark ? 'border border-zinc-800 bg-zinc-900' : 'border border-gray-100 bg-white'}`}>
+        {/* Floating Controls */}
+        <View className='absolute top-[130px] right-4 z-10 space-y-3'>
+          <BlurView
+            intensity={dark ? 60 : 90}
+            tint={dark ? 'dark' : 'light'}
+            className='overflow-hidden rounded-[20px] border border-white/10'>
             <TouchableOpacity
               onPress={() => {}}
-              className='items-center justify-center border-b border-gray-100 p-4 dark:border-zinc-800'>
-              <Ionicons name='add' size={20} color={dark ? '#fff' : '#000'} />
+              className='items-center justify-center border-b border-zinc-100/10 p-3'>
+              <Ionicons name='add' size={22} color={dark ? '#FFF' : '#000'} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => {}} className='items-center justify-center p-4'>
-              <Ionicons name='remove' size={20} color={dark ? '#fff' : '#000'} />
+            <TouchableOpacity onPress={() => {}} className='items-center justify-center p-3'>
+              <Ionicons name='remove' size={22} color={dark ? '#FFF' : '#000'} />
             </TouchableOpacity>
-          </View>
+          </BlurView>
+
           <TouchableOpacity
             onPress={() => mapRef.current?.centerOnUserLocation()}
-            className={`mt-4 h-12 w-12 items-center justify-center rounded-full shadow-lg ${dark ? 'border border-zinc-800 bg-zinc-900' : 'border border-gray-100 bg-white'}`}>
+            className='h-12 w-12 items-center justify-center rounded-full shadow-lg'
+            style={{ backgroundColor: dark ? '#1C1C1E' : '#FFFFFF' }}>
             <Ionicons name='navigate' size={20} color={primaryColor} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Floating Add Report Button */}
-        <View className='absolute bottom-[90px] z-10 w-full items-center px-6'>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={onOpenReport}
-            className='w-full flex-row items-center justify-center rounded-full px-8 py-4 shadow-2xl'
-            style={{
-              backgroundColor: primaryColor,
-              shadowColor: primaryColor,
-              shadowOffset: { width: 0, height: 10 },
-              shadowOpacity: 0.3,
-              shadowRadius: 20,
-            }}>
-            <Ionicons name='add' size={24} color='#FFF' />
-            <Text className='ml-2 text-base font-semibold text-white'>Ajouter un signalement</Text>
           </TouchableOpacity>
         </View>
 
         <BottomBar />
 
-        {/* Glassmorphic Report Sheet */}
+        {/* Apple Style Modal */}
         <Modalize
           ref={modalizeRef}
           adjustToContentHeight={false}
-          snapPoint={600}
+          snapPoint={650}
           modalStyle={{
-            backgroundColor: dark ? '#18181b' : '#ffffff',
-            borderTopLeftRadius: 32,
-            borderTopRightRadius: 32,
+            backgroundColor: dark ? '#1C1C1E' : '#F2F2F7',
+            borderTopLeftRadius: 36,
+            borderTopRightRadius: 36,
           }}
-          handleStyle={{ backgroundColor: dark ? '#3f3f46' : '#d4d4d8', width: 60, height: 6 }}
+          handleStyle={{
+            backgroundColor: dark ? '#3F3F46' : '#D1D1D6',
+            width: 40,
+            height: 5,
+            marginTop: 10,
+          }}
           HeaderComponent={
-            <View className='px-6 pt-8 pb-4'>
-              <Text className={`text-2xl font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>
+            <View className='px-6 pt-10 pb-4'>
+              <Text
+                className={`text-3xl font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
                 Nouveau Signalement
               </Text>
             </View>
@@ -213,32 +214,24 @@ export default function Carte() {
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
             <ScrollView className='px-6 pt-2 pb-10' showsVerticalScrollIndicator={false}>
               <Text
-                className={`mb-3 text-sm font-medium ${dark ? 'text-gray-300' : 'text-slate-700'}`}>
-                Que souhaitez-vous signaler ?
+                className={`mb-3 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                Catégorie
               </Text>
-
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                className='mb-4 flex-row'>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} className='mb-6'>
                 {categories.map((cat) => (
                   <TouchableOpacity
                     key={cat}
                     onPress={() => setCategory(cat)}
-                    className={`mr-2 flex-row items-center rounded-full border border-gray-200 px-4 py-2 ${category === cat ? 'border-blue-500 bg-blue-500' : dark ? 'border-zinc-700 bg-zinc-800' : 'bg-white'}`}
-                    style={
+                    className={`mr-2 rounded-full border px-6 py-3 ${
                       category === cat
-                        ? { backgroundColor: primaryColor, borderColor: primaryColor }
-                        : {}
-                    }>
+                        ? 'border-transparent'
+                        : dark
+                          ? 'border-zinc-800 bg-zinc-800/50'
+                          : 'border-zinc-200 bg-white'
+                    }`}
+                    style={category === cat ? { backgroundColor: primaryColor } : {}}>
                     <Text
-                      className={
-                        category === cat
-                          ? 'font-medium text-white'
-                          : dark
-                            ? 'text-gray-300'
-                            : 'text-slate-800'
-                      }>
+                      className={`text-sm font-bold ${category === cat ? 'text-white' : dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
                       {cat}
                     </Text>
                   </TouchableOpacity>
@@ -246,28 +239,28 @@ export default function Carte() {
               </ScrollView>
 
               <Text
-                className={`mb-3 text-sm font-medium ${dark ? 'text-gray-300' : 'text-slate-700'}`}>
-                Adresse
+                className={`mb-3 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                Localisation
               </Text>
               <View
-                className={`mb-6 flex-row items-center rounded-2xl border px-4 py-3 ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-gray-200 bg-gray-50'}`}>
-                <Ionicons name='location-outline' size={20} color={dark ? '#9ca3af' : '#64748b'} />
+                className={`mb-6 flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800/50' : 'bg-white'} border border-zinc-100 shadow-sm dark:border-zinc-800`}>
+                <Ionicons name='location' size={18} color={primaryColor} />
                 <TextInput
                   value={address}
                   onChangeText={setAddress}
-                  placeholder='Localisation actuelle'
-                  placeholderTextColor={dark ? '#9ca3af' : '#94a3b8'}
-                  className={`ml-2 flex-1 text-base ${dark ? 'text-white' : 'text-slate-900'}`}
+                  placeholder='Localisation automatique...'
+                  placeholderTextColor={dark ? '#52525B' : '#A1A1AA'}
+                  className={`ml-3 flex-1 text-base font-medium ${dark ? 'text-white' : 'text-black'}`}
                 />
               </View>
 
               <Text
-                className={`mb-3 text-sm font-medium ${dark ? 'text-gray-300' : 'text-slate-700'}`}>
+                className={`mb-3 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
                 Photo
               </Text>
               <TouchableOpacity
                 onPress={pickImage}
-                className={`mb-6 h-32 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed ${dark ? 'border-zinc-700 bg-zinc-900/50' : 'border-gray-300 bg-gray-50'}`}>
+                className={`mb-6 h-40 overflow-hidden rounded-3xl border-2 border-dashed ${dark ? 'border-zinc-800 bg-zinc-900/50' : 'border-zinc-300 bg-white'} items-center justify-center`}>
                 {selectedImage ? (
                   <Image
                     source={{ uri: selectedImage }}
@@ -276,38 +269,38 @@ export default function Carte() {
                   />
                 ) : (
                   <View className='items-center'>
-                    <Ionicons name='camera' size={32} color={dark ? '#6b7280' : '#94a3b8'} />
-                    <Text className={`mt-2 text-xs ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
-                      Ajouter une photo
+                    <Ionicons name='camera' size={32} color={dark ? '#3F3F46' : '#D4D4D8'} />
+                    <Text
+                      className={`mt-2 text-xs font-bold ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                      Ajouter une preuve
                     </Text>
                   </View>
                 )}
               </TouchableOpacity>
 
               <Text
-                className={`mb-3 text-sm font-medium ${dark ? 'text-gray-300' : 'text-slate-700'}`}>
-                Commentaire additionnel
+                className={`mb-3 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                Commentaire
               </Text>
               <TextInput
                 value={comments}
                 onChangeText={setComments}
                 placeholder='Décrivez le problème...'
-                placeholderTextColor={dark ? '#9ca3af' : '#94a3b8'}
+                placeholderTextColor={dark ? '#52525B' : '#A1A1AA'}
                 multiline
-                numberOfLines={4}
-                className={`mb-8 min-h-[100px] items-start justify-start rounded-2xl border px-4 py-3 ${dark ? 'border-zinc-800 bg-zinc-900 text-white' : 'border-gray-200 bg-gray-50 text-slate-900'}`}
+                className={`mb-8 min-h-[100px] rounded-2xl p-4 font-medium ${dark ? 'bg-zinc-800/50 text-white' : 'bg-white text-black'} border border-zinc-100 shadow-sm dark:border-zinc-800`}
                 textAlignVertical='top'
               />
 
               <TouchableOpacity
                 onPress={handleSubmit}
                 disabled={isSubmitting}
-                className='w-full items-center justify-center rounded-full py-4'
+                className='w-full items-center justify-center rounded-full py-5 shadow-lg'
                 style={{ backgroundColor: primaryColor }}>
                 {isSubmitting ? (
-                  <ActivityIndicator color='#fff' />
+                  <ActivityIndicator color='white' />
                 ) : (
-                  <Text className='text-base font-semibold text-white'>Envoyer le signalement</Text>
+                  <Text className='text-lg font-black text-white'>Envoyer</Text>
                 )}
               </TouchableOpacity>
             </ScrollView>
