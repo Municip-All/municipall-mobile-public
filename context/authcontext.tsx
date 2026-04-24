@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiClient from '../services/apiClient';
 
@@ -26,6 +26,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const login = useCallback(async (token: string, userData: User) => {
+    await AsyncStorage.setItem('user_token', token);
+    await AsyncStorage.setItem('user_data', JSON.stringify(userData));
+    setUser(userData);
+    setIsAuthenticated(true);
+  }, []);
+
+  const logout = useCallback(async () => {
+    await AsyncStorage.removeItem('user_token');
+    await AsyncStorage.removeItem('user_data');
+    setUser(null);
+    setIsAuthenticated(false);
+  }, []);
+
+  const updateUser = useCallback((userData: Partial<User>) => {
+    setUser((currentUser) => {
+      if (currentUser) {
+        const newUser = { ...currentUser, ...userData };
+        AsyncStorage.setItem('user_data', JSON.stringify(newUser));
+        return newUser;
+      }
+      return currentUser;
+    });
+  }, []);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -61,29 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     initializeAuth();
-  }, []);
-
-  const login = async (token: string, userData: User) => {
-    await AsyncStorage.setItem('user_token', token);
-    await AsyncStorage.setItem('user_data', JSON.stringify(userData));
-    setUser(userData);
-    setIsAuthenticated(true);
-  };
-
-  const logout = async () => {
-    await AsyncStorage.removeItem('user_token');
-    await AsyncStorage.removeItem('user_data');
-    setUser(null);
-    setIsAuthenticated(false);
-  };
-
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      const newUser = { ...user, ...userData };
-      setUser(newUser);
-      AsyncStorage.setItem('user_data', JSON.stringify(newUser));
-    }
-  };
+  }, [logout]);
 
   const value = useMemo<AuthContextType>(
     () => ({
@@ -94,7 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       logout,
       updateUser,
     }),
-    [isAuthenticated, isLoading, user, updateUser]
+    [isAuthenticated, isLoading, user, login, logout, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
