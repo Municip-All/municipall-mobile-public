@@ -10,6 +10,9 @@ export interface CityConfig {
     useGradient: boolean;
     logoUrl: string;
   };
+  neighborhoods?: string[];
+  usefulNumbers?: { label: string; phone: string; icon: string }[];
+  usefulLinks?: { label: string; url: string; icon: string }[];
 }
 
 export const cityService = {

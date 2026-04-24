@@ -55,7 +55,7 @@ export default function Home() {
         </View>
 
         {/* Highlight Card (Weather) */}
-        <View className='mb-6 shadow-sm'>
+        <View className='mb-6 rounded-[28px] shadow-sm'>
           <BlurView
             intensity={dark ? 40 : 80}
             tint={dark ? 'dark' : 'light'}

@@ -9,6 +9,8 @@ export interface User {
   surname: string;
   role: string;
   avatar_url?: string;
+  points?: number;
+  neighborhood?: string;
 }
 
 type AuthContextType = {
