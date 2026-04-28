@@ -24,4 +24,9 @@ export const cityService = {
     });
     return response.data;
   },
+
+  getAllCities: async (): Promise<{ id: string, name: string, logoUrl?: string }[]> => {
+    const response = await apiClient.get(`city-config`);
+    return response.data;
+  },
 };
