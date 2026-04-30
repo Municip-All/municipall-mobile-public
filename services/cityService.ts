@@ -10,6 +10,15 @@ export interface CityConfig {
     useGradient: boolean;
     logoUrl: string;
   };
+  wasteConfig?: {
+    services: {
+      type: string;
+      icon: string;
+      color: string;
+      days: number[];
+      time: string;
+    }[];
+  };
 }
 
 export const cityService = {
@@ -25,7 +34,7 @@ export const cityService = {
     return response.data;
   },
 
-  getAllCities: async (): Promise<{ id: string, name: string, logoUrl?: string }[]> => {
+  getAllCities: async (): Promise<{ id: string; name: string; logoUrl?: string }[]> => {
     const response = await apiClient.get(`city-config`);
     return response.data;
   },
