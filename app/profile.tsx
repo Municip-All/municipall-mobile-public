@@ -7,6 +7,7 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  Linking,
 } from 'react-native';
 import { useTheme } from '@context/themecontext';
 import { useCity } from '@context/citycontext';
@@ -17,7 +18,6 @@ import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { Linking } from 'react-native';
 import apiClient from '../services/apiClient';
 import { cityService } from '../services/cityService';
 
@@ -30,10 +30,22 @@ export default function Profile() {
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
   const [showCityPicker, setShowCityPicker] = useState(false);
-  const [availableCities, setAvailableCities] = useState<{ id: string, name: string }[]>([]);
+  const [availableCities, setAvailableCities] = useState<{ id: string; name: string }[]>([]);
+  const [userStats, setUserStats] = useState({ reports: 0, participations: 0, points: 0 });
 
   React.useEffect(() => {
-    cityService.getAllCities().then(setAvailableCities).catch(console.error);
+    const loadData = async () => {
+      try {
+        const statsResp = await apiClient.get('users/stats');
+        if (statsResp.data) setUserStats(statsResp.data);
+
+        const cities = await cityService.getAllCities();
+        setAvailableCities(cities);
+      } catch (err) {
+        console.error('Failed to load profile data', err);
+      }
+    };
+    loadData();
   }, []);
 
   if (!isAuthenticated || !user) {
@@ -55,12 +67,12 @@ export default function Profile() {
   const handleReferCity = () => {
     const subject = encodeURIComponent("Suggestion d'adoption de la solution Municip'All");
     const body = encodeURIComponent(
-      "Monsieur le Maire / Madame la Maire,\n\n" +
-      "En tant que citoyen engagé, je souhaiterais vous suggérer d'adopter la solution Municip'All pour faciliter la communication entre les services municipaux et les habitants.\n\n" +
-      "Cette solution permet de signaler des incidents en temps réel, de suivre les travaux et d'être alerté des événements importants de notre ville.\n\n" +
-      "Plusieurs villes partenaires l'utilisent déjà avec succès. Vous pouvez trouver plus d'informations sur https://municipall.dev\n\n" +
-      "En espérant que cette suggestion retiendra votre attention.\n\n" +
-      "Bien cordialement,"
+      'Monsieur le Maire / Madame la Maire,\n\n' +
+        "En tant que citoyen engagé, je souhaiterais vous suggérer d'adopter la solution Municip'All pour faciliter la communication entre les services municipaux et les habitants.\n\n" +
+        "Cette solution permet de signaler des incidents en temps réel, de suivre les travaux et d'être alerté des événements importants de notre ville.\n\n" +
+        "Plusieurs villes partenaires l'utilisent déjà avec succès. Vous pouvez trouver plus d'informations sur https://municipall.dev\n\n" +
+        'En espérant que cette suggestion retiendra votre attention.\n\n' +
+        'Bien cordialement,'
     );
     Linking.openURL(`mailto:?subject=${subject}&body=${body}`);
   };
@@ -167,9 +179,19 @@ export default function Profile() {
         {/* Stats Section */}
         <View className='mb-8 flex-row justify-between'>
           {[
-            { label: 'Signalements', value: '12', icon: 'alert-circle', color: '#FF3B30' },
-            { label: 'Participations', value: '5', icon: 'calendar', color: '#007AFF' },
-            { label: 'Points', value: user.points || '0', icon: 'star', color: '#FFCC00' },
+            {
+              label: 'Signalements',
+              value: userStats.reports.toString(),
+              icon: 'alert-circle',
+              color: '#FF3B30',
+            },
+            {
+              label: 'Participations',
+              value: userStats.participations.toString(),
+              icon: 'calendar',
+              color: '#007AFF',
+            },
+            { label: 'Points', value: userStats.points.toString(), icon: 'star', color: '#FFCC00' },
           ].map((stat, i) => (
             <View
               key={i}
@@ -192,36 +214,35 @@ export default function Profile() {
           Ma Résidence
         </Text>
         <View
-          className={`mb-8 overflow-hidden rounded-[24px] ${dark ? 'bg-zinc-900' : 'bg-white'} border border-zinc-100 shadow-sm dark:border-zinc-800 p-5`}>
-          <View className="flex-row items-center justify-between mb-4">
-            <View className="flex-row items-center">
-              <View className="h-10 w-10 bg-green-50 rounded-xl items-center justify-center mr-3">
-                <Ionicons name="business" size={20} color="#34C759" />
+          className={`mb-8 overflow-hidden rounded-[24px] ${dark ? 'bg-zinc-900' : 'bg-white'} border border-zinc-100 p-5 shadow-sm dark:border-zinc-800`}>
+          <View className='mb-4 flex-row items-center justify-between'>
+            <View className='flex-row items-center'>
+              <View className='mr-3 h-10 w-10 items-center justify-center rounded-xl bg-green-50'>
+                <Ionicons name='business' size={20} color='#34C759' />
               </View>
               <View>
                 <Text className={`text-sm font-bold ${dark ? 'text-white' : 'text-zinc-900'}`}>
-                  {availableCities.find(c => c.id === user.cityId)?.name || "Non définie"}
+                  {availableCities.find((c) => c.id === user.cityId)?.name || 'Non définie'}
                 </Text>
-                <Text className="text-[11px] text-zinc-500">Ville de résidence actuelle</Text>
+                <Text className='text-[11px] text-zinc-500'>Ville de résidence actuelle</Text>
               </View>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setShowCityPicker(!showCityPicker)}
-              className="bg-zinc-100 dark:bg-zinc-800 px-4 py-2 rounded-full"
-            >
-              <Text className="text-xs font-bold text-zinc-600 dark:text-zinc-300">Modifier</Text>
+              className='rounded-full bg-zinc-100 px-4 py-2 dark:bg-zinc-800'>
+              <Text className='text-xs font-bold text-zinc-600 dark:text-zinc-300'>Modifier</Text>
             </TouchableOpacity>
           </View>
 
           {showCityPicker && (
-            <View className="flex-row flex-wrap gap-2 pt-2 border-t border-zinc-50 dark:border-zinc-800">
-              {availableCities.map(city => (
+            <View className='flex-row flex-wrap gap-2 border-t border-zinc-50 pt-2 dark:border-zinc-800'>
+              {availableCities.map((city) => (
                 <TouchableOpacity
                   key={city.id}
                   onPress={() => handleUpdateCity(city.id)}
-                  className={`px-3 py-2 rounded-xl border ${user.cityId === city.id ? 'bg-municipall-blue border-municipall-blue' : 'bg-transparent border-zinc-200 dark:border-zinc-700'}`}
-                >
-                  <Text className={`text-xs font-bold ${user.cityId === city.id ? 'text-white' : 'text-zinc-500'}`}>
+                  className={`rounded-xl border px-3 py-2 ${user.cityId === city.id ? 'bg-municipall-blue border-municipall-blue' : 'border-zinc-200 bg-transparent dark:border-zinc-700'}`}>
+                  <Text
+                    className={`text-xs font-bold ${user.cityId === city.id ? 'text-white' : 'text-zinc-500'}`}>
                     {city.name}
                   </Text>
                 </TouchableOpacity>
@@ -229,12 +250,13 @@ export default function Profile() {
             </View>
           )}
 
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={handleReferCity}
-            className="mt-4 flex-row items-center justify-center bg-indigo-50 dark:bg-indigo-900/20 py-3 rounded-xl border border-indigo-100 dark:border-indigo-900/40"
-          >
-            <Ionicons name="megaphone" size={16} color="#6366F1" className="mr-2" />
-            <Text className="text-xs font-bold text-indigo-600 dark:text-indigo-400 ml-2">Convaincre ma mairie d'adopter Municip'All</Text>
+            className='mt-4 flex-row items-center justify-center rounded-xl border border-indigo-100 bg-indigo-50 py-3 dark:border-indigo-900/40 dark:bg-indigo-900/20'>
+            <Ionicons name='megaphone' size={16} color='#6366F1' className='mr-2' />
+            <Text className='ml-2 text-xs font-bold text-indigo-600 dark:text-indigo-400'>
+              Convaincre ma mairie d&apos;adopter Municip&apos;All
+            </Text>
           </TouchableOpacity>
         </View>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import { useAuth } from '@context/authcontext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import apiClient from '../services/apiClient';
+import { cityService } from '../services/cityService';
 import BottomBar from '@components/bottombar';
 
 const SignupScreen: React.FC = () => {
@@ -33,7 +34,7 @@ const SignupScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  const [availableCities, setAvailableCities] = useState<{ id: string, name: string }[]>([]);
+  const [availableCities, setAvailableCities] = useState<{ id: string; name: string }[]>([]);
 
   const primaryColor = config?.theme.primaryColor || '#1D4ED8';
   const secondaryColor = config?.theme.secondaryColor || '#3B82F6';
@@ -58,15 +59,18 @@ const SignupScreen: React.FC = () => {
 
   const handleRegister = async () => {
     if (!email || !password || !username || !phone || !selectedCity) {
-      Alert.alert('Erreur', 'Veuillez entrer toutes les informations, y compris votre ville de résidence.');
+      Alert.alert(
+        'Erreur',
+        'Veuillez entrer toutes les informations, y compris votre ville de résidence.'
+      );
       return;
     }
 
     setIsSubmitting(true);
     try {
       const response = await apiClient.post('auth/signup', {
-        name: username, 
-        surname: '', 
+        name: username,
+        surname: '',
         email,
         password,
         phone,
@@ -225,32 +229,34 @@ const SignupScreen: React.FC = () => {
                 </View>
               ))}
 
-              <View className='mb-6 mt-2'>
-                <Text className={`mb-3 ml-1 text-xs font-semibold ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
+              <View className='mt-2 mb-6'>
+                <Text
+                  className={`mb-3 ml-1 text-xs font-semibold ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
                   MA VILLE DE RÉSIDENCE
                 </Text>
                 <View className='flex-row flex-wrap gap-2'>
-                  {availableCities.map(city => (
+                  {availableCities.map((city) => (
                     <TouchableOpacity
                       key={city.id}
                       onPress={() => setSelectedCity(city.id)}
                       activeOpacity={0.7}
                       style={{
-                        backgroundColor: selectedCity === city.id ? primaryColor : (dark ? '#27272a' : '#f1f5f9'),
+                        backgroundColor:
+                          selectedCity === city.id ? primaryColor : dark ? '#27272a' : '#f1f5f9',
                         borderRadius: 16,
                         paddingHorizontal: 16,
                         paddingVertical: 10,
                         borderWidth: 1,
-                        borderColor: selectedCity === city.id ? primaryColor : (dark ? '#3f3f46' : '#e2e8f0'),
-                      }}
-                    >
-                      <Text 
-                        style={{ 
-                          color: selectedCity === city.id ? '#FFFFFF' : (dark ? '#9CA3AF' : '#475569'),
+                        borderColor:
+                          selectedCity === city.id ? primaryColor : dark ? '#3f3f46' : '#e2e8f0',
+                      }}>
+                      <Text
+                        style={{
+                          color:
+                            selectedCity === city.id ? '#FFFFFF' : dark ? '#9CA3AF' : '#475569',
                           fontWeight: 'bold',
-                          fontSize: 13
-                        }}
-                      >
+                          fontSize: 13,
+                        }}>
                         {city.name}
                       </Text>
                     </TouchableOpacity>
