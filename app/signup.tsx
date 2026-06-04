@@ -13,7 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useTheme } from '@context/themecontext';
+import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { useAuth } from '@context/authcontext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,9 +23,8 @@ import { cityService } from '../services/cityService';
 import BottomBar from '@components/bottombar';
 
 const SignupScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const { dark, primaryColor, classes, colors } = useAppTheme();
   const { config } = useCity();
-  const dark = theme === 'dark';
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -36,7 +35,6 @@ const SignupScreen: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [availableCities, setAvailableCities] = useState<{ id: string; name: string }[]>([]);
 
-  const primaryColor = config?.theme.primaryColor || '#1D4ED8';
   const secondaryColor = config?.theme.secondaryColor || '#3B82F6';
   const useGradient = config?.theme.useGradient ?? false;
   const appName = config?.name || "Municip'All";
@@ -94,11 +92,11 @@ const SignupScreen: React.FC = () => {
   };
 
   return (
-    <View className='flex-1 bg-[#F8FAFC] dark:bg-zinc-950'>
+    <View className={`flex-1 ${classes.pageAuth}`}>
       <LinearGradient
         colors={[
-          dark ? '#000000' : useGradient ? '#E0E7FF' : '#F8FAFC',
-          dark ? '#18181b' : '#F8FAFC',
+          dark ? colors.semantic.surfaceAuth.dark : useGradient ? '#E0E7FF' : colors.semantic.surfaceAuth.light,
+          dark ? colors.card : colors.semantic.surfaceAuth.light,
         ]}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
@@ -291,8 +289,8 @@ const SignupScreen: React.FC = () => {
 
         <TouchableOpacity
           onPress={() => router.push('/login')}
-          className='absolute bottom-28 w-full flex-row justify-center bg-[#F8FAFC]/80 py-4 backdrop-blur-sm dark:bg-zinc-950/80'>
-          <Text className={`text-[15px] font-medium ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
+          className={`absolute bottom-28 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}>
+          <Text className={`text-[15px] font-medium ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
             Vous avez déjà un compte ?{' '}
             <Text className='font-bold' style={{ color: primaryColor }}>
               Se connecter

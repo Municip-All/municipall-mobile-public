@@ -15,35 +15,145 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import MapComponent from '@components/mapcomponent';
 import type { MapComponentMethods } from '@components/mapcomponent';
 import BottomBar from '@components/bottombar';
-import { useTheme } from '@context/themecontext';
+import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Modalize } from 'react-native-modalize';
-import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
+import { pickProofImage } from '../utils/pickProofImage';
+import { getReportLocation, LocationPermissionError } from '../utils/reportLocation';
 import { reportService } from '../services/reportService';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useAuth } from '../context/authcontext';
+import axios from 'axios';
 import { BlurView } from 'expo-blur';
+
+function MapToolButton({
+  onPress,
+  label,
+  children,
+  active,
+  chipBg,
+  primaryColor,
+}: {
+  onPress: () => void;
+  label: string;
+  children: React.ReactNode;
+  active?: boolean;
+  chipBg: string;
+  primaryColor: string;
+}) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      accessibilityLabel={label}
+      style={{
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: active ? `${primaryColor}22` : chipBg,
+        borderWidth: active ? 1.5 : 0,
+        borderColor: active ? primaryColor : 'transparent',
+      }}>
+      {children}
+    </TouchableOpacity>
+  );
+}
 
 export default function Carte() {
   const mapRef = useRef<MapComponentMethods>(null);
   const modalizeRef = useRef<Modalize>(null);
-  const { colorScheme } = useTheme();
+  const { dark, primaryColor, classes, colors } = useAppTheme();
   const { config } = useCity();
-  const dark = colorScheme === 'dark';
+  const { isAuthenticated, user } = useAuth();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { action } = useLocalSearchParams();
 
-  const primaryColor = config?.theme.primaryColor || '#0B0080';
-
   const [address, setAddress] = useState('');
+  const [reportCoords, setReportCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
   const [comments, setComments] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [layersOpen, setLayersOpen] = useState(false);
+  const [showComposts, setShowComposts] = useState(true);
+  const [showToilets, setShowToilets] = useState(true);
+  const [showReports, setShowReports] = useState(true);
 
   const categories = ['Voirie', 'Éclairage', 'Déchets', 'Espaces Verts', 'Autre'];
+
+  const formPaddingX = 24;
+  const formContentStyle = {
+    paddingHorizontal: formPaddingX,
+    paddingTop: 12,
+    paddingBottom: Math.max(insets.bottom, 20) + 24,
+  };
+  const fieldInnerPadding = { paddingHorizontal: 16, paddingVertical: 14 };
+  const mapOverlayPadding = 20;
+
+  const statusLegend = [
+    { label: 'En attente', color: '#FF9500' },
+    { label: 'En cours', color: '#007AFF' },
+    { label: 'Résolu', color: '#34C759' },
+  ] as const;
+
+  const mapLayers = [
+    {
+      id: 'reports',
+      label: 'Signalements',
+      icon: 'alert-circle' as const,
+      active: showReports,
+      toggle: () => setShowReports((v) => !v),
+    },
+    {
+      id: 'composts',
+      label: 'Composteurs',
+      icon: 'leaf' as const,
+      active: showComposts,
+      toggle: () => setShowComposts((v) => !v),
+    },
+    {
+      id: 'toilets',
+      label: 'Toilettes',
+      icon: 'water' as const,
+      active: showToilets,
+      toggle: () => setShowToilets((v) => !v),
+    },
+  ] as const;
+
+  const chipBg = dark ? 'rgba(39,39,42,0.9)' : 'rgba(228,228,231,0.9)';
+  const dividerColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+
+  const refreshReportLocation = async () => {
+    setIsLocating(true);
+    setAddress('Localisation en cours…');
+    try {
+      const loc = await getReportLocation();
+      setReportCoords({ lat: loc.lat, lon: loc.lon });
+      setAddress(loc.addressLabel);
+    } catch (e) {
+      setReportCoords(null);
+      if (e instanceof LocationPermissionError) {
+        setAddress('');
+        Alert.alert(
+          'Localisation désactivée',
+          'Autorisez la localisation pour enregistrer l’emplacement du signalement.',
+        );
+      } else {
+        setAddress('');
+        Alert.alert(
+          'Localisation indisponible',
+          'Impossible de déterminer votre position. Réessayez ou saisissez l’adresse manuellement.',
+        );
+      }
+    } finally {
+      setIsLocating(false);
+    }
+  };
 
   const onOpenReport = () => {
     modalizeRef.current?.open();
@@ -56,21 +166,8 @@ export default function Carte() {
   }, [action]);
 
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission refusée', 'Accès aux photos nécessaire.');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.5,
-    });
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-    }
+    const uri = await pickProofImage();
+    if (uri) setSelectedImage(uri);
   };
 
   const handleSubmit = async () => {
@@ -79,15 +176,34 @@ export default function Carte() {
       return;
     }
 
+    if (!isAuthenticated || !user) {
+      Alert.alert('Connexion requise', 'Connectez-vous pour envoyer un signalement.', [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Se connecter', onPress: () => router.push('/login') },
+      ]);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const location = await Location.getCurrentPositionAsync({});
+      let lat = reportCoords?.lat;
+      let lon = reportCoords?.lon;
+
+      if (lat == null || lon == null) {
+        const loc = await getReportLocation();
+        lat = loc.lat;
+        lon = loc.lon;
+        setReportCoords({ lat, lon });
+        setAddress(loc.addressLabel);
+      }
+
       await reportService.createReport({
         category,
-        description: comments,
+        description: comments.trim() || address.trim() || undefined,
         imageUrl: selectedImage || undefined,
-        lat: location.coords.latitude,
-        lon: location.coords.longitude,
+        lat,
+        lon,
+        userId: user.id,
         status: 'En attente',
       });
 
@@ -96,7 +212,38 @@ export default function Carte() {
       setCategory(null);
       setComments('');
       setSelectedImage(null);
-    } catch {
+      setAddress('');
+      setReportCoords(null);
+    } catch (e) {
+      if (e instanceof LocationPermissionError) {
+        Alert.alert(
+          'Localisation requise',
+          'Autorisez la localisation pour envoyer le signalement avec sa position.',
+        );
+        return;
+      }
+      if (axios.isAxiosError(e)) {
+        const status = e.response?.status;
+        if (status === 401) {
+          Alert.alert(
+            'Session expirée',
+            'Reconnectez-vous pour envoyer votre signalement.',
+            [{ text: 'OK', onPress: () => router.push('/login') }],
+          );
+          return;
+        }
+        const serverMsg =
+          typeof e.response?.data === 'object' &&
+          e.response?.data &&
+          'message' in e.response.data
+            ? String((e.response.data as { message: unknown }).message)
+            : null;
+        Alert.alert(
+          'Erreur',
+          serverMsg || "Impossible d'envoyer le signalement. Vérifiez votre connexion.",
+        );
+        return;
+      }
       Alert.alert('Erreur', "Impossible d'envoyer le signalement.");
     } finally {
       setIsSubmitting(false);
@@ -105,84 +252,170 @@ export default function Carte() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View className={`flex-1 ${dark ? 'bg-black' : 'bg-[#F2F2F7]'}`}>
+      <View className={`flex-1 ${classes.page}`}>
         {/* Map Container */}
         <View className='absolute inset-0'>
-          <MapComponent ref={mapRef} showComposts={true} showToilets={true} />
+          <MapComponent
+            ref={mapRef}
+            showComposts={showComposts}
+            showToilets={showToilets}
+            showReports={showReports}
+          />
         </View>
 
-        {/* Floating Apple-style Header */}
+        {/* En-tête carte + légende (carte unique, aérée) */}
         <View
-          className='absolute top-0 right-0 left-0 z-20 px-4'
-          style={{ paddingTop: insets.top + 10 }}>
+          pointerEvents='box-none'
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 20,
+            paddingTop: insets.top + 12,
+            paddingHorizontal: mapOverlayPadding,
+          }}>
           <BlurView
-            intensity={dark ? 40 : 80}
+            intensity={dark ? 50 : 85}
             tint={dark ? 'dark' : 'light'}
-            className='flex-row items-center justify-between rounded-[24px] border border-white/20 p-4 shadow-lg dark:border-zinc-800/50'>
-            <View>
-              <Text
-                className={`text-sm font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
-                {config?.name || 'Carte Interactive'}
-              </Text>
-              <Text className={`text-[10px] font-bold ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                Explorez votre ville
-              </Text>
-            </View>
-            <TouchableOpacity className='h-10 w-10 items-center justify-center rounded-full bg-zinc-200/50 dark:bg-zinc-800/50'>
-              <Ionicons name='layers' size={20} color={dark ? '#FFF' : '#3F3F46'} />
-            </TouchableOpacity>
-          </BlurView>
-        </View>
+            style={{
+              borderRadius: 22,
+              overflow: 'hidden',
+              borderWidth: 1,
+              borderColor: dark ? 'rgba(63,63,70,0.55)' : 'rgba(255,255,255,0.35)',
+            }}>
+            <View style={{ paddingHorizontal: 20, paddingTop: 18, paddingBottom: 16 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ flex: 1, paddingRight: 12 }}>
+                  <Text
+                    className={`text-lg font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
+                    {config?.name || "Municip'All"}
+                  </Text>
+                  <Text
+                    className={`mt-1 text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                    Explorez votre ville
+                  </Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <MapToolButton
+                    chipBg={chipBg}
+                    primaryColor={primaryColor}
+                    onPress={() => mapRef.current?.zoomOut()}
+                    label='Dézoomer'>
+                    <Ionicons name='remove' size={20} color={dark ? '#FAFAFA' : '#3F3F46'} />
+                  </MapToolButton>
+                  <MapToolButton
+                    chipBg={chipBg}
+                    primaryColor={primaryColor}
+                    onPress={() => mapRef.current?.zoomIn()}
+                    label='Zoomer'>
+                    <Ionicons name='add' size={20} color={dark ? '#FAFAFA' : '#3F3F46'} />
+                  </MapToolButton>
+                  <MapToolButton
+                    chipBg={chipBg}
+                    primaryColor={primaryColor}
+                    onPress={() => mapRef.current?.centerOnUserLocation()}
+                    label='Ma position'>
+                    <Ionicons name='navigate' size={20} color={primaryColor} />
+                  </MapToolButton>
+                  <MapToolButton
+                    chipBg={chipBg}
+                    primaryColor={primaryColor}
+                    onPress={() => setLayersOpen((o) => !o)}
+                    label='Calques de la carte'
+                    active={layersOpen}>
+                    <Ionicons
+                      name='layers'
+                      size={20}
+                      color={layersOpen ? primaryColor : dark ? '#FAFAFA' : '#3F3F46'}
+                    />
+                  </MapToolButton>
+                </View>
+              </View>
 
-        {/* Status Legend (Pill style) */}
-        <View className='absolute top-[130px] left-4 z-10 flex-row'>
-          <BlurView
-            intensity={dark ? 60 : 90}
-            tint={dark ? 'dark' : 'light'}
-            className='flex-row items-center rounded-full border border-white/10 px-4 py-2 shadow-sm'>
-            <View className='mr-4 flex-row items-center'>
-              <View className='mr-2 h-2 w-2 rounded-full bg-orange-500' />
-              <Text className={`text-[10px] font-bold ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
-                Attente
-              </Text>
-            </View>
-            <View className='mr-4 flex-row items-center'>
-              <View className='mr-2 h-2 w-2 rounded-full bg-blue-500' />
-              <Text className={`text-[10px] font-bold ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
-                Cours
-              </Text>
-            </View>
-            <View className='flex-row items-center'>
-              <View className='mr-2 h-2 w-2 rounded-full bg-green-500' />
-              <Text className={`text-[10px] font-bold ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
-                Résolu
-              </Text>
+              {layersOpen && (
+                <View style={{ marginTop: 14 }}>
+                  <Text
+                    className={`mb-2 text-[10px] font-bold uppercase tracking-widest ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    Afficher sur la carte
+                  </Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                    {mapLayers.map((layer) => (
+                      <TouchableOpacity
+                        key={layer.id}
+                        onPress={layer.toggle}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          paddingHorizontal: 12,
+                          paddingVertical: 8,
+                          borderRadius: 20,
+                          backgroundColor: layer.active
+                            ? `${primaryColor}18`
+                            : dark
+                              ? 'rgba(39,39,42,0.65)'
+                              : 'rgba(255,255,255,0.65)',
+                          borderWidth: 1,
+                          borderColor: layer.active ? primaryColor : 'transparent',
+                        }}>
+                        <Ionicons
+                          name={
+                            layer.active
+                              ? layer.icon
+                              : (`${layer.icon}-outline` as keyof typeof Ionicons.glyphMap)
+                          }
+                          size={16}
+                          color={layer.active ? primaryColor : dark ? '#A1A1AA' : '#71717A'}
+                        />
+                        <Text
+                          className={`ml-2 text-xs font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-700'}`}>
+                          {layer.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              <View
+                style={{
+                  height: 1,
+                  marginTop: 14,
+                  marginBottom: 12,
+                  backgroundColor: dividerColor,
+                }}
+              />
+
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                {statusLegend.map((item) => (
+                  <View
+                    key={item.label}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      paddingHorizontal: 10,
+                      paddingVertical: 6,
+                      borderRadius: 16,
+                      backgroundColor: dark ? 'rgba(39,39,42,0.65)' : 'rgba(255,255,255,0.65)',
+                    }}>
+                    <View
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: 4,
+                        backgroundColor: item.color,
+                        marginRight: 6,
+                      }}
+                    />
+                    <Text
+                      className={`text-[11px] font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-700'}`}>
+                      {item.label}
+                    </Text>
+                  </View>
+                ))}
+              </View>
             </View>
           </BlurView>
-        </View>
-
-        {/* Floating Controls */}
-        <View className='absolute top-[130px] right-4 z-10 space-y-3'>
-          <BlurView
-            intensity={dark ? 60 : 90}
-            tint={dark ? 'dark' : 'light'}
-            className='overflow-hidden rounded-[20px] border border-white/10'>
-            <TouchableOpacity
-              onPress={() => {}}
-              className='items-center justify-center border-b border-zinc-100/10 p-3'>
-              <Ionicons name='add' size={22} color={dark ? '#FFF' : '#000'} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => {}} className='items-center justify-center p-3'>
-              <Ionicons name='remove' size={22} color={dark ? '#FFF' : '#000'} />
-            </TouchableOpacity>
-          </BlurView>
-
-          <TouchableOpacity
-            onPress={() => mapRef.current?.centerOnUserLocation()}
-            className='h-12 w-12 items-center justify-center rounded-full shadow-lg'
-            style={{ backgroundColor: dark ? '#1C1C1E' : '#FFFFFF' }}>
-            <Ionicons name='navigate' size={20} color={primaryColor} />
-          </TouchableOpacity>
         </View>
 
         <BottomBar />
@@ -190,21 +423,24 @@ export default function Carte() {
         {/* Apple Style Modal */}
         <Modalize
           ref={modalizeRef}
+          onOpened={() => {
+            void refreshReportLocation();
+          }}
           adjustToContentHeight={false}
           snapPoint={650}
           modalStyle={{
-            backgroundColor: dark ? '#1C1C1E' : '#F2F2F7',
+            backgroundColor: colors.modalSheet,
             borderTopLeftRadius: 36,
             borderTopRightRadius: 36,
           }}
           handleStyle={{
-            backgroundColor: dark ? '#3F3F46' : '#D1D1D6',
+            backgroundColor: colors.handle,
             width: 40,
             height: 5,
             marginTop: 10,
           }}
           HeaderComponent={
-            <View className='px-6 pt-10 pb-4'>
+            <View style={{ paddingHorizontal: formPaddingX, paddingTop: 40, paddingBottom: 12 }}>
               <Text
                 className={`text-3xl font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
                 Nouveau Signalement
@@ -212,55 +448,78 @@ export default function Carte() {
             </View>
           }>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-            <ScrollView className='px-6 pt-2 pb-10' showsVerticalScrollIndicator={false}>
-              <Text
-                className={`mb-3 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                Catégorie
-              </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} className='mb-6'>
-                {categories.map((cat) => (
-                  <TouchableOpacity
-                    key={cat}
-                    onPress={() => setCategory(cat)}
-                    className={`mr-2 rounded-full border px-6 py-3 ${
-                      category === cat
-                        ? 'border-transparent'
-                        : dark
-                          ? 'border-zinc-800 bg-zinc-800/50'
-                          : 'border-zinc-200 bg-white'
-                    }`}
-                    style={category === cat ? { backgroundColor: primaryColor } : {}}>
-                    <Text
-                      className={`text-sm font-bold ${category === cat ? 'text-white' : dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                      {cat}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={formContentStyle}
+              keyboardShouldPersistTaps='handled'>
+              <Text className={classes.formLabel}>Catégorie</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingVertical: 4, paddingRight: 4 }}
+                style={{ marginBottom: 24 }}>
+                {categories.map((cat) => {
+                  const isSelected = category === cat;
+                  return (
+                    <TouchableOpacity
+                      key={cat}
+                      onPress={() => setCategory(cat)}
+                      className={isSelected ? 'rounded-full' : classes.chipUnselected}
+                      style={[
+                        { marginRight: 10 },
+                        isSelected
+                          ? {
+                              backgroundColor: primaryColor,
+                              paddingHorizontal: 20,
+                              paddingVertical: 12,
+                              shadowColor: primaryColor,
+                              shadowOffset: { width: 0, height: 2 },
+                              shadowOpacity: 0.35,
+                              shadowRadius: 6,
+                              elevation: 4,
+                            }
+                          : undefined,
+                      ]}>
+                      <Text
+                        className={`text-sm font-bold ${isSelected ? 'text-white' : classes.chipUnselectedText}`}>
+                        {cat}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </ScrollView>
 
-              <Text
-                className={`mb-3 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                Localisation
-              </Text>
+              <Text className={classes.formLabel}>Localisation</Text>
               <View
-                className={`mb-6 flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800/50' : 'bg-white'} border border-zinc-100 shadow-sm dark:border-zinc-800`}>
+                className={`mb-6 flex-row items-center ${classes.formField}`}
+                style={fieldInnerPadding}>
                 <Ionicons name='location' size={18} color={primaryColor} />
                 <TextInput
                   value={address}
                   onChangeText={setAddress}
-                  placeholder='Localisation automatique...'
-                  placeholderTextColor={dark ? '#52525B' : '#A1A1AA'}
-                  className={`ml-3 flex-1 text-base font-medium ${dark ? 'text-white' : 'text-black'}`}
+                  editable={!isLocating}
+                  placeholder='Adresse détectée automatiquement…'
+                  placeholderTextColor={colors.placeholder}
+                  className={`ml-3 flex-1 ${classes.formFieldText}`}
                 />
+                <TouchableOpacity
+                  onPress={() => void refreshReportLocation()}
+                  disabled={isLocating}
+                  accessibilityLabel='Actualiser la position'
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  {isLocating ? (
+                    <ActivityIndicator size='small' color={primaryColor} />
+                  ) : (
+                    <Ionicons name='refresh' size={20} color={primaryColor} />
+                  )}
+                </TouchableOpacity>
               </View>
 
-              <Text
-                className={`mb-3 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                Photo
-              </Text>
+              <Text className={classes.formLabel}>Photo</Text>
               <TouchableOpacity
                 onPress={pickImage}
-                className={`mb-6 h-40 overflow-hidden rounded-3xl border-2 border-dashed ${dark ? 'border-zinc-800 bg-zinc-900/50' : 'border-zinc-300 bg-white'} items-center justify-center`}>
+                className={`mb-6 h-44 overflow-hidden ${classes.photoDropzone} items-center justify-center`}
+                style={{ padding: 16 }}>
                 {selectedImage ? (
                   <Image
                     source={{ uri: selectedImage }}
@@ -269,34 +528,34 @@ export default function Carte() {
                   />
                 ) : (
                   <View className='items-center'>
-                    <Ionicons name='camera' size={32} color={dark ? '#3F3F46' : '#D4D4D8'} />
-                    <Text
-                      className={`mt-2 text-xs font-bold ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                      Ajouter une preuve
-                    </Text>
+                    <Ionicons name='camera' size={36} color={colors.iconMuted} />
+                    <Text className={classes.photoHint}>Photo ou galerie</Text>
                   </View>
                 )}
               </TouchableOpacity>
 
-              <Text
-                className={`mb-3 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                Commentaire
-              </Text>
+              <Text className={classes.formLabel}>Commentaire</Text>
               <TextInput
                 value={comments}
                 onChangeText={setComments}
                 placeholder='Décrivez le problème...'
-                placeholderTextColor={dark ? '#52525B' : '#A1A1AA'}
+                placeholderTextColor={colors.placeholder}
                 multiline
-                className={`mb-8 min-h-[100px] rounded-2xl p-4 font-medium ${dark ? 'bg-zinc-800/50 text-white' : 'bg-white text-black'} border border-zinc-100 shadow-sm dark:border-zinc-800`}
+                className={`mb-8 min-h-[120px] ${classes.formField} ${classes.formFieldText}`}
+                style={fieldInnerPadding}
                 textAlignVertical='top'
               />
 
               <TouchableOpacity
                 onPress={handleSubmit}
                 disabled={isSubmitting}
-                className='w-full items-center justify-center rounded-full py-5 shadow-lg'
-                style={{ backgroundColor: primaryColor }}>
+                activeOpacity={0.85}
+                className='items-center justify-center rounded-full shadow-lg'
+                style={{
+                  backgroundColor: primaryColor,
+                  paddingVertical: 18,
+                  marginTop: 8,
+                }}>
                 {isSubmitting ? (
                   <ActivityIndicator color='white' />
                 ) : (

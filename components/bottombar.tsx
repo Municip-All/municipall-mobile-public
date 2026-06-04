@@ -33,15 +33,19 @@ const BottomBar: React.FC = () => {
     { id: 'profile', label: 'Profile', icon: 'person', path: '/profile' },
   ];
 
+  const inactiveColor = dark ? '#A1A1AA' : '#52525B';
+
   const getIconColor = (path: string) => {
     if (pathname === path) return primaryColor;
-    return dark ? '#9CA3AF' : '#64748B';
+    return inactiveColor;
   };
 
   const getLabelStyle = (path: string) => {
     if (pathname === path) return { color: primaryColor, fontWeight: '700' as const };
-    return { color: dark ? '#9CA3AF' : '#64748B' };
+    return { color: inactiveColor };
   };
+
+  const fabBorderColor = dark ? '#27272A' : '#F4F4F5';
 
   // SVG Path calculation for the curved tab bar
   const center = SCREEN_WIDTH / 2;
@@ -123,11 +127,13 @@ const BottomBar: React.FC = () => {
       <View style={styles.centerButtonContainer} pointerEvents='box-none'>
         <Pressable
           onPress={() => router.push({ pathname: '/carte', params: { action: 'report' } as any })}
-          style={[styles.centerButton, { backgroundColor: '#1E293B' }]} // Dark navy as in the image
+          style={[styles.centerButton, { backgroundColor: primaryColor, borderColor: fabBorderColor }]}
           className='shadow-xl'>
           <Ionicons name='paper-plane' size={24} color='#FFFFFF' />
         </Pressable>
-        <Text style={[styles.centerLabel, { color: dark ? '#FFFFFF' : '#1E293B' }]}>Signaler</Text>
+        <Text style={[styles.centerLabel, { color: dark ? '#FFFFFF' : primaryColor }]}>
+          Signaler
+        </Text>
       </View>
     </View>
   );
@@ -174,7 +180,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 4,
-    borderColor: '#F1F5F9', // Light border around the button
+    borderColor: '#F4F4F5',
   },
   centerLabel: {
     fontSize: 11,

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Stack, Redirect, usePathname } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { View, Text, ActivityIndicator } from 'react-native';
-import { ThemeProvider } from '@context/themecontext';
+import { ThemeProvider, useTheme } from '@context/themecontext';
 import { AuthProvider } from '@context/authcontext';
 import { CityProvider } from '@context/citycontext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -59,10 +59,9 @@ export default function RootLayout() {
 
   if (!fontsLoaded || !onboardingChecked) {
     return (
-      <View className='flex-1 items-center justify-center'>
-        <ActivityIndicator size='large' />
-        <Text>Chargement...</Text>
-      </View>
+      <ThemeProvider>
+        <LoadingScreen />
+      </ThemeProvider>
     );
   }
 
@@ -81,5 +80,19 @@ export default function RootLayout() {
         </AuthProvider>
       </CityProvider>
     </ThemeProvider>
+  );
+}
+
+function LoadingScreen() {
+  const { colorScheme } = useTheme();
+  const dark = colorScheme === 'dark';
+  return (
+    <View
+      className={`flex-1 items-center justify-center ${dark ? 'bg-black' : 'bg-surface'}`}>
+      <ActivityIndicator size='large' color={dark ? '#FFFFFF' : '#0B0080'} />
+      <Text className={`mt-4 text-base font-medium ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
+        Chargement...
+      </Text>
+    </View>
   );
 }

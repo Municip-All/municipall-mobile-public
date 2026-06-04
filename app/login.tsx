@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useTheme } from '@context/themecontext';
+import { useAppTheme } from '@hooks/useAppTheme';
 import { useAuth } from '@context/authcontext';
 import { useCity } from '@context/citycontext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,9 +21,8 @@ import BottomBar from '@components/bottombar';
 import apiClient from '../services/apiClient';
 
 const LoginScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const { dark, primaryColor, classes, colors } = useAppTheme();
   const { config } = useCity();
-  const dark = theme === 'dark';
   const router = useRouter();
   const { login } = useAuth();
   const { redirectTo } = useLocalSearchParams<{ redirectTo?: string }>();
@@ -33,7 +32,6 @@ const LoginScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const primaryColor = config?.theme.primaryColor || '#1D4ED8';
   const secondaryColor = config?.theme.secondaryColor || '#3B82F6';
   const useGradient = config?.theme.useGradient ?? false;
   const appName = config?.name || "Municip'All";
@@ -68,11 +66,11 @@ const LoginScreen: React.FC = () => {
   };
 
   return (
-    <View className='flex-1 bg-[#F8FAFC] px-6 dark:bg-zinc-950'>
+    <View className={`flex-1 px-6 ${classes.pageAuth}`}>
       <LinearGradient
         colors={[
-          dark ? '#000000' : useGradient ? '#E0E7FF' : '#F8FAFC',
-          dark ? '#18181b' : '#F8FAFC',
+          dark ? colors.semantic.surfaceAuth.dark : useGradient ? '#E0E7FF' : colors.semantic.surfaceAuth.light,
+          dark ? colors.card : colors.semantic.surfaceAuth.light,
         ]}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
@@ -127,7 +125,7 @@ const LoginScreen: React.FC = () => {
             className={`mb-2 text-4xl font-extrabold tracking-tight ${dark ? 'text-white' : 'text-slate-900'}`}>
             Bienvenue.
           </Text>
-          <Text className={`text-base font-medium ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
+          <Text className={classes.subtitle}>
             Connectez-vous à {appName}
           </Text>
         </View>
@@ -142,15 +140,15 @@ const LoginScreen: React.FC = () => {
 
             <View className='mb-4'>
               <Text
-                className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
+                className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 IDENTIFIANT / EMAIL
               </Text>
               <View
-                className={`flex-row items-center rounded-2xl border px-4 py-3 ${dark ? 'border-white/10 bg-black/50' : 'border-blue-50 bg-white'}`}>
+                className={`flex-row items-center rounded-2xl px-4 py-3 ${classes.input}`}>
                 <Ionicons
                   name='mail-outline'
                   size={20}
-                  color={dark ? '#9CA3AF' : '#64748B'}
+                  color={colors.iconMuted}
                   className='mr-2'
                 />
                 <TextInput
@@ -167,15 +165,15 @@ const LoginScreen: React.FC = () => {
 
             <View className='mb-4'>
               <Text
-                className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
+                className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 MOT DE PASSE
               </Text>
               <View
-                className={`flex-row items-center rounded-2xl border px-4 py-3 ${dark ? 'border-white/10 bg-black/50' : 'border-blue-50 bg-white'}`}>
+                className={`flex-row items-center rounded-2xl px-4 py-3 ${classes.input}`}>
                 <Ionicons
                   name='lock-closed-outline'
                   size={20}
-                  color={dark ? '#9CA3AF' : '#64748B'}
+                  color={colors.iconMuted}
                   className='mr-2'
                 />
                 <TextInput
@@ -222,8 +220,8 @@ const LoginScreen: React.FC = () => {
 
         <TouchableOpacity
           onPress={() => router.push('/signup')}
-          className='absolute bottom-28 w-full flex-row justify-center bg-[#F8FAFC]/80 py-4 backdrop-blur-sm dark:bg-zinc-950/80'>
-          <Text className={`text-[15px] font-medium ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
+          className={`absolute bottom-28 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}>
+          <Text className={`text-[15px] font-medium ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
             Nouveau citoyen ?{' '}
             <Text className='font-bold' style={{ color: primaryColor }}>
               Créer un compte

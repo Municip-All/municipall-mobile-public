@@ -10,6 +10,8 @@ import { reportService, Report } from '../services/reportService';
 export interface MapComponentMethods {
   centerOnUserLocation: () => void;
   goToNearestCompost: () => Promise<void> | void;
+  zoomIn: () => void;
+  zoomOut: () => void;
 }
 
 type Region = {
@@ -26,21 +28,43 @@ type Toilet = { adresse?: string; geo_point_2d: GeoPoint };
 interface MapComponentProps {
   showComposts?: boolean;
   showToilets?: boolean;
+  showReports?: boolean;
 }
 
 const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, ref) => {
-  const { showComposts = true, showToilets = true } = props || {};
-  const { theme } = useTheme();
+  const { showComposts = true, showToilets = true, showReports = true } = props || {};
+  const { colorScheme } = useTheme();
+  const dark = colorScheme === 'dark';
   const { config } = useCity();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [compostMarkers, setCompostMarkers] = useState<Compost[]>([]);
   const [toiletsMarkers, setToiletsMarkers] = useState<Toilet[]>([]);
   const [citizenReports, setCitizenReports] = useState<Report[]>([]);
   const mapRef = useRef<MapView>(null);
+  const regionRef = useRef<Region | null>(null);
 
   const primaryColor = config?.theme.primaryColor || '#2563EB';
 
+  const ZOOM_FACTOR = 0.5;
+  const MIN_DELTA = 0.002;
+  const MAX_DELTA = 2;
+
+  const zoomByFactor = (factor: number) => {
+    const current = regionRef.current;
+    if (!current || !mapRef.current) return;
+
+    const next: Region = {
+      ...current,
+      latitudeDelta: Math.min(Math.max(current.latitudeDelta * factor, MIN_DELTA), MAX_DELTA),
+      longitudeDelta: Math.min(Math.max(current.longitudeDelta * factor, MIN_DELTA), MAX_DELTA),
+    };
+    regionRef.current = next;
+    mapRef.current.animateToRegion(next, 280);
+  };
+
   useImperativeHandle(ref, () => ({
+    zoomIn: () => zoomByFactor(ZOOM_FACTOR),
+    zoomOut: () => zoomByFactor(1 / ZOOM_FACTOR),
     centerOnUserLocation: () => {
       if (location && mapRef.current) {
         const region: Region = {
@@ -49,6 +73,7 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         };
+        regionRef.current = region;
         mapRef.current.animateToRegion(region, 500);
       }
     },
@@ -62,6 +87,7 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         };
+        regionRef.current = region;
         mapRef.current.animateToRegion(region, 500);
       }
     },
@@ -132,6 +158,12 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
 
         const userLocation = await Location.getCurrentPositionAsync({});
         setLocation(userLocation);
+        regionRef.current = {
+          latitude: userLocation.coords.latitude,
+          longitude: userLocation.coords.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        };
 
         await Promise.all([fetchCompostMarkers(), fetchToiletsMarkers(), fetchCitizenReports()]);
       } catch (error) {
@@ -199,7 +231,7 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
   };
 
   return (
-    <View className={`flex-1 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+    <View className={`flex-1 ${dark ? 'bg-black' : 'bg-white'}`}>
       {location ? (
         <MapView
           ref={mapRef}
@@ -210,7 +242,10 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
             latitudeDelta: 0.05,
             longitudeDelta: 0.05,
           }}
-          showsUserLocation>
+          showsUserLocation
+          onRegionChangeComplete={(region) => {
+            regionRef.current = region;
+          }}>
           {/* Public Infrastructure */}
           {showComposts &&
             compostMarkers.map((marker, index) => (
@@ -249,7 +284,8 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
             ))}
 
           {/* Citizen Reports */}
-          {citizenReports.map((report) => (
+          {showReports &&
+            citizenReports.map((report) => (
             <Marker
               key={`report-${report.id}`}
               coordinate={{
@@ -269,12 +305,12 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
                 </View>
               </Callout>
             </Marker>
-          ))}
+            ))}
         </MapView>
       ) : (
         <View className='flex-1 items-center justify-center'>
           <ActivityIndicator size='large' color={primaryColor} />
-          <Text className={`mt-4 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+          <Text className={`mt-4 ${dark ? 'text-white' : 'text-black'}`}>
             Chargement de la carte...
           </Text>
         </View>

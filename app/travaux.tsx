@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useTheme } from '@context/themecontext';
+import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
 import BottomBar from '@components/bottombar';
@@ -9,11 +9,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import apiClient from '../services/apiClient';
 
 export default function Travaux() {
-  const { colorScheme } = useTheme();
+  const { dark, primaryColor, classes } = useAppTheme();
   const { config } = useCity();
-  const dark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
-  const primaryColor = config?.theme.primaryColor || '#0B0080';
 
   const [works, setWorks] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -59,7 +57,7 @@ export default function Travaux() {
   };
 
   return (
-    <View className={`flex-1 ${dark ? 'bg-black' : 'bg-[#F2F2F7]'}`}>
+    <View className={`flex-1 ${classes.page}`}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 20,
