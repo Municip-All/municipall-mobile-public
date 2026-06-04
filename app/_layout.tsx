@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { ThemeProvider, useTheme } from '@context/themecontext';
 import { AuthProvider } from '@context/authcontext';
+import PushNotificationRegistrar from '@components/PushNotificationRegistrar';
 import { CityProvider } from '@context/citycontext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -69,6 +70,7 @@ export default function RootLayout() {
     <ThemeProvider>
       <CityProvider>
         <AuthProvider>
+          <PushNotificationRegistrar />
           {needsOnboarding && pathname !== '/onboarding' ? <Redirect href='/onboarding' /> : null}
           <Stack
             screenOptions={{
