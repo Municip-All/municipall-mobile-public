@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as Location from 'expo-location';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { View, Text, Image, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { useTheme } from '@context/themecontext';
 import { useCity } from '@context/citycontext';
@@ -256,13 +256,9 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
                   longitude: marker.geo_point_2d.lon,
                 }}
                 title={marker.operateur || 'Composteur'}
-                description={marker.adresse}>
-                <Image
-                  source={require('../assets/images/ping_composte.png')}
-                  style={{ width: 35, height: 35 }}
-                  resizeMode='contain'
-                />
-              </Marker>
+                description={marker.adresse}
+                pinColor='#22c55e'
+              />
             ))}
 
           {showToilets &&
@@ -274,13 +270,9 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
                   longitude: marker.geo_point_2d.lon,
                 }}
                 title='Toilette publique'
-                description={marker.adresse}>
-                <Image
-                  source={require('../assets/images/ping_toilet.png')}
-                  style={{ width: 35, height: 35 }}
-                  resizeMode='contain'
-                />
-              </Marker>
+                description={marker.adresse}
+                pinColor='#0ea5e9'
+              />
             ))}
 
           {/* Citizen Reports */}

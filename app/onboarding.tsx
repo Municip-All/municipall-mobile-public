@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import LegalFooterLinks from '@components/LegalFooterLinks';
 import { useAppTheme } from '@hooks/useAppTheme';
 
 const ONBOARDING_KEY = 'onboarding_completed_v1';
@@ -96,6 +97,11 @@ export default function Onboarding() {
             <Text className='font-semibold text-white'>{nextLabel}</Text>
           </TouchableOpacity>
         </View>
+        {index === total - 1 ? (
+          <View className='mt-6 w-full'>
+            <LegalFooterLinks />
+          </View>
+        ) : null}
       </View>
     </View>
   );

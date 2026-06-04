@@ -1,7 +1,8 @@
+import 'react-native-reanimated';
 import React, { useEffect, useState } from 'react';
 import { Stack, Redirect, usePathname } from 'expo-router';
 import { useFonts } from 'expo-font';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { ThemeProvider, useTheme } from '@context/themecontext';
 import { AuthProvider } from '@context/authcontext';
 import PushNotificationRegistrar from '@components/PushNotificationRegistrar';
@@ -89,12 +90,22 @@ function LoadingScreen() {
   const { colorScheme } = useTheme();
   const dark = colorScheme === 'dark';
   return (
-    <View
-      className={`flex-1 items-center justify-center ${dark ? 'bg-black' : 'bg-surface'}`}>
+    <View style={[styles.loadingRoot, { backgroundColor: dark ? '#000000' : '#F2F2F7' }]}>
       <ActivityIndicator size='large' color={dark ? '#FFFFFF' : '#0B0080'} />
-      <Text className={`mt-4 text-base font-medium ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
-        Chargement...
-      </Text>
+      <Text style={[styles.loadingText, { color: dark ? '#D4D4D8' : '#52525B' }]}>Chargement...</Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingRoot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+});

@@ -2,7 +2,8 @@ module.exports = function (api) {
   api.cache(true);
   let plugins = [];
 
-  plugins.push('react-native-worklets/plugin');
+  // Doit rester en dernier (Reanimated 4)
+  plugins.push('react-native-reanimated/plugin');
   // Enable @-based path aliases (runtime via Babel)
   plugins.push([
     'module-resolver',

@@ -1,4 +1,6 @@
-// Configuration Expo (dynamic). projectId EAS requis pour les push — voir eas.json.
+// Charge .env avant toute lecture de process.env (IOS_PERSONAL_TEAM, etc.)
+require('dotenv').config();
+
 const appJson = require('./app.json');
 
 /** UUID du projet EAS (expo.dev) — complété par `npx eas init` */
@@ -22,7 +24,18 @@ function getEasProjectId() {
 
 const easProjectId = getEasProjectId();
 
-const plugins = [...(appJson.expo.plugins || [])];
+/** Compte Apple gratuit : pas de capacité Push côté provisioning iOS */
+const iosPersonalTeam = process.env.IOS_PERSONAL_TEAM === '1';
+
+function isExpoNotificationsPlugin(entry) {
+  if (entry === 'expo-notifications') return true;
+  return Array.isArray(entry) && entry[0] === 'expo-notifications';
+}
+
+const plugins = [...(appJson.expo.plugins || [])].filter(
+  (entry) => !(iosPersonalTeam && isExpoNotificationsPlugin(entry)),
+);
+
 if (!plugins.includes('expo-dev-client')) {
   plugins.push('expo-dev-client');
 }
@@ -31,38 +44,52 @@ if (!plugins.some((p) => Array.isArray(p) && p[0] === 'expo-build-properties')) 
     'expo-build-properties',
     {
       ios: {
-        newArchEnabled: false,
-      },
-      android: {
-        newArchEnabled: false,
+        deploymentTarget: '15.1',
       },
     },
   ]);
 }
+// Toujours en dernier : nettoie entitlements + Xcode si un prebuild les a remis
+if (iosPersonalTeam) {
+  plugins.push('./plugins/ios-personal-team');
+}
+
+const iosBundleIdentifier =
+  iosPersonalTeam && process.env.IOS_BUNDLE_IDENTIFIER
+    ? process.env.IOS_BUNDLE_IDENTIFIER
+    : appJson.expo.ios?.bundleIdentifier ?? 'municipall.v2';
 
 /** @type {import('expo/config').ExpoConfig} */
 module.exports = {
   ...appJson.expo,
+  newArchEnabled: true,
+  ...(iosPersonalTeam
+    ? {
+        autolinking: {
+          exclude: ['expo-notifications'],
+        },
+      }
+    : {}),
   plugins,
   ios: {
     ...appJson.expo.ios,
+    bundleIdentifier: iosBundleIdentifier,
+    // Ne pas définir aps-environment ici en Personal Team
+    entitlements: iosPersonalTeam
+      ? {}
+      : {
+          'aps-environment': 'development',
+        },
     infoPlist: {
       NSLocationWhenInUseUsageDescription: LOCATION_USAGE,
       NSLocationAlwaysAndWhenInUseUsageDescription: LOCATION_USAGE,
     },
-  },
-  android: {
-    ...appJson.expo.android,
-    permissions: [
-      'ACCESS_COARSE_LOCATION',
-      'ACCESS_FINE_LOCATION',
-      ...(appJson.expo.android?.permissions ?? []),
-    ],
   },
   extra: {
     ...appJson.expo.extra,
     eas: {
       projectId: easProjectId,
     },
+    iosPersonalTeam,
   },
 };

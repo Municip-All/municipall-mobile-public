@@ -21,6 +21,9 @@ import { BlurView } from 'expo-blur';
 import apiClient from '../services/apiClient';
 import { cityService } from '../services/cityService';
 import BottomBar from '@components/bottombar';
+import LegalConsentBlock from '@components/LegalConsentBlock';
+import LegalFooterLinks from '@components/LegalFooterLinks';
+import { recordLegalConsent } from '../services/legalConsent';
 
 const SignupScreen: React.FC = () => {
   const { dark, primaryColor, classes, colors } = useAppTheme();
@@ -41,6 +44,9 @@ const SignupScreen: React.FC = () => {
 
   const { login: authLogin } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [acceptedCgu, setAcceptedCgu] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const [acceptedAge, setAcceptedAge] = useState(false);
 
   useEffect(() => {
     const loadCities = async () => {
@@ -64,6 +70,14 @@ const SignupScreen: React.FC = () => {
       return;
     }
 
+    if (!acceptedCgu || !acceptedPrivacy || !acceptedAge) {
+      Alert.alert(
+        'Consentements requis',
+        `Vous devez accepter les CGU, la politique de confidentialité et certifier avoir au moins 16 ans.`
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const response = await apiClient.post('auth/signup', {
@@ -76,6 +90,7 @@ const SignupScreen: React.FC = () => {
       });
 
       const { access_token, user } = response.data;
+      await recordLegalConsent();
       await authLogin(access_token, user);
 
       Alert.alert('Succès', `Bienvenue ${user.name} ! Votre compte est créé.`);
@@ -262,9 +277,18 @@ const SignupScreen: React.FC = () => {
                 </View>
               </View>
 
+              <LegalConsentBlock
+                acceptedCgu={acceptedCgu}
+                acceptedPrivacy={acceptedPrivacy}
+                acceptedAge={acceptedAge}
+                onCguChange={setAcceptedCgu}
+                onPrivacyChange={setAcceptedPrivacy}
+                onAgeChange={setAcceptedAge}
+              />
+
               <TouchableOpacity
                 onPress={handleRegister}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !acceptedCgu || !acceptedPrivacy || !acceptedAge}
                 activeOpacity={0.8}
                 className='mt-4 w-full flex-row items-center justify-center rounded-[20px] py-4 shadow-xl'
                 style={{
@@ -284,12 +308,13 @@ const SignupScreen: React.FC = () => {
                 )}
               </TouchableOpacity>
             </BlurView>
+            <LegalFooterLinks />
           </View>
         </ScrollView>
 
         <TouchableOpacity
           onPress={() => router.push('/login')}
-          className={`absolute bottom-28 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}>
+          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}>
           <Text className={`text-[15px] font-medium ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
             Vous avez déjà un compte ?{' '}
             <Text className='font-bold' style={{ color: primaryColor }}>

@@ -1,5 +1,3 @@
-import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
 import apiClient from './apiClient';
@@ -9,20 +7,15 @@ const EAS_PROJECT_ID_UUID =
 
 let pushSetupMessageLogged = false;
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
-
 function logPushSetupOnce(message: string) {
   if (pushSetupMessageLogged) return;
   pushSetupMessageLogged = true;
   console.info(`[push] ${message}`);
+}
+
+/** Compte Apple gratuit : pas de module push natif (évite crash au lancement sur iPhone). */
+export function isIosPersonalTeamBuild(): boolean {
+  return Constants.expoConfig?.extra?.iosPersonalTeam === true;
 }
 
 export function isExpoGo(): boolean {
@@ -30,7 +23,8 @@ export function isExpoGo(): boolean {
 }
 
 export function isPushSupportedEnvironment(): boolean {
-  return Device.isDevice && !isExpoGo() && !!resolveExpoProjectId();
+  if (isIosPersonalTeamBuild()) return false;
+  return !isExpoGo() && !!resolveExpoProjectId();
 }
 
 function resolveExpoProjectId(): string | undefined {
@@ -47,46 +41,63 @@ function resolveExpoProjectId(): string | undefined {
   return undefined;
 }
 
-async function ensureAndroidChannels() {
-  if (Platform.OS !== 'android') return;
-
-  await Notifications.setNotificationChannelAsync('default', {
-    name: 'Informations',
-    importance: Notifications.AndroidImportance.DEFAULT,
-  });
-  await Notifications.setNotificationChannelAsync('urgent', {
-    name: 'Urgences',
-    importance: Notifications.AndroidImportance.MAX,
-    vibrationPattern: [0, 250, 250, 250],
-  });
+async function loadNotificationsModule() {
+  return import('expo-notifications');
 }
 
-async function fetchExpoPushToken(): Promise<string | null> {
+async function loadDeviceModule() {
+  return import('expo-device');
+}
+
+export async function registerForPushNotificationsAsync(): Promise<string | null> {
+  if (isIosPersonalTeamBuild()) {
+    logPushSetupOnce(
+      'Push désactivé (IOS_PERSONAL_TEAM=1). Compte développeur Apple requis pour les notifications sur iPhone.',
+    );
+    return null;
+  }
+
+  const Device = await loadDeviceModule();
+  if (!Device.isDevice) {
+    return null;
+  }
+
+  const Notifications = await loadNotificationsModule();
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'Informations',
+      importance: Notifications.AndroidImportance.DEFAULT,
+    });
+    await Notifications.setNotificationChannelAsync('urgent', {
+      name: 'Urgences',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+    });
+  }
+
   if (isExpoGo()) {
     logPushSetupOnce(
-      'Expo Go ne supporte plus les push (SDK 53+). Utilisez un development build : npm run ios ou npm run android.',
+      'Expo Go ne supporte plus les push (SDK 53+). Utilisez un development build.',
     );
     return null;
   }
 
   const projectId = resolveExpoProjectId();
   if (!projectId) {
-    logPushSetupOnce(
-      'projectId EAS manquant. Exécutez "npx eas init" puis relancez avec npm run ios (ou android).',
-    );
+    logPushSetupOnce('projectId EAS manquant (npx eas init).');
     return null;
   }
-
-  const tokenResponse = await Notifications.getExpoPushTokenAsync({ projectId });
-  return tokenResponse.data;
-}
-
-export async function registerForPushNotificationsAsync(): Promise<string | null> {
-  if (!Device.isDevice) {
-    return null;
-  }
-
-  await ensureAndroidChannels();
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
@@ -100,10 +111,15 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
     return null;
   }
 
-  return fetchExpoPushToken();
+  const tokenResponse = await Notifications.getExpoPushTokenAsync({ projectId });
+  return tokenResponse.data;
 }
 
 export async function syncPushTokenWithBackend(): Promise<boolean> {
+  if (!isPushSupportedEnvironment()) {
+    return false;
+  }
+
   try {
     const token = await registerForPushNotificationsAsync();
     if (!token) return false;

@@ -10,6 +10,7 @@ export interface CityConfig {
   id?: string;
   name: string;
   features: string[];
+  dataRetentionPolicy?: string;
   contact?: CityContactConfig;
   theme: {
     primaryColor: string;

@@ -20,8 +20,8 @@ const FloatingMapButton: React.FC = () => {
           borderColor: dark ? '#3F3F46' : '#E4E4E7',
           shadowColor: '#000',
         },
-      ]}
-      className='shadow-2xl'>
+        styles.buttonShadow,
+      ]}>
       <Ionicons name='map' size={24} color={primaryColor} />
     </TouchableOpacity>
   );
@@ -42,6 +42,9 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 10,
     zIndex: 50,
+  },
+  buttonShadow: {
+    shadowOpacity: 0.25,
   },
 });
 

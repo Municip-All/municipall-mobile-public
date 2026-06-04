@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useAuth } from '../context/authcontext';
-import { syncPushTokenWithBackend } from '../services/pushNotifications';
+import {
+  isPushSupportedEnvironment,
+  syncPushTokenWithBackend,
+} from '../services/pushNotifications';
 
 /** Enregistre le token Expo Push quand l'utilisateur est connecté. */
 export default function PushNotificationRegistrar() {
@@ -8,7 +11,7 @@ export default function PushNotificationRegistrar() {
   const syncedRef = useRef(false);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || !isPushSupportedEnvironment()) return;
 
     if (!isAuthenticated) {
       syncedRef.current = false;
