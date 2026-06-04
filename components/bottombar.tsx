@@ -127,8 +127,11 @@ const BottomBar: React.FC = () => {
       <View style={styles.centerButtonContainer} pointerEvents='box-none'>
         <Pressable
           onPress={() => router.push({ pathname: '/carte', params: { action: 'report' } as any })}
-          style={[styles.centerButton, { backgroundColor: primaryColor, borderColor: fabBorderColor }]}
-          className='shadow-xl'>
+          style={[
+            styles.centerButton,
+            styles.centerButtonShadow,
+            { backgroundColor: primaryColor, borderColor: fabBorderColor },
+          ]}>
           <Ionicons name='paper-plane' size={24} color='#FFFFFF' />
         </Pressable>
         <Text style={[styles.centerLabel, { color: dark ? '#FFFFFF' : primaryColor }]}>
@@ -181,6 +184,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 4,
     borderColor: '#F4F4F5',
+  },
+  centerButtonShadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
   },
   centerLabel: {
     fontSize: 11,

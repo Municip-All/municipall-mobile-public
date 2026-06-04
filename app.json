@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "my-expo-app",
-    "slug": "my-expo-app",
+    "name": "Municip'All",
+    "slug": "municipall",
     "scheme": "municipall",
     "version": "1.0.0",
     "web": {
@@ -12,6 +12,14 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#0B0080",
+          "sounds": []
+        }
+      ],
       [
         "expo-image-picker",
         {
