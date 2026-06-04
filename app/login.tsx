@@ -18,6 +18,7 @@ import { useCity } from '@context/citycontext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import BottomBar from '@components/bottombar';
+import LegalFooterLinks from '@components/LegalFooterLinks';
 import apiClient from '../services/apiClient';
 
 const LoginScreen: React.FC = () => {
@@ -216,11 +217,12 @@ const LoginScreen: React.FC = () => {
               )}
             </TouchableOpacity>
           </BlurView>
+          <LegalFooterLinks />
         </View>
 
         <TouchableOpacity
           onPress={() => router.push('/signup')}
-          className={`absolute bottom-28 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}>
+          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}>
           <Text className={`text-[15px] font-medium ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
             Nouveau citoyen ?{' '}
             <Text className='font-bold' style={{ color: primaryColor }}>

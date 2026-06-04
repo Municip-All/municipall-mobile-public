@@ -20,6 +20,8 @@ import { useRouter } from 'expo-router';
 import { pickProofImage } from '../utils/pickProofImage';
 import apiClient from '../services/apiClient';
 import { cityService } from '../services/cityService';
+import { uploadUserAvatar } from '../services/userProfileService';
+import { isPersistentAvatarUrl } from '../utils/avatarImage';
 
 export default function Profile() {
   const { theme, dark, primaryColor, classes, colors, setTheme } = useAppTheme();
@@ -102,7 +104,8 @@ export default function Profile() {
     setIsUploading(true);
     try {
       updateUser({ avatar_url: uri });
-      await apiClient.post('users/avatar', { avatarUrl: uri });
+      const avatarUrl = await uploadUserAvatar(uri, user.id);
+      updateUser({ avatar_url: avatarUrl });
       Alert.alert('Succès', 'Photo mise à jour.');
     } catch {
       Alert.alert('Erreur', 'Mise à jour impossible.');
@@ -110,6 +113,12 @@ export default function Profile() {
       setIsUploading(false);
     }
   };
+
+  const displayAvatarUrl =
+    user.avatar_url &&
+    (isPersistentAvatarUrl(user.avatar_url) || user.avatar_url.startsWith('file://'))
+      ? user.avatar_url
+      : undefined;
 
   return (
     <View className={`flex-1 ${classes.page}`}>
@@ -131,8 +140,8 @@ export default function Profile() {
           className={`mb-8 items-center p-6 ${classes.cardRoundedLg}`}>
           <TouchableOpacity onPress={pickImage} disabled={isUploading} className='relative mb-4'>
             <View className='h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-800'>
-              {user.avatar_url ? (
-                <Image source={{ uri: user.avatar_url }} className='h-full w-full' />
+              {displayAvatarUrl ? (
+                <Image source={{ uri: displayAvatarUrl }} className='h-full w-full' />
               ) : (
                 <View className='flex-1 items-center justify-center'>
                   <Ionicons name='person' size={40} color={dark ? '#3F3F46' : '#D4D4D8'} />
@@ -281,18 +290,87 @@ export default function Profile() {
         <View
           className={`overflow-hidden rounded-[24px] ${dark ? 'bg-zinc-900' : 'bg-white'} mb-6 border border-zinc-100 shadow-sm dark:border-zinc-800`}>
           {[
-            { label: 'Informations personnelles', icon: 'person-outline', color: '#007AFF' },
+            {
+              label: 'Informations personnelles',
+              icon: 'person-outline',
+              color: '#007AFF',
+              route: '/profile-personal-info',
+            },
             {
               label: 'Sécurité et mot de passe',
               icon: 'shield-checkmark-outline',
               color: '#34C759',
+              route: '/profile-security',
             },
-            { label: 'Notifications', icon: 'notifications-outline', color: '#FF9500' },
-            { label: "Centre d'aide", icon: 'help-buoy-outline', color: '#AF52DE' },
-          ].map((item, i) => (
+            {
+              label: 'Notifications',
+              icon: 'notifications-outline',
+              color: '#FF9500',
+              route: '/profile-notifications',
+            },
+            {
+              label: "Centre d'aide",
+              icon: 'help-buoy-outline',
+              color: '#AF52DE',
+              route: '/profile-help',
+            },
+          ].map((item, i, arr) => (
             <TouchableOpacity
               key={i}
-              className={`flex-row items-center justify-between p-4 ${i !== 3 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
+              onPress={() => router.push(item.route as any)}
+              className={`flex-row items-center justify-between p-4 ${i !== arr.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
+              <View className='flex-row items-center'>
+                <View
+                  className='mr-3 h-8 w-8 items-center justify-center rounded-lg'
+                  style={{ backgroundColor: `${item.color}15` }}>
+                  <Ionicons name={item.icon as any} size={18} color={item.color} />
+                </View>
+                <Text
+                  className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                  {item.label}
+                </Text>
+              </View>
+              <Ionicons name='chevron-forward' size={16} color={colors.chevron} />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text
+          className={`mb-3 ml-4 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+          Confidentialité et légal
+        </Text>
+        <View
+          className={`overflow-hidden rounded-[24px] ${dark ? 'bg-zinc-900' : 'bg-white'} mb-6 border border-zinc-100 shadow-sm dark:border-zinc-800`}>
+          {[
+            {
+              label: 'Mes données personnelles',
+              icon: 'shield-outline',
+              color: '#007AFF',
+              route: '/legal/my-data',
+            },
+            {
+              label: 'Politique de confidentialité',
+              icon: 'lock-closed-outline',
+              color: '#34C759',
+              route: '/legal/privacy',
+            },
+            {
+              label: "Conditions d'utilisation",
+              icon: 'document-text-outline',
+              color: '#FF9500',
+              route: '/legal/cgu',
+            },
+            {
+              label: 'Informations légales',
+              icon: 'library-outline',
+              color: '#AF52DE',
+              route: '/legal',
+            },
+          ].map((item, i, arr) => (
+            <TouchableOpacity
+              key={item.route}
+              onPress={() => router.push(item.route as any)}
+              className={`flex-row items-center justify-between p-4 ${i !== arr.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
               <View className='flex-row items-center'>
                 <View
                   className='mr-3 h-8 w-8 items-center justify-center rounded-lg'

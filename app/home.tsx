@@ -55,7 +55,7 @@ export default function Home() {
 
   const logo = config?.theme.logoUrl
     ? { uri: config.theme.logoUrl }
-    : require('../assets/images/logo_white.png');
+    : require('../assets/logo_app.png');
 
   return (
     <View className={`flex-1 ${classes.page}`}>
