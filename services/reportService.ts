@@ -22,8 +22,20 @@ export const reportService = {
     }));
   },
 
-  createReport: async (reportData: Partial<Report>): Promise<Report> => {
-    const response = await apiClient.post('reports', reportData);
-    return response.data;
+  createReport: async (
+    reportData: Partial<Report> & { userId?: number },
+  ): Promise<Report> => {
+    const payload = { ...reportData };
+    if (payload.imageUrl?.startsWith('file://')) {
+      delete payload.imageUrl;
+    }
+    const response = await apiClient.post('reports', payload);
+    const r = response.data;
+    return {
+      ...r,
+      lat: r.location?.coordinates?.[1] ?? reportData.lat ?? 0,
+      lon: r.location?.coordinates?.[0] ?? reportData.lon ?? 0,
+      status: r.status ?? reportData.status ?? 'En attente',
+    };
   },
 };

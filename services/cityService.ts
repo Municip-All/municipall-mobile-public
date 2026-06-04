@@ -1,9 +1,16 @@
 import apiClient from './apiClient';
 
+export interface CityContactConfig {
+  email?: string;
+  phone?: string;
+  helpText?: string;
+}
+
 export interface CityConfig {
   id?: string;
   name: string;
   features: string[];
+  contact?: CityContactConfig;
   theme: {
     primaryColor: string;
     secondaryColor?: string;

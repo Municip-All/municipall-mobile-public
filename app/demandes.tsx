@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useTheme } from '@context/themecontext';
-import { useCity } from '@context/citycontext';
+import { useAppTheme } from '@hooks/useAppTheme';
 import { Ionicons } from '@expo/vector-icons';
 import BottomBar from '@components/bottombar';
 import FloatingMapButton from '@components/FloatingMapButton';
@@ -9,11 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { reportService, Report } from '../services/reportService';
 
 export default function SignalementsList() {
-  const { colorScheme } = useTheme();
-  const { config } = useCity();
-  const dark = colorScheme === 'dark';
+  const { dark, primaryColor, classes } = useAppTheme();
   const insets = useSafeAreaInsets();
-  const primaryColor = config?.theme.primaryColor || '#0B0080';
 
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +46,7 @@ export default function SignalementsList() {
     activeFilter === 'Tous' ? reports : reports.filter((r) => r.status === activeFilter);
 
   return (
-    <View className={`flex-1 ${dark ? 'bg-black' : 'bg-[#F2F2F7]'}`}>
+    <View className={`flex-1 ${classes.page}`}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 20,

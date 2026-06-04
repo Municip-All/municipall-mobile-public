@@ -9,7 +9,7 @@ import {
   Alert,
   Linking,
 } from 'react-native';
-import { useTheme } from '@context/themecontext';
+import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { useAuth } from '@context/authcontext';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,15 +17,13 @@ import BottomBar from '@components/bottombar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
+import { pickProofImage } from '../utils/pickProofImage';
 import apiClient from '../services/apiClient';
 import { cityService } from '../services/cityService';
 
 export default function Profile() {
-  const { theme, colorScheme, setTheme } = useTheme();
-  const { config } = useCity();
+  const { theme, dark, primaryColor, classes, colors, setTheme } = useAppTheme();
   const { user, logout, updateUser, isAuthenticated } = useAuth();
-  const dark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
@@ -77,8 +75,6 @@ export default function Profile() {
     Linking.openURL(`mailto:?subject=${subject}&body=${body}`);
   };
 
-  const primaryColor = config?.theme.primaryColor || '#0B0080';
-
   const handleLogout = async () => {
     Alert.alert('Déconnexion', 'Êtes-vous sûr de vouloir vous déconnecter ?', [
       { text: 'Annuler', style: 'cancel' },
@@ -94,22 +90,12 @@ export default function Profile() {
   };
 
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission refusée', 'Accès aux photos nécessaire.');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.5,
+    const uri = await pickProofImage({
+      title: 'Photo de profil',
+      message: 'Prenez une photo ou choisissez une image dans votre galerie.',
+      pickerOptions: { aspect: [1, 1] },
     });
-
-    if (!result.canceled) {
-      uploadAvatar(result.assets[0].uri);
-    }
+    if (uri) uploadAvatar(uri);
   };
 
   const uploadAvatar = async (uri: string) => {
@@ -126,7 +112,7 @@ export default function Profile() {
   };
 
   return (
-    <View className={`flex-1 ${dark ? 'bg-black' : 'bg-[#F2F2F7]'}`}>
+    <View className={`flex-1 ${classes.page}`}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 20,
@@ -136,19 +122,13 @@ export default function Profile() {
         showsVerticalScrollIndicator={false}>
         {/* Apple Style Header */}
         <View className='mb-8'>
-          <Text
-            className={`text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-            Compte
-          </Text>
-          <Text
-            className={`text-4xl font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
-            Profil
-          </Text>
+          <Text className={classes.eyebrow}>Compte</Text>
+          <Text className={classes.title}>Profil</Text>
         </View>
 
         {/* Profile Card */}
         <View
-          className={`mb-8 overflow-hidden rounded-[32px] ${dark ? 'bg-zinc-900' : 'bg-white'} items-center border border-zinc-100 p-6 shadow-sm dark:border-zinc-800`}>
+          className={`mb-8 items-center p-6 ${classes.cardRoundedLg}`}>
           <TouchableOpacity onPress={pickImage} disabled={isUploading} className='relative mb-4'>
             <View className='h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-800'>
               {user.avatar_url ? (
@@ -171,9 +151,7 @@ export default function Profile() {
           <Text className={`text-2xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
             {user.name} {user.surname}
           </Text>
-          <Text className={`text-sm font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-            {user.email}
-          </Text>
+          <Text className={classes.subtitle}>{user.email}</Text>
         </View>
 
         {/* Stats Section */}
@@ -201,7 +179,7 @@ export default function Profile() {
                 {stat.value}
               </Text>
               <Text
-                className={`text-[9px] font-bold tracking-tighter uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                className={classes.meta}>
                 {stat.label}
               </Text>
             </View>
@@ -224,7 +202,9 @@ export default function Profile() {
                 <Text className={`text-sm font-bold ${dark ? 'text-white' : 'text-zinc-900'}`}>
                   {availableCities.find((c) => c.id === user.cityId)?.name || 'Non définie'}
                 </Text>
-                <Text className='text-[11px] text-zinc-500'>Ville de résidence actuelle</Text>
+                <Text className={`text-[11px] ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  Ville de résidence actuelle
+                </Text>
               </View>
             </View>
             <TouchableOpacity
@@ -240,9 +220,14 @@ export default function Profile() {
                 <TouchableOpacity
                   key={city.id}
                   onPress={() => handleUpdateCity(city.id)}
-                  className={`rounded-xl border px-3 py-2 ${user.cityId === city.id ? 'bg-municipall-blue border-municipall-blue' : 'border-zinc-200 bg-transparent dark:border-zinc-700'}`}>
+                  className={`rounded-xl border px-3 py-2 ${user.cityId === city.id ? '' : classes.chipInactive}`}
+                  style={
+                    user.cityId === city.id
+                      ? { backgroundColor: primaryColor, borderColor: primaryColor }
+                      : undefined
+                  }>
                   <Text
-                    className={`text-xs font-bold ${user.cityId === city.id ? 'text-white' : 'text-zinc-500'}`}>
+                    className={`text-xs font-bold ${user.cityId === city.id ? 'text-white' : dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
                     {city.name}
                   </Text>
                 </TouchableOpacity>
@@ -319,7 +304,7 @@ export default function Profile() {
                   {item.label}
                 </Text>
               </View>
-              <Ionicons name='chevron-forward' size={16} color='#A1A1AA' />
+              <Ionicons name='chevron-forward' size={16} color={colors.chevron} />
             </TouchableOpacity>
           ))}
         </View>

@@ -1,62 +1,29 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import { useTheme } from '@context/themecontext';
+import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
 import BottomBar from '@components/bottombar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
+import { getNextCollection, formatCollectionDay } from '../utils/wasteSchedule';
 
 export default function Collecte() {
-  const { colorScheme } = useTheme();
+  const { dark, primaryColor, classes } = useAppTheme();
   const { config } = useCity();
-  const dark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
-  const primaryColor = config?.theme.primaryColor || '#0B0080';
 
   const schedule = config?.wasteConfig?.services || [
     { type: 'Ordures ménagères', days: [1, 4], time: '19:00', icon: 'trash', color: '#8E8E93' },
     { type: 'Emballages & Papiers', days: [3], time: '08:30', icon: 'refresh', color: '#FFD60A' },
   ];
 
-  const getNextCollection = (): { date: Date; service: any } | null => {
-    const now = new Date();
-    let nearest: { date: Date; service: any } | null = null;
-
-    for (const service of schedule) {
-      for (const day of service.days) {
-        let d = new Date();
-        let diff = (day - now.getDay() + 7) % 7;
-        d.setDate(now.getDate() + diff);
-
-        const [h, m] = service.time.split(':').map(Number);
-        d.setHours(h, m, 0, 0);
-
-        if (d <= now) {
-          d.setDate(d.getDate() + 7);
-        }
-
-        if (!nearest || d < nearest.date) {
-          nearest = { date: d, service };
-        }
-      }
-    }
-
-    return nearest;
-  };
-
-  const next = getNextCollection();
+  const next = getNextCollection(schedule);
 
   const formatNextDate = (date: Date) => {
-    const now = new Date();
-    const tomorrow = new Date();
-    tomorrow.setDate(now.getDate() + 1);
-
-    if (date.toDateString() === now.toDateString()) return "Aujourd'hui";
-    if (date.toDateString() === tomorrow.toDateString()) return 'Demain';
-
-    return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    const label = formatCollectionDay(date);
+    return label.charAt(0).toUpperCase() + label.slice(1);
   };
 
   const formatDays = (days: number[]) => {
@@ -73,7 +40,7 @@ export default function Collecte() {
   };
 
   return (
-    <View className={`flex-1 ${dark ? 'bg-black' : 'bg-[#F2F2F7]'}`}>
+    <View className={`flex-1 ${classes.page}`}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 20,

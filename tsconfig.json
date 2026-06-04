@@ -12,7 +12,8 @@
       "@components/*": ["components/*"],
       "@context/*": ["context/*"],
       "@assets/*": ["assets/*"],
-      "@constants/*": ["constants/*"]
+      "@constants/*": ["constants/*"],
+      "@hooks/*": ["hooks/*"]
     }
   }
 }

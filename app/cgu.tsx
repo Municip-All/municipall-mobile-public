@@ -1,23 +1,36 @@
 import React from 'react';
-import { ScrollView, Text } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAppTheme } from '@hooks/useAppTheme';
 
 const CGUPage: React.FC = () => {
+  const { dark, classes } = useAppTheme();
+  const insets = useSafeAreaInsets();
+
   return (
-    <ScrollView className='flex-1 bg-gray-900 p-4'>
-      <Text className='mb-4 text-2xl font-bold text-white'>
-        Conditions Générales d&apos;Utilisation
-      </Text>
+    <View className={`flex-1 ${classes.page}`}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: insets.top + 20,
+          paddingBottom: insets.bottom + 24,
+          paddingHorizontal: 20,
+        }}
+        showsVerticalScrollIndicator={false}>
+        <Text className={`mb-6 text-2xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
+          Conditions Générales d&apos;Utilisation
+        </Text>
 
-      <Text className='mb-4 text-base text-white'>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vitae eros eget tellus
-        tristique bibendum. Donec rutrum sed sem quis venenatis.
-      </Text>
+        <Text className={classes.body}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vitae eros eget tellus
+          tristique bibendum. Donec rutrum sed sem quis venenatis.
+        </Text>
 
-      <Text className='mb-4 text-base text-white'>
-        Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis
-        egestas. Integer nec libero venenatis, ultricies ligula id, sollicitudin lacus.
-      </Text>
-    </ScrollView>
+        <Text className={`mt-4 ${classes.body}`}>
+          Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis
+          egestas. Integer nec libero venenatis, ultricies ligula id, sollicitudin lacus.
+        </Text>
+      </ScrollView>
+    </View>
   );
 };
 
