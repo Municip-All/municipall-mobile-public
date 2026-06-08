@@ -39,7 +39,7 @@ export default function LegalHubScreen() {
             <Text className={classes.meta}>Votre commune — {cityLegal.cityName}</Text>
             <Text className={`mt-2 text-xs leading-5 ${classes.body}`}>
               {cityLegal.dataRetentionPolicy?.trim() ||
-                'Durées spécifiques non renseignées : les durées par défaut Municipall s\'appliquent (voir politique de confidentialité, section 5).'}
+                "Durées spécifiques non renseignées : les durées par défaut Municipall s'appliquent (voir politique de confidentialité, section 5)."}
             </Text>
           </View>
         ) : null}
@@ -56,7 +56,8 @@ export default function LegalHubScreen() {
                 <Ionicons name={item.icon} size={22} color={item.color} />
               </View>
               <View className='flex-1'>
-                <Text className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                <Text
+                  className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
                   {item.label}
                 </Text>
                 <Text className={`mt-0.5 text-xs ${dark ? 'text-zinc-500' : 'text-zinc-500'}`}>
@@ -68,7 +69,8 @@ export default function LegalHubScreen() {
           ))}
         </View>
 
-        <Text className={`mt-6 text-center text-[11px] leading-4 ${dark ? 'text-zinc-500' : 'text-zinc-500'}`}>
+        <Text
+          className={`mt-6 text-center text-[11px] leading-4 ${dark ? 'text-zinc-500' : 'text-zinc-500'}`}>
           Version {LEGAL_ENTITY.documentVersion} — {LEGAL_ENTITY.lastUpdated}
           {'\n'}
           {LEGAL_ENTITY.privacyEmail}

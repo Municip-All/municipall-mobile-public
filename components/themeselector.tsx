@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 
 const ThemeSelector: React.FC = () => {
-  const { theme, setTheme, dark, primaryColor, classes } = useAppTheme();
+  const { theme, setTheme, dark, primaryColor } = useAppTheme();
 
   const options = [
     { id: 'light' as const, label: 'Clair' },
@@ -12,7 +12,8 @@ const ThemeSelector: React.FC = () => {
   ];
 
   return (
-    <View className={`rounded-2xl p-1 ${dark ? 'bg-zinc-900' : 'bg-white'} border border-zinc-200 dark:border-zinc-800`}>
+    <View
+      className={`rounded-2xl p-1 ${dark ? 'bg-zinc-900' : 'bg-white'} border border-zinc-200 dark:border-zinc-800`}>
       {options.map((option) => (
         <TouchableOpacity
           key={option.id}

@@ -25,6 +25,7 @@ import { isPersistentAvatarUrl } from '../utils/avatarImage';
 
 export default function Profile() {
   const { theme, dark, primaryColor, classes, colors, setTheme } = useAppTheme();
+  const { applyBrandingCity } = useCity();
   const { user, logout, updateUser, isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -57,8 +58,9 @@ export default function Profile() {
     try {
       await apiClient.post('users/profile', { cityId });
       updateUser({ ...user, cityId });
+      await applyBrandingCity(cityId);
       setShowCityPicker(false);
-      Alert.alert('Succès', 'Ville de résidence mise à jour.');
+      Alert.alert('Succès', 'Ville et identité visuelle mises à jour.');
     } catch {
       Alert.alert('Erreur', 'Impossible de mettre à jour la ville.');
     }
@@ -95,7 +97,7 @@ export default function Profile() {
     const uri = await pickProofImage({
       title: 'Photo de profil',
       message: 'Prenez une photo ou choisissez une image dans votre galerie.',
-      pickerOptions: { aspect: [1, 1] },
+      pickerOptions: { aspect: [1, 1], quality: 0.5, allowsEditing: true },
     });
     if (uri) uploadAvatar(uri);
   };
@@ -136,8 +138,7 @@ export default function Profile() {
         </View>
 
         {/* Profile Card */}
-        <View
-          className={`mb-8 items-center p-6 ${classes.cardRoundedLg}`}>
+        <View className={`mb-8 items-center p-6 ${classes.cardRoundedLg}`}>
           <TouchableOpacity onPress={pickImage} disabled={isUploading} className='relative mb-4'>
             <View className='h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-800'>
               {displayAvatarUrl ? (
@@ -187,10 +188,7 @@ export default function Profile() {
               <Text className={`mt-1 text-lg font-black ${dark ? 'text-white' : 'text-black'}`}>
                 {stat.value}
               </Text>
-              <Text
-                className={classes.meta}>
-                {stat.label}
-              </Text>
+              <Text className={classes.meta}>{stat.label}</Text>
             </View>
           ))}
         </View>

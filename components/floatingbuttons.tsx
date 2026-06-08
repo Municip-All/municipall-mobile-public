@@ -31,11 +31,16 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
   return (
     <View className='absolute top-24 right-4 items-end space-y-2'>
       {open && (
-        <View className={`mb-1 w-40 rounded-xl p-3 shadow-lg ${panelBg} border border-zinc-200 dark:border-zinc-700`}>
+        <View
+          className={`mb-1 w-40 rounded-xl p-3 shadow-lg ${panelBg} border border-zinc-200 dark:border-zinc-700`}>
           <TouchableOpacity
             className='mb-2 flex-row items-center justify-between'
             onPress={toggleComposts}>
-            <Ionicons name='leaf-outline' size={18} color={showComposts ? colors.success : colors.iconMuted} />
+            <Ionicons
+              name='leaf-outline'
+              size={18}
+              color={showComposts ? colors.success : colors.iconMuted}
+            />
             <View className='flex-1 pl-2'>
               <Ionicons
                 name={showComposts ? 'eye-outline' : 'eye-off-outline'}
@@ -47,7 +52,11 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
           <TouchableOpacity
             className='flex-row items-center justify-between'
             onPress={toggleToilets}>
-            <Ionicons name='water-outline' size={18} color={showToilets ? colors.info : colors.iconMuted} />
+            <Ionicons
+              name='water-outline'
+              size={18}
+              color={showToilets ? colors.info : colors.iconMuted}
+            />
             <View className='flex-1 pl-2'>
               <Ionicons
                 name={showToilets ? 'eye-outline' : 'eye-off-outline'}
@@ -69,7 +78,9 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
           className={`mb-3 rounded-full p-2 ${buttonBg} shadow-md`}>
           <Ionicons name='locate-outline' size={20} color={iconAccent} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={goToNearestCompost} className={`rounded-full p-2 ${buttonBg} shadow-md`}>
+        <TouchableOpacity
+          onPress={goToNearestCompost}
+          className={`rounded-full p-2 ${buttonBg} shadow-md`}>
           <Ionicons name='leaf-outline' size={20} color={colors.success} />
         </TouchableOpacity>
       </View>

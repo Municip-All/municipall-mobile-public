@@ -15,7 +15,7 @@ async function formatAddressFromCoords(lat: number, lon: number): Promise<string
 
     const street = [place.streetNumber, place.street].filter(Boolean).join(' ');
     const parts = [street, place.postalCode, place.city || place.subregion || place.region].filter(
-      Boolean,
+      Boolean
     );
     return parts.length > 0 ? parts.join(', ') : `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
   } catch {

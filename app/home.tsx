@@ -3,7 +3,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Image,
   Pressable,
   ActivityIndicator,
 } from 'react-native';
@@ -16,19 +15,25 @@ import { useCity } from '@context/citycontext';
 import { useHomeHighlights } from '@hooks/useHomeHighlights';
 import type { HomeHighlight } from '../services/homeHighlights';
 import BottomBar from '@components/bottombar';
+import BrandedLogo from '@components/BrandedLogo';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Home() {
-  const { dark, primaryColor, classes } = useAppTheme();
-  const { config, weatherData, weatherLoading, weatherError, fetchWeather } = useCity();
-  const { highlights, loading: highlightsLoading, refresh: refreshHighlights } =
-    useHomeHighlights(config);
+  const { dark, primaryColor, classes, brand } = useAppTheme();
+  const { config, weatherData, weatherLoading, weatherError, fetchWeather, refreshConfig } =
+    useCity();
+  const {
+    highlights,
+    loading: highlightsLoading,
+    refresh: refreshHighlights,
+  } = useHomeHighlights(config);
 
   useFocusEffect(
     useCallback(() => {
       refreshHighlights();
-    }, [refreshHighlights])
+      void refreshConfig();
+    }, [refreshHighlights, refreshConfig])
   );
 
   const iconBg = (item: HomeHighlight) => {
@@ -51,11 +56,9 @@ export default function Home() {
   const insets = useSafeAreaInsets();
 
   const weatherEnabled = config?.features?.includes('weather') ?? false;
-  const cityName = weatherData?.city || config?.name || 'Ma Ville';
-
-  const logo = config?.theme.logoUrl
-    ? { uri: config.theme.logoUrl }
-    : require('../assets/logo_app.png');
+  /** Nom d'app marque blanche (backoffice) — pas le libellé météo géolocalisé */
+  const appDisplayName = brand.appName;
+  const weatherLocation = weatherData?.city;
 
   return (
     <View className={`flex-1 ${classes.page}`}>
@@ -76,14 +79,10 @@ export default function Home() {
                 month: 'long',
               })}
             </Text>
-            <Text className={classes.title}>
-              {cityName}
-            </Text>
+            <Text className={classes.title}>{appDisplayName}</Text>
           </View>
-          <TouchableOpacity
-            onPress={() => router.push('/profile')}
-            className='h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800'>
-            <Image source={logo} style={{ width: '100%', height: '100%' }} resizeMode='cover' />
+          <TouchableOpacity onPress={() => router.push('/profile')} activeOpacity={0.85}>
+            <BrandedLogo size={48} radius={24} mode='contain' />
           </TouchableOpacity>
         </View>
 
@@ -112,10 +111,19 @@ export default function Home() {
                         ? weatherError
                         : weatherData?.description || 'Appuyez pour actualiser'}
                   </Text>
+                  {weatherLocation &&
+                    weatherLocation.toLowerCase() !== appDisplayName.toLowerCase() && (
+                      <Text
+                        className={`mt-1 text-xs font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                        {weatherLocation}
+                      </Text>
+                    )}
                 </View>
                 <View className='items-center'>
                   <Ionicons
-                    name={weatherLoading ? 'refresh' : weatherData ? 'cloud-outline' : 'partly-sunny'}
+                    name={
+                      weatherLoading ? 'refresh' : weatherData ? 'cloud-outline' : 'partly-sunny'
+                    }
                     size={48}
                     color={primaryColor}
                   />
@@ -142,9 +150,7 @@ export default function Home() {
                 style={{ backgroundColor: dark ? '#1C1C1E' : '#FFFFFF' }}>
                 <Ionicons name={item.icon as any} size={28} color={item.color} />
               </View>
-              <Text className={classes.caption}>
-                {item.label}
-              </Text>
+              <Text className={classes.caption}>{item.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -158,8 +164,8 @@ export default function Home() {
         ) : highlights.length === 0 ? (
           <View className={`mb-4 p-5 ${classes.cardRounded}`}>
             <Text className={classes.body}>
-              Rien à signaler pour le moment. Consultez les travaux, la collecte ou les
-              événements de votre ville.
+              Rien à signaler pour le moment. Consultez les travaux, la collecte ou les événements
+              de votre ville.
             </Text>
           </View>
         ) : (
@@ -174,8 +180,7 @@ export default function Home() {
                   <Ionicons name={item.icon} size={24} color={item.iconColor} />
                 </View>
                 <View className='flex-1'>
-                  <Text
-                    className={`text-base font-bold ${dark ? 'text-white' : 'text-zinc-900'}`}>
+                  <Text className={`text-base font-bold ${dark ? 'text-white' : 'text-zinc-900'}`}>
                     {item.title}
                   </Text>
                   <Text className={`mt-1 ${classes.body}`}>{item.body}</Text>

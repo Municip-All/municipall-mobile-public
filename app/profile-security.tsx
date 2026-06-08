@@ -19,7 +19,7 @@ import ProfileScreenHeader from '@components/ProfileScreenHeader';
 import { updateUserPassword } from '../services/userProfileService';
 
 export default function ProfileSecurityScreen() {
-  const { dark, classes, primaryColor, colors } = useAppTheme();
+  const { classes, primaryColor, colors } = useAppTheme();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();

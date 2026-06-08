@@ -33,7 +33,7 @@ function isExpoNotificationsPlugin(entry) {
 }
 
 const plugins = [...(appJson.expo.plugins || [])].filter(
-  (entry) => !(iosPersonalTeam && isExpoNotificationsPlugin(entry)),
+  (entry) => !(iosPersonalTeam && isExpoNotificationsPlugin(entry))
 );
 
 if (!plugins.includes('expo-dev-client')) {
@@ -57,7 +57,7 @@ if (iosPersonalTeam) {
 const iosBundleIdentifier =
   iosPersonalTeam && process.env.IOS_BUNDLE_IDENTIFIER
     ? process.env.IOS_BUNDLE_IDENTIFIER
-    : appJson.expo.ios?.bundleIdentifier ?? 'municipall.v2';
+    : (appJson.expo.ios?.bundleIdentifier ?? 'municipall.v2');
 
 /** @type {import('expo/config').ExpoConfig} */
 module.exports = {

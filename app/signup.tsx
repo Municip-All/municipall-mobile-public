@@ -110,7 +110,11 @@ const SignupScreen: React.FC = () => {
     <View className={`flex-1 ${classes.pageAuth}`}>
       <LinearGradient
         colors={[
-          dark ? colors.semantic.surfaceAuth.dark : useGradient ? '#E0E7FF' : colors.semantic.surfaceAuth.light,
+          dark
+            ? colors.semantic.surfaceAuth.dark
+            : useGradient
+              ? '#E0E7FF'
+              : colors.semantic.surfaceAuth.light,
           dark ? colors.card : colors.semantic.surfaceAuth.light,
         ]}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}

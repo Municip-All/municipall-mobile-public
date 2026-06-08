@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useTheme } from '@context/themecontext';
 import { useCity } from '@context/citycontext';
 import { DEFAULT_PRIMARY, semanticColors, tintColor } from '@constants/design';
+import { buildBrandTheme } from '@constants/brand';
 
 /**
  * Hook unifié pour le thème : préférence utilisateur, schéma résolu,
@@ -11,7 +12,8 @@ export function useAppTheme() {
   const { colorScheme, theme, setTheme } = useTheme();
   const { config } = useCity();
   const dark = colorScheme === 'dark';
-  const primaryColor = config?.theme.primaryColor ?? DEFAULT_PRIMARY;
+  const brand = useMemo(() => buildBrandTheme(config), [config]);
+  const primaryColor = brand.primaryColor || DEFAULT_PRIMARY;
 
   const classes = useMemo(
     () => ({
@@ -62,6 +64,8 @@ export function useAppTheme() {
     () => ({
       semantic: semanticColors,
       primary: primaryColor,
+      onPrimary: brand.onPrimary,
+      primarySoft: brand.primarySoft,
       primaryTint: tintColor(primaryColor),
       iconMuted: dark ? semanticColors.muted.dark : semanticColors.muted.light,
       chevron: dark ? semanticColors.muted.dark : semanticColors.muted.light,
@@ -79,7 +83,7 @@ export function useAppTheme() {
       modalSheet: dark ? semanticColors.card.dark : semanticColors.surface.light,
       handle: dark ? '#52525B' : '#D1D1D6',
     }),
-    [dark, primaryColor]
+    [dark, primaryColor, brand.onPrimary, brand.primarySoft]
   );
 
   return {
@@ -88,6 +92,7 @@ export function useAppTheme() {
     theme,
     setTheme,
     primaryColor,
+    brand,
     classes,
     colors,
     tintColor,

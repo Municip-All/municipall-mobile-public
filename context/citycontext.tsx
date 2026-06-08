@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useMemo, useCall
 import { Config } from '../constants/Config';
 import { cityService, CityConfig } from '../services/cityService';
 import * as Location from 'expo-location';
-import axios from 'axios';
+import { isAxiosError } from 'axios';
 import apiClient, { setApiTenantId } from '../services/apiClient';
 
 export interface WeatherData {
@@ -21,6 +21,8 @@ interface CityContextType {
   weatherError: string | null;
   fetchWeather: () => Promise<void>;
   refreshConfig: () => Promise<void>;
+  /** Recharge config + tenant (marque blanche après login ou changement de ville) */
+  applyBrandingCity: (cityId: string) => Promise<void>;
 }
 
 const CityContext = createContext<CityContextType | undefined>(undefined);
@@ -47,6 +49,20 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('CityContext: Failed to refresh config', error);
     }
   }, [tenantId]);
+
+  const applyBrandingCity = useCallback(
+    async (cityId: string) => {
+      if (!cityId) return;
+      try {
+        const cfg = await cityService.getCityConfig(cityId);
+        setTenantId(cityId);
+        setConfig(cfg);
+      } catch (error) {
+        console.error('CityContext: Failed to apply branding city', error);
+      }
+    },
+    [setTenantId]
+  );
 
   const fetchWeather = useCallback(async () => {
     if (!config?.features?.includes('weather')) {
@@ -78,7 +94,7 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('CityContext: Error fetching weather:', error);
       setWeatherData(null);
       let message = 'Impossible de récupérer la météo. Réessayez.';
-      if (axios.isAxiosError(error)) {
+      if (isAxiosError(error)) {
         const data = error.response?.data as { message?: string | string[] } | undefined;
         if (typeof data?.message === 'string') message = data.message;
         else if (Array.isArray(data?.message)) message = data.message.join(', ');
@@ -141,7 +157,7 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     initializeCity();
-  }, []);
+  }, [setTenantId]);
 
   const value = useMemo(
     () => ({
@@ -153,6 +169,7 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
       weatherError,
       fetchWeather,
       refreshConfig,
+      applyBrandingCity,
     }),
     [
       config,
@@ -163,6 +180,7 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
       weatherError,
       fetchWeather,
       refreshConfig,
+      applyBrandingCity,
     ]
   );
 

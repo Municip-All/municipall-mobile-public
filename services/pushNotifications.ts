@@ -28,10 +28,7 @@ export function isPushSupportedEnvironment(): boolean {
 }
 
 function resolveExpoProjectId(): string | undefined {
-  const candidates = [
-    Constants.expoConfig?.extra?.eas?.projectId,
-    Constants.easConfig?.projectId,
-  ];
+  const candidates = [Constants.expoConfig?.extra?.eas?.projectId, Constants.easConfig?.projectId];
 
   for (const id of candidates) {
     if (typeof id === 'string' && EAS_PROJECT_ID_UUID.test(id)) {
@@ -52,7 +49,7 @@ async function loadDeviceModule() {
 export async function registerForPushNotificationsAsync(): Promise<string | null> {
   if (isIosPersonalTeamBuild()) {
     logPushSetupOnce(
-      'Push désactivé (IOS_PERSONAL_TEAM=1). Compte développeur Apple requis pour les notifications sur iPhone.',
+      'Push désactivé (IOS_PERSONAL_TEAM=1). Compte développeur Apple requis pour les notifications sur iPhone.'
     );
     return null;
   }
@@ -87,9 +84,7 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
   }
 
   if (isExpoGo()) {
-    logPushSetupOnce(
-      'Expo Go ne supporte plus les push (SDK 53+). Utilisez un development build.',
-    );
+    logPushSetupOnce('Expo Go ne supporte plus les push (SDK 53+). Utilisez un development build.');
     return null;
   }
 

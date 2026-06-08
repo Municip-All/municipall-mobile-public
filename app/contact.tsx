@@ -158,7 +158,8 @@ const ContactScreen: React.FC = () => {
               disabled={!contactEmail}
               className={`mb-3 flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactEmail ? 'opacity-50' : ''}`}>
               <Ionicons name='mail-outline' size={20} color={primaryColor} />
-              <Text className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-white' : 'text-black'}`}>
+              <Text
+                className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-white' : 'text-black'}`}>
                 {contactEmail || 'E-mail non renseigné'}
               </Text>
             </TouchableOpacity>
@@ -167,7 +168,8 @@ const ContactScreen: React.FC = () => {
               disabled={!contactPhone}
               className={`flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactPhone ? 'opacity-50' : ''}`}>
               <Ionicons name='call-outline' size={20} color={primaryColor} />
-              <Text className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-white' : 'text-black'}`}>
+              <Text
+                className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-white' : 'text-black'}`}>
                 {contactPhone || 'Téléphone non renseigné'}
               </Text>
             </TouchableOpacity>
@@ -276,7 +278,9 @@ const ContactScreen: React.FC = () => {
                 {closedTickets.length > 0 && (
                   <>
                     <View className='bg-zinc-50 px-4 py-2 dark:bg-zinc-800/50'>
-                      <Text className='text-[10px] font-bold uppercase text-zinc-500'>Clôturées</Text>
+                      <Text className='text-[10px] font-bold text-zinc-500 uppercase'>
+                        Clôturées
+                      </Text>
                     </View>
                     {closedTickets.map((ticket, i) => (
                       <TouchableOpacity

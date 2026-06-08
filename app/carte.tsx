@@ -25,7 +25,7 @@ import { getReportLocation, LocationPermissionError } from '../utils/reportLocat
 import { reportService } from '../services/reportService';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '../context/authcontext';
-import axios from 'axios';
+import { isAxiosError } from 'axios';
 import { BlurView } from 'expo-blur';
 
 function MapToolButton({
@@ -141,13 +141,13 @@ export default function Carte() {
         setAddress('');
         Alert.alert(
           'Localisation désactivée',
-          'Autorisez la localisation pour enregistrer l’emplacement du signalement.',
+          'Autorisez la localisation pour enregistrer l’emplacement du signalement.'
         );
       } else {
         setAddress('');
         Alert.alert(
           'Localisation indisponible',
-          'Impossible de déterminer votre position. Réessayez ou saisissez l’adresse manuellement.',
+          'Impossible de déterminer votre position. Réessayez ou saisissez l’adresse manuellement.'
         );
       }
     } finally {
@@ -166,7 +166,11 @@ export default function Carte() {
   }, [action]);
 
   const pickImage = async () => {
-    const uri = await pickProofImage();
+    const uri = await pickProofImage({
+      title: 'Photo du signalement',
+      message: 'Prenez une photo ou choisissez une image pour illustrer le problème.',
+      pickerOptions: { aspect: [4, 3], quality: 0.35, allowsEditing: true },
+    });
     if (uri) setSelectedImage(uri);
   };
 
@@ -218,29 +222,25 @@ export default function Carte() {
       if (e instanceof LocationPermissionError) {
         Alert.alert(
           'Localisation requise',
-          'Autorisez la localisation pour envoyer le signalement avec sa position.',
+          'Autorisez la localisation pour envoyer le signalement avec sa position.'
         );
         return;
       }
-      if (axios.isAxiosError(e)) {
+      if (isAxiosError(e)) {
         const status = e.response?.status;
         if (status === 401) {
-          Alert.alert(
-            'Session expirée',
-            'Reconnectez-vous pour envoyer votre signalement.',
-            [{ text: 'OK', onPress: () => router.push('/login') }],
-          );
+          Alert.alert('Session expirée', 'Reconnectez-vous pour envoyer votre signalement.', [
+            { text: 'OK', onPress: () => router.push('/login') },
+          ]);
           return;
         }
         const serverMsg =
-          typeof e.response?.data === 'object' &&
-          e.response?.data &&
-          'message' in e.response.data
+          typeof e.response?.data === 'object' && e.response?.data && 'message' in e.response.data
             ? String((e.response.data as { message: unknown }).message)
             : null;
         Alert.alert(
           'Erreur',
-          serverMsg || "Impossible d'envoyer le signalement. Vérifiez votre connexion.",
+          serverMsg || "Impossible d'envoyer le signalement. Vérifiez votre connexion."
         );
         return;
       }
@@ -336,7 +336,7 @@ export default function Carte() {
               {layersOpen && (
                 <View style={{ marginTop: 14 }}>
                   <Text
-                    className={`mb-2 text-[10px] font-bold uppercase tracking-widest ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    className={`mb-2 text-[10px] font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
                     Afficher sur la carte
                   </Text>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>

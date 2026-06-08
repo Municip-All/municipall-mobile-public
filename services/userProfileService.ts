@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import { localImageUriToDataUrl, saveLocalAvatarUri } from '../utils/avatarImage';
+import { prepareImageForUpload, saveLocalAvatarUri } from '../utils/avatarImage';
 import type { User } from '../context/authcontext';
 
 export type UpdateProfilePayload = {
@@ -10,7 +10,7 @@ export type UpdateProfilePayload = {
 };
 
 export async function uploadUserAvatar(localUri: string, userId: number): Promise<string> {
-  const dataUrl = await localImageUriToDataUrl(localUri);
+  const dataUrl = await prepareImageForUpload(localUri);
   const response = await apiClient.post<{ avatar_url?: string }>('users/avatar', {
     avatarUrl: dataUrl,
   });

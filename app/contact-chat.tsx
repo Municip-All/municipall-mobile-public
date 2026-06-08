@@ -122,8 +122,7 @@ export default function ContactChatScreen() {
           contentContainerStyle={styles.scrollContent}
           onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}>
           {ticket.messages.map((msg) => {
-            const isMine =
-              msg.senderRole === 'citizen' && msg.senderId === user?.id;
+            const isMine = msg.senderRole === 'citizen' && msg.senderId === user?.id;
             const isAgent = msg.senderRole === 'agent';
 
             const bubbleStyle = isMine
@@ -196,8 +195,7 @@ export default function ContactChatScreen() {
             </View>
           </View>
         ) : (
-          <View
-            className={`border-t px-4 py-4 ${dark ? 'border-zinc-800' : 'border-zinc-200'}`}>
+          <View className={`border-t px-4 py-4 ${dark ? 'border-zinc-800' : 'border-zinc-200'}`}>
             <Text className={`text-center text-sm ${classes.body}`}>
               Cette conversation est clôturée par la mairie.
             </Text>

@@ -17,9 +17,7 @@ export default function LegalDocumentScreen({ document, showBackHeader = true }:
 
   return (
     <View className={`flex-1 ${classes.page}`}>
-      {showBackHeader ? (
-        <ProfileScreenHeader title={document.title} />
-      ) : null}
+      {showBackHeader ? <ProfileScreenHeader title={document.title} /> : null}
       <ScrollView
         contentContainerStyle={{
           paddingTop: showBackHeader ? 8 : insets.top + 16,
@@ -53,7 +51,8 @@ export default function LegalDocumentScreen({ document, showBackHeader = true }:
           </View>
         ))}
 
-        <View className={`mt-2 rounded-2xl border p-4 ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-zinc-50'}`}>
+        <View
+          className={`mt-2 rounded-2xl border p-4 ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-zinc-50'}`}>
           <Text className={classes.meta}>Document {LEGAL_ENTITY.documentVersion}</Text>
           <Text className={`mt-1 ${classes.body}`}>
             {LEGAL_ENTITY.publisherName} — {LEGAL_ENTITY.website}

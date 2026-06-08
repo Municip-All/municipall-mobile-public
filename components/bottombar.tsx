@@ -2,9 +2,9 @@ import React from 'react';
 import { View, Pressable, Text, Platform, Dimensions, StyleSheet } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { useTheme } from '@context/themecontext';
-import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@context/authcontext';
+import { useAppTheme } from '@hooks/useAppTheme';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -15,12 +15,10 @@ const BottomBar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { colorScheme } = useTheme();
-  const { config } = useCity();
+  const { primaryColor, colors, brand } = useAppTheme();
   const { isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
   const dark = colorScheme === 'dark';
-
-  const primaryColor = config?.theme.primaryColor || '#0B0080';
   const tabHeight = 64;
   const totalHeight = tabHeight + insets.bottom;
 
@@ -45,7 +43,7 @@ const BottomBar: React.FC = () => {
     return { color: inactiveColor };
   };
 
-  const fabBorderColor = dark ? '#27272A' : '#F4F4F5';
+  const fabBorderColor = colors.fabBorder;
 
   // SVG Path calculation for the curved tab bar
   const center = SCREEN_WIDTH / 2;
@@ -132,7 +130,7 @@ const BottomBar: React.FC = () => {
             styles.centerButtonShadow,
             { backgroundColor: primaryColor, borderColor: fabBorderColor },
           ]}>
-          <Ionicons name='paper-plane' size={24} color='#FFFFFF' />
+          <Ionicons name='paper-plane' size={24} color={brand.onPrimary} />
         </Pressable>
         <Text style={[styles.centerLabel, { color: dark ? '#FFFFFF' : primaryColor }]}>
           Signaler

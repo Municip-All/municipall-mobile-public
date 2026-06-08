@@ -96,7 +96,8 @@ export default function ProfileNotificationsScreen() {
               key={option.key}
               className={`flex-row items-center justify-between p-4 ${index < OPTIONS.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
               <View className='mr-4 flex-1'>
-                <Text className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                <Text
+                  className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
                   {option.label}
                 </Text>
                 <Text className={`mt-1 text-xs ${dark ? 'text-zinc-500' : 'text-zinc-500'}`}>
