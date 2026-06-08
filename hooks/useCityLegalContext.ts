@@ -32,7 +32,7 @@ export function useCityLegalContext(): CityLegalContext & { loading: boolean } {
       .then((cfg) => {
         if (cancelled) return;
         setCtx({
-          cityName: cfg.name,
+          cityName: cfg.officialName || cfg.name,
           dataRetentionPolicy: cfg.dataRetentionPolicy,
         });
       })

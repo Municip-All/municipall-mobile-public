@@ -25,6 +25,6 @@ export function useLegalDocuments(): {
       cookies: buildCookiesDocument(),
       cityContext,
     }),
-    [cityContext.cityName, cityContext.dataRetentionPolicy],
+    [cityContext]
   );
 }

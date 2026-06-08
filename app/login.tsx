@@ -14,16 +14,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useAuth } from '@context/authcontext';
-import { useCity } from '@context/citycontext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import BottomBar from '@components/bottombar';
+import BrandedLogo from '@components/BrandedLogo';
 import LegalFooterLinks from '@components/LegalFooterLinks';
 import apiClient from '../services/apiClient';
 
 const LoginScreen: React.FC = () => {
-  const { dark, primaryColor, classes, colors } = useAppTheme();
-  const { config } = useCity();
+  const { dark, primaryColor, classes, colors, brand } = useAppTheme();
   const router = useRouter();
   const { login } = useAuth();
   const { redirectTo } = useLocalSearchParams<{ redirectTo?: string }>();
@@ -33,9 +32,9 @@ const LoginScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const secondaryColor = config?.theme.secondaryColor || '#3B82F6';
-  const useGradient = config?.theme.useGradient ?? false;
-  const appName = config?.name || "Municip'All";
+  const secondaryColor = brand.secondaryColor;
+  const useGradient = brand.useGradient;
+  const appName = brand.appName;
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -70,7 +69,11 @@ const LoginScreen: React.FC = () => {
     <View className={`flex-1 px-6 ${classes.pageAuth}`}>
       <LinearGradient
         colors={[
-          dark ? colors.semantic.surfaceAuth.dark : useGradient ? '#E0E7FF' : colors.semantic.surfaceAuth.light,
+          dark
+            ? colors.semantic.surfaceAuth.dark
+            : useGradient
+              ? '#E0E7FF'
+              : colors.semantic.surfaceAuth.light,
           dark ? colors.card : colors.semantic.surfaceAuth.light,
         ]}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
@@ -111,24 +114,25 @@ const LoginScreen: React.FC = () => {
         className='relative flex-1 justify-center'
         style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
         <View className='mb-10 items-center justify-center'>
-          <View
-            className='mb-6 h-20 w-20 items-center justify-center rounded-[28px] shadow-xl'
+          <BrandedLogo
+            size={80}
+            radius={28}
+            backgroundColor={primaryColor}
+            iconColor={brand.onPrimary}
             style={{
-              backgroundColor: primaryColor,
+              marginBottom: 24,
               shadowColor: primaryColor,
               shadowOffset: { width: 0, height: 10 },
               shadowOpacity: 0.3,
               shadowRadius: 20,
-            }}>
-            <Ionicons name='business' size={40} color='#FFFFFF' />
-          </View>
+              elevation: 8,
+            }}
+          />
           <Text
             className={`mb-2 text-4xl font-extrabold tracking-tight ${dark ? 'text-white' : 'text-slate-900'}`}>
             Bienvenue.
           </Text>
-          <Text className={classes.subtitle}>
-            Connectez-vous à {appName}
-          </Text>
+          <Text className={classes.subtitle}>Connectez-vous à {appName}</Text>
         </View>
 
         <View className='w-full items-center'>
@@ -144,14 +148,8 @@ const LoginScreen: React.FC = () => {
                 className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 IDENTIFIANT / EMAIL
               </Text>
-              <View
-                className={`flex-row items-center rounded-2xl px-4 py-3 ${classes.input}`}>
-                <Ionicons
-                  name='mail-outline'
-                  size={20}
-                  color={colors.iconMuted}
-                  className='mr-2'
-                />
+              <View className={`flex-row items-center rounded-2xl px-4 py-3 ${classes.input}`}>
+                <Ionicons name='mail-outline' size={20} color={colors.iconMuted} className='mr-2' />
                 <TextInput
                   value={email}
                   onChangeText={setEmail}
@@ -169,8 +167,7 @@ const LoginScreen: React.FC = () => {
                 className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 MOT DE PASSE
               </Text>
-              <View
-                className={`flex-row items-center rounded-2xl px-4 py-3 ${classes.input}`}>
+              <View className={`flex-row items-center rounded-2xl px-4 py-3 ${classes.input}`}>
                 <Ionicons
                   name='lock-closed-outline'
                   size={20}
@@ -208,11 +205,13 @@ const LoginScreen: React.FC = () => {
                 shadowRadius: 15,
               }}>
               {isSubmitting ? (
-                <ActivityIndicator color='#fff' />
+                <ActivityIndicator color={brand.onPrimary} />
               ) : (
                 <>
-                  <Text className='mr-2 text-lg font-bold text-white'>Se connecter</Text>
-                  <Ionicons name='arrow-forward' size={20} color='#FFFFFF' />
+                  <Text className='mr-2 text-lg font-bold' style={{ color: brand.onPrimary }}>
+                    Se connecter
+                  </Text>
+                  <Ionicons name='arrow-forward' size={20} color={brand.onPrimary} />
                 </>
               )}
             </TouchableOpacity>

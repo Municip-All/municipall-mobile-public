@@ -29,8 +29,7 @@ const MapComponent = forwardRef<MapComponentMethods, object>((_props, ref) => {
   }));
 
   return (
-    <View
-      className={`flex-1 items-center justify-center ${dark ? 'bg-black' : 'bg-white'}`}>
+    <View className={`flex-1 items-center justify-center ${dark ? 'bg-black' : 'bg-white'}`}>
       <Text className={`${dark ? 'text-white' : 'text-black'} px-6 text-center`}>
         {
           "La carte native n'est pas disponible sur le web pour l'instant.\nOuvre l'application mobile pour la carte interactive."

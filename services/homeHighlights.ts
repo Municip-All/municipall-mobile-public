@@ -116,7 +116,7 @@ function buildEventHighlights(events: CityEvent[]): HomeHighlight[] {
 export function buildHomeHighlights(
   config: CityConfig | null,
   works: ConstructionWork[],
-  events: CityEvent[],
+  events: CityEvent[]
 ): HomeHighlight[] {
   if (!config) return [];
 

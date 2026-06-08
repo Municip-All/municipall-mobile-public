@@ -7,7 +7,7 @@ export interface WasteServiceSchedule {
 }
 
 export function getNextCollection(
-  schedule: WasteServiceSchedule[],
+  schedule: WasteServiceSchedule[]
 ): { date: Date; service: WasteServiceSchedule } | null {
   if (!schedule.length) return null;
 

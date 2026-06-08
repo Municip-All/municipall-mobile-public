@@ -22,6 +22,14 @@ export async function localImageUriToDataUrl(uri: string): Promise<string> {
   return `data:${mime};base64,${base64}`;
 }
 
+/**
+ * Prépare une image pour l'API.
+ * La compression se fait à la sélection (quality dans ImagePicker), pas via module natif.
+ */
+export async function prepareImageForUpload(uri: string): Promise<string> {
+  return localImageUriToDataUrl(uri);
+}
+
 export function isPersistentAvatarUrl(url?: string | null): boolean {
   if (!url) return false;
   return url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://');
@@ -50,7 +58,7 @@ async function getLocalAvatarUri(userId: number): Promise<string | null> {
 
 /** Fusionne l’avatar API (data/http) avec une copie locale si l’API renvoie un file:// expiré. */
 export async function resolveAvatarForUser<T extends { id: number; avatar_url?: string }>(
-  user: T,
+  user: T
 ): Promise<T> {
   const fromApi = user.avatar_url;
 

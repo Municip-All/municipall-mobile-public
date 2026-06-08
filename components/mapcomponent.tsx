@@ -278,25 +278,25 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
           {/* Citizen Reports */}
           {showReports &&
             citizenReports.map((report) => (
-            <Marker
-              key={`report-${report.id}`}
-              coordinate={{
-                latitude: report.lat,
-                longitude: report.lon,
-              }}
-              pinColor={getStatusColor(report.status)}>
-              <Callout>
-                <View className='min-w-[150px] p-2'>
-                  <Text className='font-bold text-slate-900'>{report.category}</Text>
-                  <Text className='mt-1 text-xs text-slate-600'>{report.description}</Text>
-                  <Text
-                    className='mt-2 text-[10px] font-bold'
-                    style={{ color: getStatusColor(report.status) }}>
-                    {report.status.toUpperCase()}
-                  </Text>
-                </View>
-              </Callout>
-            </Marker>
+              <Marker
+                key={`report-${report.id}`}
+                coordinate={{
+                  latitude: report.lat,
+                  longitude: report.lon,
+                }}
+                pinColor={getStatusColor(report.status)}>
+                <Callout>
+                  <View className='min-w-[150px] p-2'>
+                    <Text className='font-bold text-slate-900'>{report.category}</Text>
+                    <Text className='mt-1 text-xs text-slate-600'>{report.description}</Text>
+                    <Text
+                      className='mt-2 text-[10px] font-bold'
+                      style={{ color: getStatusColor(report.status) }}>
+                      {report.status.toUpperCase()}
+                    </Text>
+                  </View>
+                </Callout>
+              </Marker>
             ))}
         </MapView>
       ) : (

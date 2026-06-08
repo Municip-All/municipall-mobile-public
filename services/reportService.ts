@@ -1,4 +1,5 @@
 import apiClient from './apiClient';
+import { prepareImageForUpload } from '../utils/avatarImage';
 
 export interface Report {
   id?: number;
@@ -22,12 +23,10 @@ export const reportService = {
     }));
   },
 
-  createReport: async (
-    reportData: Partial<Report> & { userId?: number },
-  ): Promise<Report> => {
+  createReport: async (reportData: Partial<Report> & { userId?: number }): Promise<Report> => {
     const payload = { ...reportData };
     if (payload.imageUrl?.startsWith('file://')) {
-      delete payload.imageUrl;
+      payload.imageUrl = await prepareImageForUpload(payload.imageUrl);
     }
     const response = await apiClient.post('reports', payload);
     const r = response.data;

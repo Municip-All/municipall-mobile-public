@@ -68,8 +68,12 @@ export default function ProfileHelpScreen() {
           {FAQ.map((item, i) => (
             <View
               key={item.q}
-              className={i < FAQ.length - 1 ? 'mb-5 border-b border-zinc-50 pb-5 dark:border-zinc-800' : ''}>
-              <Text className={`text-sm font-bold ${dark ? 'text-white' : 'text-zinc-900'}`}>{item.q}</Text>
+              className={
+                i < FAQ.length - 1 ? 'mb-5 border-b border-zinc-50 pb-5 dark:border-zinc-800' : ''
+              }>
+              <Text className={`text-sm font-bold ${dark ? 'text-white' : 'text-zinc-900'}`}>
+                {item.q}
+              </Text>
               <Text className={`mt-2 ${classes.body}`}>{item.a}</Text>
             </View>
           ))}
@@ -88,7 +92,8 @@ export default function ProfileHelpScreen() {
                   style={{ backgroundColor: `${item.color}15` }}>
                   <Ionicons name={item.icon} size={18} color={item.color} />
                 </View>
-                <Text className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                <Text
+                  className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
                   {item.label}
                 </Text>
               </View>
@@ -98,7 +103,9 @@ export default function ProfileHelpScreen() {
         </View>
 
         <TouchableOpacity
-          onPress={() => Linking.openURL('mailto:support@municipall.dev?subject=Aide%20application%20Municipall')}
+          onPress={() =>
+            Linking.openURL('mailto:support@municipall.dev?subject=Aide%20application%20Municipall')
+          }
           className='mt-6 items-center rounded-2xl border border-zinc-200 py-4 dark:border-zinc-700'>
           <Text style={{ color: primaryColor }} className='text-base font-bold'>
             Écrire au support

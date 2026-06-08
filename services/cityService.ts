@@ -9,6 +9,7 @@ export interface CityContactConfig {
 export interface CityConfig {
   id?: string;
   name: string;
+  officialName?: string;
   features: string[];
   dataRetentionPolicy?: string;
   contact?: CityContactConfig;

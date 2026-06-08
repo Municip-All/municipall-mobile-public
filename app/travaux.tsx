@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
-import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
 import BottomBar from '@components/bottombar';
 import FloatingMapButton from '@components/FloatingMapButton';
@@ -10,7 +9,6 @@ import apiClient from '../services/apiClient';
 
 export default function Travaux() {
   const { dark, primaryColor, classes } = useAppTheme();
-  const { config } = useCity();
   const insets = useSafeAreaInsets();
 
   const [works, setWorks] = React.useState<any[]>([]);

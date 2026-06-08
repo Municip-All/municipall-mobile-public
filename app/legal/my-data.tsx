@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Linking,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -59,12 +52,12 @@ export default function LegalMyDataScreen() {
       onPress: () =>
         mailto(
           "Demande d'accès / portabilité RGPD — Municip'All",
-          `Bonjour,\n\nJe souhaite recevoir une copie de mes données personnelles associées au compte : ${user.email} (ID ${user.id}).\n\nCordialement,\n${user.name} ${user.surname}`,
+          `Bonjour,\n\nJe souhaite recevoir une copie de mes données personnelles associées au compte : ${user.email} (ID ${user.id}).\n\nCordialement,\n${user.name} ${user.surname}`
         ),
     },
     {
       title: 'Supprimer mon compte',
-      description: 'Demande d\'effacement définitif de votre compte et données associées.',
+      description: "Demande d'effacement définitif de votre compte et données associées.",
       icon: 'trash-outline',
       color: '#FF3B30',
       onPress: () => {
@@ -79,7 +72,7 @@ export default function LegalMyDataScreen() {
               onPress: () => {
                 mailto(
                   "Demande de suppression de compte — Municip'All",
-                  `Bonjour,\n\nJe demande la suppression définitive de mon compte et de mes données personnelles.\n\nCompte : ${user.email} (ID ${user.id})\n\nCordialement,\n${user.name} ${user.surname}`,
+                  `Bonjour,\n\nJe demande la suppression définitive de mon compte et de mes données personnelles.\n\nCompte : ${user.email} (ID ${user.id})\n\nCordialement,\n${user.name} ${user.surname}`
                 );
               },
             },
@@ -89,13 +82,13 @@ export default function LegalMyDataScreen() {
               onPress: async () => {
                 mailto(
                   "Demande de suppression de compte — Municip'All",
-                  `Bonjour,\n\nJe demande la suppression définitive de mon compte.\n\nCompte : ${user.email} (ID ${user.id})\n\nCordialement,\n${user.name} ${user.surname}`,
+                  `Bonjour,\n\nJe demande la suppression définitive de mon compte.\n\nCompte : ${user.email} (ID ${user.id})\n\nCordialement,\n${user.name} ${user.surname}`
                 );
                 await logout();
                 router.replace('/login');
               },
             },
-          ],
+          ]
         );
       },
     },
@@ -107,7 +100,7 @@ export default function LegalMyDataScreen() {
       onPress: () =>
         mailto(
           'Demande RGPD (opposition / limitation)',
-          `Bonjour,\n\nJe souhaite exercer mon droit d'opposition ou de limitation concernant le compte ${user.email}.\n\nPrécision de ma demande :\n\n`,
+          `Bonjour,\n\nJe souhaite exercer mon droit d'opposition ou de limitation concernant le compte ${user.email}.\n\nPrécision de ma demande :\n\n`
         ),
     },
     {
@@ -162,7 +155,8 @@ export default function LegalMyDataScreen() {
                 <Ionicons name={action.icon} size={20} color={action.color} />
               </View>
               <View className='flex-1'>
-                <Text className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                <Text
+                  className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
                   {action.title}
                 </Text>
                 <Text className={`mt-0.5 text-xs ${dark ? 'text-zinc-500' : 'text-zinc-500'}`}>

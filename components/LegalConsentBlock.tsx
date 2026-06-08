@@ -25,11 +25,7 @@ export default function LegalConsentBlock({
   const { dark, primaryColor, classes } = useAppTheme();
   const router = useRouter();
 
-  const row = (
-    checked: boolean,
-    onChange: (v: boolean) => void,
-    label: React.ReactNode,
-  ) => (
+  const row = (checked: boolean, onChange: (v: boolean) => void, label: React.ReactNode) => (
     <View className='mb-3 flex-row items-start'>
       <ExpoCheckbox
         value={checked}
@@ -53,24 +49,23 @@ export default function LegalConsentBlock({
   );
 
   return (
-    <View className={`mt-2 rounded-2xl border p-4 ${dark ? 'border-zinc-700 bg-zinc-900/50' : 'border-zinc-200 bg-white/80'}`}>
-      <Text className={`mb-3 text-xs font-bold uppercase tracking-wide ${classes.meta}`}>
+    <View
+      className={`mt-2 rounded-2xl border p-4 ${dark ? 'border-zinc-700 bg-zinc-900/50' : 'border-zinc-200 bg-white/80'}`}>
+      <Text className={`mb-3 text-xs font-bold tracking-wide uppercase ${classes.meta}`}>
         Consentements obligatoires
       </Text>
       {row(
         acceptedCgu,
         onCguChange,
-        <>
-          J&apos;ai lu et j&apos;accepte les {link("conditions d'utilisation", '/legal/cgu')}.
-        </>,
+        <>J&apos;ai lu et j&apos;accepte les {link("conditions d'utilisation", '/legal/cgu')}.</>
       )}
       {row(
         acceptedPrivacy,
         onPrivacyChange,
         <>
-          J&apos;accepte la {link('politique de confidentialité', '/legal/privacy')} et le traitement
-          de mes données conformément au RGPD.
-        </>,
+          J&apos;accepte la {link('politique de confidentialité', '/legal/privacy')} et le
+          traitement de mes données conformément au RGPD.
+        </>
       )}
       {row(
         acceptedAge,
@@ -78,7 +73,7 @@ export default function LegalConsentBlock({
         <>
           Je certifie avoir au moins {LEGAL_ENTITY.minimumAge} ans (aucune autorisation parentale
           n&apos;est requise à partir de {LEGAL_ENTITY.minimumAge} ans pour utiliser ce service).
-        </>,
+        </>
       )}
       <TouchableOpacity onPress={() => router.push('/legal')} className='mt-1'>
         <Text className={`text-xs ${dark ? 'text-zinc-500' : 'text-zinc-500'}`}>

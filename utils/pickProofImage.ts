@@ -17,7 +17,10 @@ export type PickProofImageOptions = {
 async function requestLibraryPermission(): Promise<boolean> {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (status !== 'granted') {
-    Alert.alert('Permission refusée', 'Autorisez l’accès à la galerie dans les réglages du téléphone.');
+    Alert.alert(
+      'Permission refusée',
+      'Autorisez l’accès à la galerie dans les réglages du téléphone.'
+    );
     return false;
   }
   return true;
@@ -26,20 +29,23 @@ async function requestLibraryPermission(): Promise<boolean> {
 async function requestCameraPermission(): Promise<boolean> {
   const { status } = await ImagePicker.requestCameraPermissionsAsync();
   if (status !== 'granted') {
-    Alert.alert('Permission refusée', 'Autorisez l’accès à l’appareil photo dans les réglages du téléphone.');
+    Alert.alert(
+      'Permission refusée',
+      'Autorisez l’accès à l’appareil photo dans les réglages du téléphone.'
+    );
     return false;
   }
   return true;
 }
 
 function resolvePickerOptions(
-  overrides?: PickProofImageOptions['pickerOptions'],
+  overrides?: PickProofImageOptions['pickerOptions']
 ): ImagePicker.ImagePickerOptions {
   return { ...defaultPickerOptions, ...overrides };
 }
 
 async function pickFromLibrary(
-  pickerOptions: ImagePicker.ImagePickerOptions,
+  pickerOptions: ImagePicker.ImagePickerOptions
 ): Promise<string | null> {
   if (!(await requestLibraryPermission())) return null;
   const result = await ImagePicker.launchImageLibraryAsync(pickerOptions);
@@ -48,7 +54,7 @@ async function pickFromLibrary(
 }
 
 async function pickFromCamera(
-  pickerOptions: ImagePicker.ImagePickerOptions,
+  pickerOptions: ImagePicker.ImagePickerOptions
 ): Promise<string | null> {
   if (!(await requestCameraPermission())) return null;
   const result = await ImagePicker.launchCameraAsync(pickerOptions);
@@ -62,8 +68,7 @@ async function pickFromCamera(
  */
 export function pickProofImage(options?: PickProofImageOptions): Promise<string | null> {
   const title = options?.title ?? 'Ajouter une preuve';
-  const message =
-    options?.message ?? 'Prenez une photo ou choisissez une image existante.';
+  const message = options?.message ?? 'Prenez une photo ou choisissez une image existante.';
   const pickerOptions = resolvePickerOptions(options?.pickerOptions);
 
   return new Promise((resolve) => {

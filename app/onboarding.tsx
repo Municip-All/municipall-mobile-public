@@ -57,8 +57,7 @@ export default function Onboarding() {
   };
 
   return (
-    <View
-      className={`flex-1 items-center justify-between px-6 pt-20 pb-14 ${classes.page}`}>
+    <View className={`flex-1 items-center justify-between px-6 pt-20 pb-14 ${classes.page}`}>
       <View className='items-center'>
         <View
           className='mb-5 h-16 w-16 items-center justify-center rounded-full'
@@ -68,8 +67,7 @@ export default function Onboarding() {
         <Text className={`text-center text-2xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
           {steps[index].title}
         </Text>
-        <Text
-          className={`mt-3 text-center text-sm leading-6 ${classes.body}`}>
+        <Text className={`mt-3 text-center text-sm leading-6 ${classes.body}`}>
           {steps[index].desc}
         </Text>
       </View>

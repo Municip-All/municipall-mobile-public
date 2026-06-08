@@ -28,10 +28,10 @@ function retentionSection(ctx: CityLegalContext): LegalSection {
   return {
     title: '5. Durées de conservation',
     bullets: [
-      'Données de compte : jusqu\'à suppression du compte ou 3 ans d\'inactivité, sauf obligation légale contraire.',
-      'Photo de profil et préférences : jusqu\'à suppression par l\'utilisateur ou clôture du compte.',
-      'Jetons de notification : jusqu\'à retrait du consentement ou suppression du compte.',
-      'Logs de sécurité et d\'accès : 12 mois maximum, sauf incident nécessitant une conservation prolongée.',
+      "Données de compte : jusqu'à suppression du compte ou 3 ans d'inactivité, sauf obligation légale contraire.",
+      "Photo de profil et préférences : jusqu'à suppression par l'utilisateur ou clôture du compte.",
+      "Jetons de notification : jusqu'à retrait du consentement ou suppression du compte.",
+      "Logs de sécurité et d'accès : 12 mois maximum, sauf incident nécessitant une conservation prolongée.",
     ],
     paragraphs: [
       `${E.legalName} est responsable de traitement. Les informations nécessaires au traitement de vos demandes sont transmises à la commune partenaire en sa qualité de destinataire habilité, dans le cadre du contrat qui lie ${E.legalName} à cette collectivité.`,
@@ -77,7 +77,7 @@ export function buildCguDocument(_ctx?: CityLegalContext): LegalDocument {
       {
         title: '4. Signalements et contenus',
         paragraphs: [
-          'Les contenus publiés doivent être licites et pertinents. L\'Éditeur et la commune peuvent traiter, conserver et transmettre ces données aux fins de gestion du service public local.',
+          "Les contenus publiés doivent être licites et pertinents. L'Éditeur et la commune peuvent traiter, conserver et transmettre ces données aux fins de gestion du service public local.",
           "L'Éditeur peut suspendre un compte en cas d'usage abusif ou frauduleux.",
         ],
       },
@@ -98,7 +98,7 @@ export function buildCguDocument(_ctx?: CityLegalContext): LegalDocument {
       {
         title: '7. Modifications et droit applicable',
         paragraphs: [
-          'Les CGU peuvent être modifiées ; la version en vigueur est celle accessible dans l\'Application.',
+          "Les CGU peuvent être modifiées ; la version en vigueur est celle accessible dans l'Application.",
           'Droit français applicable. Litiges : recherche amiable préalable, puis tribunaux compétents.',
         ],
       },
@@ -121,15 +121,15 @@ export function buildPrivacyDocument(ctx: CityLegalContext = {}): LegalDocument 
         paragraphs: [
           `Le responsable de traitement des données collectées via ${E.appName} est ${E.legalName} (${E.legalForm}), ${E.publisherAddress}.`,
           `Délégué à la protection des données (DPO) : ${E.dpoName}, contact : ${E.dpoEmail}.`,
-          'Aucun autre responsable de traitement n\'est désigné dans le cadre de cette Application : les communes partenaires reçoivent les données strictement nécessaires au traitement de vos demandes, en qualité de destinataires habilités.',
+          "Aucun autre responsable de traitement n'est désigné dans le cadre de cette Application : les communes partenaires reçoivent les données strictement nécessaires au traitement de vos demandes, en qualité de destinataires habilités.",
         ],
       },
       {
         title: '2. Finalités et bases légales',
         bullets: [
           'Gestion du compte et authentification (exécution du contrat).',
-          'Signalements et contact mairie (exécution du service / mission d\'intérêt public local).',
-          'Géolocalisation ponctuelle lors d\'un signalement (action positive de l\'utilisateur).',
+          "Signalements et contact mairie (exécution du service / mission d'intérêt public local).",
+          "Géolocalisation ponctuelle lors d'un signalement (action positive de l'utilisateur).",
           'Notifications push (consentement, révocable).',
           'Sécurité et lutte contre les abus (intérêt légitime).',
           'Obligations légales et réponses aux autorités.',
@@ -147,7 +147,7 @@ export function buildPrivacyDocument(ctx: CityLegalContext = {}): LegalDocument 
       {
         title: '4. Destinataires et sous-traitants',
         paragraphs: [
-          'Données accessibles aux équipes habilitées de l\'Éditeur et, le cas échéant, aux agents de la commune partenaire pour le traitement de vos demandes.',
+          "Données accessibles aux équipes habilitées de l'Éditeur et, le cas échéant, aux agents de la commune partenaire pour le traitement de vos demandes.",
         ],
         bullets: [
           E.hostingDescription,
@@ -179,7 +179,7 @@ export function buildPrivacyDocument(ctx: CityLegalContext = {}): LegalDocument 
       {
         title: '9. Transferts hors UE',
         paragraphs: [
-          'Les données sont hébergées en France. Tout transfert hors Union européenne ferait l\'objet de garanties appropriées (clauses contractuelles types, etc.).',
+          "Les données sont hébergées en France. Tout transfert hors Union européenne ferait l'objet de garanties appropriées (clauses contractuelles types, etc.).",
         ],
       },
       {
@@ -220,11 +220,7 @@ export function buildMentionsDocument(): LegalDocument {
       },
       {
         title: 'Hébergement',
-        paragraphs: [
-          `Hébergeur : ${E.hostingProvider}`,
-          E.hostingLocation,
-          E.hostingDescription,
-        ],
+        paragraphs: [`Hébergeur : ${E.hostingProvider}`, E.hostingLocation, E.hostingDescription],
       },
       {
         title: 'Propriété intellectuelle',
@@ -289,7 +285,7 @@ export const LEGAL_HUB_ITEMS = [
     id: 'cgu',
     route: '/legal/cgu' as const,
     label: "Conditions d'utilisation",
-    description: 'CGU de l\'application',
+    description: "CGU de l'application",
     icon: 'document-text-outline' as const,
     color: '#34C759',
   },

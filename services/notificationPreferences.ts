@@ -26,8 +26,6 @@ export async function loadNotificationPreferences(): Promise<NotificationPrefere
   }
 }
 
-export async function saveNotificationPreferences(
-  prefs: NotificationPreferences,
-): Promise<void> {
+export async function saveNotificationPreferences(prefs: NotificationPreferences): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
 }

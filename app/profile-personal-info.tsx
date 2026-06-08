@@ -86,7 +86,12 @@ export default function ProfilePersonalInfoScreen() {
           {[
             { label: 'Prénom', value: name, onChange: setName },
             { label: 'Nom', value: surname, onChange: setSurname },
-            { label: 'E-mail', value: email, onChange: setEmail, keyboard: 'email-address' as const },
+            {
+              label: 'E-mail',
+              value: email,
+              onChange: setEmail,
+              keyboard: 'email-address' as const,
+            },
             { label: 'Quartier', value: neighborhood, onChange: setNeighborhood },
           ].map((field, index) => (
             <View key={field.label} className={index > 0 ? 'mt-4' : ''}>

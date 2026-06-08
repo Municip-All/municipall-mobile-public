@@ -1,12 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  Image,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
@@ -79,8 +72,8 @@ function EventCard({
 
   return (
     <View
-      className={`overflow-hidden rounded-[28px] mb-4 border shadow-sm ${
-        dark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100'
+      className={`mb-4 overflow-hidden rounded-[28px] border shadow-sm ${
+        dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
       }`}>
       {event.imageUrl ? (
         <Image source={{ uri: event.imageUrl }} className='h-40 w-full' resizeMode='cover' />
@@ -117,7 +110,8 @@ function EventCard({
               size={16}
               color={dark ? '#71717A' : '#A1A1AA'}
             />
-            <Text className={`ml-2 text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+            <Text
+              className={`ml-2 text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
               {formatEventDateRange(event.startDate, event.endDate)}
             </Text>
           </View>
@@ -159,9 +153,7 @@ export default function Events() {
       const now = Date.now();
       const upcoming = data
         .filter((e) => new Date(e.endDate).getTime() >= now)
-        .sort(
-          (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
-        );
+        .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
       setEvents(upcoming);
     } catch (e) {
       console.error(e);
@@ -176,7 +168,7 @@ export default function Events() {
     useCallback(() => {
       refreshConfig();
       loadEvents();
-    }, [loadEvents, refreshConfig]),
+    }, [loadEvents, refreshConfig])
   );
 
   const filteredEvents = useMemo(() => {
@@ -262,7 +254,7 @@ export default function Events() {
               </View>
             ) : filteredEvents.length === 0 ? (
               <View
-                className={`rounded-[28px] border p-8 items-center ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-white'}`}>
+                className={`items-center rounded-[28px] border p-8 ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-white'}`}>
                 <Ionicons name='calendar-outline' size={36} color={dark ? '#52525B' : '#A1A1AA'} />
                 <Text
                   className={`mt-4 text-center text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
@@ -273,12 +265,7 @@ export default function Events() {
               </View>
             ) : (
               filteredEvents.map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  dark={dark}
-                  primaryColor={primaryColor}
-                />
+                <EventCard key={event.id} event={event} dark={dark} primaryColor={primaryColor} />
               ))
             )}
           </>
