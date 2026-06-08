@@ -44,12 +44,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     [nativewind]
   );
 
+  const [systemScheme, setSystemScheme] = useState<'light' | 'dark'>(
+    () => Appearance.getColorScheme() ?? 'light'
+  );
+
+  useEffect(() => {
+    const sub = Appearance.addChangeListener(({ colorScheme }) => {
+      if (colorScheme === 'light' || colorScheme === 'dark') {
+        setSystemScheme(colorScheme);
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
   const resolved: 'light' | 'dark' = useMemo(() => {
-    if (pref === 'system') {
-      return Appearance.getColorScheme() ?? 'light';
-    }
+    if (pref === 'system') return systemScheme;
     return pref;
-  }, [pref]);
+  }, [pref, systemScheme]);
 
   const value: ThemeContextType = useMemo(
     () => ({ theme: pref, setTheme, colorScheme: resolved }),

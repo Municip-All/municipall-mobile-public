@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as Location from 'expo-location';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { View, Text, Image, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { useTheme } from '@context/themecontext';
 import { useCity } from '@context/citycontext';
@@ -10,6 +10,8 @@ import { reportService, Report } from '../services/reportService';
 export interface MapComponentMethods {
   centerOnUserLocation: () => void;
   goToNearestCompost: () => Promise<void> | void;
+  zoomIn: () => void;
+  zoomOut: () => void;
 }
 
 type Region = {
@@ -26,21 +28,43 @@ type Toilet = { adresse?: string; geo_point_2d: GeoPoint };
 interface MapComponentProps {
   showComposts?: boolean;
   showToilets?: boolean;
+  showReports?: boolean;
 }
 
 const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, ref) => {
-  const { showComposts = true, showToilets = true } = props || {};
-  const { theme } = useTheme();
+  const { showComposts = true, showToilets = true, showReports = true } = props || {};
+  const { colorScheme } = useTheme();
+  const dark = colorScheme === 'dark';
   const { config } = useCity();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [compostMarkers, setCompostMarkers] = useState<Compost[]>([]);
   const [toiletsMarkers, setToiletsMarkers] = useState<Toilet[]>([]);
   const [citizenReports, setCitizenReports] = useState<Report[]>([]);
   const mapRef = useRef<MapView>(null);
+  const regionRef = useRef<Region | null>(null);
 
   const primaryColor = config?.theme.primaryColor || '#2563EB';
 
+  const ZOOM_FACTOR = 0.5;
+  const MIN_DELTA = 0.002;
+  const MAX_DELTA = 2;
+
+  const zoomByFactor = (factor: number) => {
+    const current = regionRef.current;
+    if (!current || !mapRef.current) return;
+
+    const next: Region = {
+      ...current,
+      latitudeDelta: Math.min(Math.max(current.latitudeDelta * factor, MIN_DELTA), MAX_DELTA),
+      longitudeDelta: Math.min(Math.max(current.longitudeDelta * factor, MIN_DELTA), MAX_DELTA),
+    };
+    regionRef.current = next;
+    mapRef.current.animateToRegion(next, 280);
+  };
+
   useImperativeHandle(ref, () => ({
+    zoomIn: () => zoomByFactor(ZOOM_FACTOR),
+    zoomOut: () => zoomByFactor(1 / ZOOM_FACTOR),
     centerOnUserLocation: () => {
       if (location && mapRef.current) {
         const region: Region = {
@@ -49,6 +73,7 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         };
+        regionRef.current = region;
         mapRef.current.animateToRegion(region, 500);
       }
     },
@@ -62,6 +87,7 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         };
+        regionRef.current = region;
         mapRef.current.animateToRegion(region, 500);
       }
     },
@@ -132,6 +158,12 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
 
         const userLocation = await Location.getCurrentPositionAsync({});
         setLocation(userLocation);
+        regionRef.current = {
+          latitude: userLocation.coords.latitude,
+          longitude: userLocation.coords.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        };
 
         await Promise.all([fetchCompostMarkers(), fetchToiletsMarkers(), fetchCitizenReports()]);
       } catch (error) {
@@ -199,7 +231,7 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
   };
 
   return (
-    <View className={`flex-1 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+    <View className={`flex-1 ${dark ? 'bg-black' : 'bg-white'}`}>
       {location ? (
         <MapView
           ref={mapRef}
@@ -210,7 +242,10 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
             latitudeDelta: 0.05,
             longitudeDelta: 0.05,
           }}
-          showsUserLocation>
+          showsUserLocation
+          onRegionChangeComplete={(region) => {
+            regionRef.current = region;
+          }}>
           {/* Public Infrastructure */}
           {showComposts &&
             compostMarkers.map((marker, index) => (
@@ -221,13 +256,9 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
                   longitude: marker.geo_point_2d.lon,
                 }}
                 title={marker.operateur || 'Composteur'}
-                description={marker.adresse}>
-                <Image
-                  source={require('../assets/images/ping_composte.png')}
-                  style={{ width: 35, height: 35 }}
-                  resizeMode='contain'
-                />
-              </Marker>
+                description={marker.adresse}
+                pinColor='#22c55e'
+              />
             ))}
 
           {showToilets &&
@@ -239,42 +270,39 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
                   longitude: marker.geo_point_2d.lon,
                 }}
                 title='Toilette publique'
-                description={marker.adresse}>
-                <Image
-                  source={require('../assets/images/ping_toilet.png')}
-                  style={{ width: 35, height: 35 }}
-                  resizeMode='contain'
-                />
-              </Marker>
+                description={marker.adresse}
+                pinColor='#0ea5e9'
+              />
             ))}
 
           {/* Citizen Reports */}
-          {citizenReports.map((report) => (
-            <Marker
-              key={`report-${report.id}`}
-              coordinate={{
-                latitude: report.lat,
-                longitude: report.lon,
-              }}
-              pinColor={getStatusColor(report.status)}>
-              <Callout>
-                <View className='min-w-[150px] p-2'>
-                  <Text className='font-bold text-slate-900'>{report.category}</Text>
-                  <Text className='mt-1 text-xs text-slate-600'>{report.description}</Text>
-                  <Text
-                    className='mt-2 text-[10px] font-bold'
-                    style={{ color: getStatusColor(report.status) }}>
-                    {report.status.toUpperCase()}
-                  </Text>
-                </View>
-              </Callout>
-            </Marker>
-          ))}
+          {showReports &&
+            citizenReports.map((report) => (
+              <Marker
+                key={`report-${report.id}`}
+                coordinate={{
+                  latitude: report.lat,
+                  longitude: report.lon,
+                }}
+                pinColor={getStatusColor(report.status)}>
+                <Callout>
+                  <View className='min-w-[150px] p-2'>
+                    <Text className='font-bold text-slate-900'>{report.category}</Text>
+                    <Text className='mt-1 text-xs text-slate-600'>{report.description}</Text>
+                    <Text
+                      className='mt-2 text-[10px] font-bold'
+                      style={{ color: getStatusColor(report.status) }}>
+                      {report.status.toUpperCase()}
+                    </Text>
+                  </View>
+                </Callout>
+              </Marker>
+            ))}
         </MapView>
       ) : (
         <View className='flex-1 items-center justify-center'>
           <ActivityIndicator size='large' color={primaryColor} />
-          <Text className={`mt-4 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+          <Text className={`mt-4 ${dark ? 'text-white' : 'text-black'}`}>
             Chargement de la carte...
           </Text>
         </View>

@@ -1,29 +1,46 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import { useTheme } from '@context/themecontext';
+import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
 import BottomBar from '@components/bottombar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
+import { getNextCollection, formatCollectionDay } from '../utils/wasteSchedule';
 
 export default function Collecte() {
-  const { colorScheme } = useTheme();
+  const { dark, primaryColor, classes } = useAppTheme();
   const { config } = useCity();
-  const dark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
-  const primaryColor = config?.theme.primaryColor || '#0B0080';
 
-  const schedule = [
-    { type: 'Ordures ménagères', day: 'Lundi, Jeudi', icon: 'trash', color: '#8E8E93' },
-    { type: 'Emballages & Papiers', day: 'Mercredi', icon: 'refresh', color: '#FFD60A' },
-    { type: 'Déchets Verts', day: 'Vendredi (Saisonnier)', icon: 'leaf', color: '#34C759' },
-    { type: 'Encombrants', day: '1er Mardi du mois', icon: 'archive', color: '#FF9500' },
+  const schedule = config?.wasteConfig?.services || [
+    { type: 'Ordures ménagères', days: [1, 4], time: '19:00', icon: 'trash', color: '#8E8E93' },
+    { type: 'Emballages & Papiers', days: [3], time: '08:30', icon: 'refresh', color: '#FFD60A' },
   ];
 
+  const next = getNextCollection(schedule);
+
+  const formatNextDate = (date: Date) => {
+    const label = formatCollectionDay(date);
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  };
+
+  const formatDays = (days: number[]) => {
+    const dayMap: Record<number, string> = {
+      1: 'Lun',
+      2: 'Mar',
+      3: 'Mer',
+      4: 'Jeu',
+      5: 'Ven',
+      6: 'Sam',
+      0: 'Dim',
+    };
+    return days.map((d) => dayMap[d]).join(', ');
+  };
+
   return (
-    <View className={`flex-1 ${dark ? 'bg-black' : 'bg-[#F2F2F7]'}`}>
+    <View className={`flex-1 ${classes.page}`}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 20,
@@ -54,12 +71,20 @@ export default function Collecte() {
                 Prochaine collecte
               </Text>
               <Text className={`mt-1 text-2xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
-                Demain, 08:30
+                {next
+                  ? `${formatNextDate(next.date)}, ${next.date.getHours()}h${next.date.getMinutes().toString().padStart(2, '0')}`
+                  : 'Aucune collecte prévue'}
               </Text>
-              <View className='mt-3 flex-row items-center self-start rounded-full bg-yellow-400/20 px-3 py-1'>
-                <Ionicons name='refresh' size={14} color='#FFD60A' />
-                <Text className='ml-2 text-xs font-bold text-yellow-500'>Recyclage</Text>
-              </View>
+              {next && (
+                <View
+                  className='mt-3 flex-row items-center self-start rounded-full px-3 py-1'
+                  style={{ backgroundColor: `${next.service.color}20` }}>
+                  <Ionicons name={next.service.icon as any} size={14} color={next.service.color} />
+                  <Text className='ml-2 text-xs font-bold' style={{ color: next.service.color }}>
+                    {next.service.type}
+                  </Text>
+                </View>
+              )}
             </View>
           </BlurView>
         </View>
@@ -84,7 +109,7 @@ export default function Collecte() {
                   {item.type}
                 </Text>
                 <Text className={`mt-0.5 text-sm ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                  {item.day}
+                  {formatDays(item.days)} • {item.time}
                 </Text>
               </View>
             </View>

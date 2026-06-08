@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "my-expo-app",
-    "slug": "my-expo-app",
+    "name": "Municip'All",
+    "slug": "municipall",
     "scheme": "municipall",
     "version": "1.0.0",
     "web": {
@@ -10,14 +10,37 @@
     "experiments": {
       "tsconfigPaths": true
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/logo_app.png",
+          "color": "#0B0080",
+          "sounds": []
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Autorisez l'accès à vos photos pour joindre une preuve à votre signalement.",
+          "cameraPermission": "Autorisez l'accès à l'appareil photo pour joindre une preuve à votre signalement."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Autorisez la localisation pour positionner votre signalement sur la carte."
+        }
+      ]
+    ],
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/logo_app.png",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#F2F2F7"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -26,7 +49,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logo_app.png",
         "backgroundColor": "#ffffff"
       },
       "package": "municipall.v2"

@@ -1,10 +1,14 @@
+import 'react-native-reanimated';
 import React, { useEffect, useState } from 'react';
 import { Stack, Redirect, usePathname } from 'expo-router';
 import { useFonts } from 'expo-font';
-import { View, Text, ActivityIndicator } from 'react-native';
-import { ThemeProvider } from '@context/themecontext';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { ThemeProvider, useTheme } from '@context/themecontext';
 import { AuthProvider } from '@context/authcontext';
+import PushNotificationRegistrar from '@components/PushNotificationRegistrar';
+import BrandingSync from '@components/BrandingSync';
 import { CityProvider } from '@context/citycontext';
+import { DEFAULT_PRIMARY } from '@constants/design';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import '../global.css';
@@ -59,10 +63,9 @@ export default function RootLayout() {
 
   if (!fontsLoaded || !onboardingChecked) {
     return (
-      <View className='flex-1 items-center justify-center'>
-        <ActivityIndicator size='large' />
-        <Text>Chargement...</Text>
-      </View>
+      <ThemeProvider>
+        <LoadingScreen />
+      </ThemeProvider>
     );
   }
 
@@ -70,6 +73,8 @@ export default function RootLayout() {
     <ThemeProvider>
       <CityProvider>
         <AuthProvider>
+          <BrandingSync />
+          <PushNotificationRegistrar />
           {needsOnboarding && pathname !== '/onboarding' ? <Redirect href='/onboarding' /> : null}
           <Stack
             screenOptions={{
@@ -83,3 +88,29 @@ export default function RootLayout() {
     </ThemeProvider>
   );
 }
+
+function LoadingScreen() {
+  const { colorScheme } = useTheme();
+  const dark = colorScheme === 'dark';
+  return (
+    <View style={[styles.loadingRoot, { backgroundColor: dark ? '#000000' : '#F2F2F7' }]}>
+      <ActivityIndicator size='large' color={dark ? '#FFFFFF' : DEFAULT_PRIMARY} />
+      <Text style={[styles.loadingText, { color: dark ? '#D4D4D8' : '#52525B' }]}>
+        Chargement...
+      </Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  loadingRoot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+});
