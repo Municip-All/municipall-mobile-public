@@ -10,7 +10,7 @@ import ProfileScreenHeader from '@components/ProfileScreenHeader';
 const FAQ = [
   {
     q: 'Comment signaler un problème dans ma ville ?',
-    a: "Depuis l'onglet Carte ou l'accueil, créez un signalement en indiquant le lieu et une description. Vous pouvez joindre une photo.",
+    a: "Depuis l'onglet Carte ou l'accueil, créez un signalement en indiquant le lieu et une description. Vous pouvez joindre une photo. La mairie peut vous répondre dans la conversation du signalement (onglet Signalements).",
   },
   {
     q: 'Comment changer ma ville de résidence ?',
