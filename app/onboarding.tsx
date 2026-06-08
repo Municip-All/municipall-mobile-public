@@ -3,8 +3,8 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { useTheme } from '@context/themecontext';
-import { useCity } from '@context/citycontext';
+import LegalFooterLinks from '@components/LegalFooterLinks';
+import { useAppTheme } from '@hooks/useAppTheme';
 
 const ONBOARDING_KEY = 'onboarding_completed_v1';
 
@@ -31,13 +31,9 @@ const steps = [
 
 export default function Onboarding() {
   const router = useRouter();
-  const { theme } = useTheme();
-  const { config } = useCity();
-  const dark = theme === 'dark';
+  const { dark, primaryColor, classes } = useAppTheme();
   const [index, setIndex] = useState(0);
   const total = steps.length;
-
-  const primaryColor = config?.theme.primaryColor || '#2563EB';
 
   const nextLabel = useMemo(
     () => (index < total - 1 ? 'Suivant' : "C'est parti !"),
@@ -61,8 +57,7 @@ export default function Onboarding() {
   };
 
   return (
-    <View
-      className={`flex-1 items-center justify-between px-6 pt-20 pb-14 ${dark ? 'bg-zinc-900' : 'bg-white'}`}>
+    <View className={`flex-1 items-center justify-between px-6 pt-20 pb-14 ${classes.page}`}>
       <View className='items-center'>
         <View
           className='mb-5 h-16 w-16 items-center justify-center rounded-full'
@@ -72,8 +67,7 @@ export default function Onboarding() {
         <Text className={`text-center text-2xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
           {steps[index].title}
         </Text>
-        <Text
-          className={`mt-3 text-center text-sm leading-6 ${dark ? 'text-gray-300' : 'text-slate-600'}`}>
+        <Text className={`mt-3 text-center text-sm leading-6 ${classes.body}`}>
           {steps[index].desc}
         </Text>
       </View>
@@ -90,7 +84,7 @@ export default function Onboarding() {
         </View>
         <View className='w-full flex-row items-center justify-between'>
           <TouchableOpacity onPress={onSkip} accessibilityRole='button' accessibilityLabel='Passer'>
-            <Text className={`text-sm ${dark ? 'text-gray-300' : 'text-slate-600'}`}>Passer</Text>
+            <Text className={`text-sm ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>Passer</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={onNext}
@@ -101,6 +95,11 @@ export default function Onboarding() {
             <Text className='font-semibold text-white'>{nextLabel}</Text>
           </TouchableOpacity>
         </View>
+        {index === total - 1 ? (
+          <View className='mt-6 w-full'>
+            <LegalFooterLinks />
+          </View>
+        ) : null}
       </View>
     </View>
   );

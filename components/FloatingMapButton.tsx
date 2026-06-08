@@ -2,15 +2,11 @@ import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useTheme } from '@context/themecontext';
-import { useCity } from '@context/citycontext';
+import { useAppTheme } from '@hooks/useAppTheme';
 
 const FloatingMapButton: React.FC = () => {
-  const { colorScheme } = useTheme();
-  const { config } = useCity();
+  const { dark, primaryColor, colors } = useAppTheme();
   const router = useRouter();
-  const dark = colorScheme === 'dark';
-  const primaryColor = config?.theme.primaryColor || '#0B0080';
 
   return (
     <TouchableOpacity
@@ -19,11 +15,13 @@ const FloatingMapButton: React.FC = () => {
       style={[
         styles.button,
         {
-          backgroundColor: dark ? '#2C2C2E' : '#FFFFFF',
+          backgroundColor: colors.elevated,
+          borderWidth: 1,
+          borderColor: dark ? '#3F3F46' : '#E4E4E7',
           shadowColor: '#000',
         },
-      ]}
-      className='shadow-2xl'>
+        styles.buttonShadow,
+      ]}>
       <Ionicons name='map' size={24} color={primaryColor} />
     </TouchableOpacity>
   );
@@ -44,6 +42,9 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 10,
     zIndex: 50,
+  },
+  buttonShadow: {
+    shadowOpacity: 0.25,
   },
 });
 

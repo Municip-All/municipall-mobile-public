@@ -2,9 +2,9 @@ import React from 'react';
 import { View, Pressable, Text, Platform, Dimensions, StyleSheet } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { useTheme } from '@context/themecontext';
-import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@context/authcontext';
+import { useAppTheme } from '@hooks/useAppTheme';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -15,12 +15,10 @@ const BottomBar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { colorScheme } = useTheme();
-  const { config } = useCity();
+  const { primaryColor, colors, brand } = useAppTheme();
   const { isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
   const dark = colorScheme === 'dark';
-
-  const primaryColor = config?.theme.primaryColor || '#0B0080';
   const tabHeight = 64;
   const totalHeight = tabHeight + insets.bottom;
 
@@ -33,15 +31,19 @@ const BottomBar: React.FC = () => {
     { id: 'profile', label: 'Profile', icon: 'person', path: '/profile' },
   ];
 
+  const inactiveColor = dark ? '#A1A1AA' : '#52525B';
+
   const getIconColor = (path: string) => {
     if (pathname === path) return primaryColor;
-    return dark ? '#9CA3AF' : '#64748B';
+    return inactiveColor;
   };
 
   const getLabelStyle = (path: string) => {
     if (pathname === path) return { color: primaryColor, fontWeight: '700' as const };
-    return { color: dark ? '#9CA3AF' : '#64748B' };
+    return { color: inactiveColor };
   };
+
+  const fabBorderColor = colors.fabBorder;
 
   // SVG Path calculation for the curved tab bar
   const center = SCREEN_WIDTH / 2;
@@ -123,11 +125,16 @@ const BottomBar: React.FC = () => {
       <View style={styles.centerButtonContainer} pointerEvents='box-none'>
         <Pressable
           onPress={() => router.push({ pathname: '/carte', params: { action: 'report' } as any })}
-          style={[styles.centerButton, { backgroundColor: '#1E293B' }]} // Dark navy as in the image
-          className='shadow-xl'>
-          <Ionicons name='paper-plane' size={24} color='#FFFFFF' />
+          style={[
+            styles.centerButton,
+            styles.centerButtonShadow,
+            { backgroundColor: primaryColor, borderColor: fabBorderColor },
+          ]}>
+          <Ionicons name='paper-plane' size={24} color={brand.onPrimary} />
         </Pressable>
-        <Text style={[styles.centerLabel, { color: dark ? '#FFFFFF' : '#1E293B' }]}>Signaler</Text>
+        <Text style={[styles.centerLabel, { color: dark ? '#FFFFFF' : primaryColor }]}>
+          Signaler
+        </Text>
       </View>
     </View>
   );
@@ -174,7 +181,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 4,
-    borderColor: '#F1F5F9', // Light border around the button
+    borderColor: '#F4F4F5',
+  },
+  centerButtonShadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
   },
   centerLabel: {
     fontSize: 11,

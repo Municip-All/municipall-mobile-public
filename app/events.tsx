@@ -1,24 +1,183 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { useTheme } from '@context/themecontext';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
 import BottomBar from '@components/bottombar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { eventsService, CityEvent } from '../services/eventsService';
 
-export default function Events() {
-  const { colorScheme } = useTheme();
-  const { config } = useCity();
-  const dark = colorScheme === 'dark';
-  const insets = useSafeAreaInsets();
-  const [activeFilter, setActiveFilter] = useState('Tous');
+const FILTERS = ['Tous', 'Culture', 'Sport', 'Social', 'Éducation', 'Cérémonie'] as const;
 
-  const primaryColor = config?.theme.primaryColor || '#0B0080';
-  const filters = ['Tous', 'Mairie', 'Associations', 'Sports'];
+function formatEventDateRange(startIso: string, endIso: string): string {
+  const start = new Date(startIso);
+  const end = new Date(endIso);
+  const dateOpts: Intl.DateTimeFormatOptions = {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  };
+  const timeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
+  const sameDay = start.toDateString() === end.toDateString();
+  if (sameDay) {
+    return `${start.toLocaleDateString('fr-FR', dateOpts)} • ${start.toLocaleTimeString('fr-FR', timeOpts)}`;
+  }
+  return `${start.toLocaleDateString('fr-FR', dateOpts)} → ${end.toLocaleDateString('fr-FR', dateOpts)}`;
+}
+
+function categoryIcon(category: string): keyof typeof Ionicons.glyphMap {
+  switch (category) {
+    case 'Sport':
+      return 'basketball';
+    case 'Social':
+      return 'people';
+    case 'Éducation':
+      return 'school';
+    case 'Cérémonie':
+      return 'business';
+    case 'Culture':
+    default:
+      return 'color-palette';
+  }
+}
+
+function categoryAccent(category: string, fallback: string): string {
+  switch (category) {
+    case 'Sport':
+      return '#FF9500';
+    case 'Social':
+      return '#34C759';
+    case 'Éducation':
+      return '#5856D6';
+    case 'Cérémonie':
+      return '#007AFF';
+    case 'Culture':
+    default:
+      return fallback;
+  }
+}
+
+function EventCard({
+  event,
+  dark,
+  primaryColor,
+}: {
+  event: CityEvent;
+  dark: boolean;
+  primaryColor: string;
+}) {
+  const accent = categoryAccent(event.category, primaryColor);
 
   return (
-    <View className={`flex-1 ${dark ? 'bg-black' : 'bg-[#F2F2F7]'}`}>
+    <View
+      className={`mb-4 overflow-hidden rounded-[28px] border shadow-sm ${
+        dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
+      }`}>
+      {event.imageUrl ? (
+        <Image source={{ uri: event.imageUrl }} className='h-40 w-full' resizeMode='cover' />
+      ) : null}
+      <View className='p-6'>
+        <View className='mb-4 flex-row items-center'>
+          <View
+            className='mr-4 h-12 w-12 items-center justify-center rounded-2xl'
+            style={{ backgroundColor: `${accent}22` }}>
+            <Ionicons name={categoryIcon(event.category)} size={24} color={accent} />
+          </View>
+          <View className='flex-1'>
+            <Text className={`text-xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
+              {event.title}
+            </Text>
+            <Text className={`text-sm font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+              {event.category}
+            </Text>
+          </View>
+        </View>
+
+        {event.description ? (
+          <Text
+            className={`mb-4 text-sm leading-5 ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}
+            numberOfLines={3}>
+            {event.description}
+          </Text>
+        ) : null}
+
+        <View className='mb-2 space-y-2'>
+          <View className='flex-row items-center'>
+            <Ionicons
+              name='calendar-clear-outline'
+              size={16}
+              color={dark ? '#71717A' : '#A1A1AA'}
+            />
+            <Text
+              className={`ml-2 text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              {formatEventDateRange(event.startDate, event.endDate)}
+            </Text>
+          </View>
+          <View className='flex-row items-center'>
+            <Ionicons name='location-outline' size={16} color={dark ? '#71717A' : '#A1A1AA'} />
+            <Text
+              className={`ml-2 flex-1 text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}
+              numberOfLines={2}>
+              {event.location}
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+export default function Events() {
+  const { dark, primaryColor, classes } = useAppTheme();
+  const { config, refreshConfig } = useCity();
+  const insets = useSafeAreaInsets();
+  const [activeFilter, setActiveFilter] = useState<(typeof FILTERS)[number]>('Tous');
+  const [events, setEvents] = useState<CityEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const agendaEnabled = config?.features?.includes('agenda') ?? false;
+
+  const loadEvents = useCallback(async () => {
+    if (!agendaEnabled) {
+      setEvents([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await eventsService.getEvents();
+      const now = Date.now();
+      const upcoming = data
+        .filter((e) => new Date(e.endDate).getTime() >= now)
+        .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+      setEvents(upcoming);
+    } catch (e) {
+      console.error(e);
+      setError('Impossible de charger les événements.');
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [agendaEnabled]);
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshConfig();
+      loadEvents();
+    }, [loadEvents, refreshConfig])
+  );
+
+  const filteredEvents = useMemo(() => {
+    if (activeFilter === 'Tous') return events;
+    return events.filter((e) => e.category === activeFilter);
+  }, [events, activeFilter]);
+
+  return (
+    <View className={`flex-1 ${classes.page}`}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 20,
@@ -26,179 +185,91 @@ export default function Events() {
           paddingHorizontal: 20,
         }}
         showsVerticalScrollIndicator={false}>
-        {/* Apple Style Header */}
         <View className='mb-6'>
-          <Text
-            className={`text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-            Agenda
-          </Text>
+          <Text className={classes.eyebrow}>Agenda</Text>
           <Text
             className={`text-4xl font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
             Événements
           </Text>
+          {config?.name ? (
+            <Text className={`mt-1 text-sm ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              {config.name}
+            </Text>
+          ) : null}
         </View>
 
-        {/* Filters Grid Style */}
-        <View className='mb-8 flex-row flex-wrap'>
-          {filters.map((filter) => {
-            const isActive = filter === activeFilter;
-            return (
-              <TouchableOpacity
-                key={filter}
-                onPress={() => setActiveFilter(filter)}
-                className={`mr-2 mb-2 rounded-full border px-6 py-2.5 ${
-                  isActive
-                    ? 'border-transparent'
-                    : dark
-                      ? 'border-zinc-800 bg-zinc-900'
-                      : 'border-zinc-200 bg-white'
-                }`}
-                style={isActive ? { backgroundColor: primaryColor } : {}}>
+        {!agendaEnabled ? (
+          <View
+            className={`rounded-[28px] border p-8 ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-white'}`}>
+            <Ionicons name='calendar-outline' size={40} color={primaryColor} />
+            <Text className={`mt-4 text-lg font-bold ${dark ? 'text-white' : 'text-black'}`}>
+              Agenda non activé
+            </Text>
+            <Text className={`mt-2 text-sm leading-5 ${classes.body}`}>
+              Votre mairie peut activer l&apos;agenda culturel depuis le backoffice (Services GPS →
+              Agenda culturel).
+            </Text>
+          </View>
+        ) : (
+          <>
+            <View className='mb-8 flex-row flex-wrap'>
+              {FILTERS.map((filter) => {
+                const isActive = filter === activeFilter;
+                return (
+                  <TouchableOpacity
+                    key={filter}
+                    onPress={() => setActiveFilter(filter)}
+                    className={`mr-2 mb-2 rounded-full border px-5 py-2.5 ${
+                      isActive
+                        ? 'border-transparent'
+                        : dark
+                          ? 'border-zinc-800 bg-zinc-900'
+                          : 'border-zinc-200 bg-white'
+                    }`}
+                    style={isActive ? { backgroundColor: primaryColor } : {}}>
+                    <Text
+                      className={`text-sm font-bold ${
+                        isActive ? 'text-white' : dark ? 'text-zinc-400' : 'text-zinc-500'
+                      }`}>
+                      {filter}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {loading ? (
+              <View className='items-center py-16'>
+                <ActivityIndicator color={primaryColor} />
+              </View>
+            ) : error ? (
+              <View
+                className={`rounded-[28px] border p-6 ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-white'}`}>
+                <Text className={classes.body}>{error}</Text>
+                <TouchableOpacity onPress={loadEvents} className='mt-4'>
+                  <Text style={{ color: primaryColor }} className='font-bold'>
+                    Réessayer
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : filteredEvents.length === 0 ? (
+              <View
+                className={`items-center rounded-[28px] border p-8 ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-white'}`}>
+                <Ionicons name='calendar-outline' size={36} color={dark ? '#52525B' : '#A1A1AA'} />
                 <Text
-                  className={`text-sm font-bold ${
-                    isActive ? 'text-white' : dark ? 'text-zinc-400' : 'text-zinc-500'
-                  }`}>
-                  {filter}
+                  className={`mt-4 text-center text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  {activeFilter === 'Tous'
+                    ? 'Aucun événement à venir pour le moment.'
+                    : `Aucun événement dans la catégorie « ${activeFilter} ».`}
                 </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        {/* Events Feed */}
-        <View className='space-y-4'>
-          {/* Card 1 */}
-          <TouchableOpacity
-            className={`overflow-hidden rounded-[28px] ${dark ? 'bg-zinc-900' : 'bg-white'} mb-4 border border-zinc-100 shadow-sm dark:border-zinc-800`}>
-            <View className='p-6'>
-              <View className='mb-4 flex-row items-center'>
-                <View
-                  className='mr-4 h-12 w-12 items-center justify-center rounded-2xl'
-                  style={{ backgroundColor: `${primaryColor}15` }}>
-                  <Ionicons name='business' size={24} color={primaryColor} />
-                </View>
-                <View className='flex-1'>
-                  <Text className={`text-xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
-                    Conseil Municipal
-                  </Text>
-                  <Text
-                    className={`text-sm font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                    Mairie de {config?.name || 'la Ville'}
-                  </Text>
-                </View>
               </View>
-
-              <View className='mb-6 space-y-2'>
-                <View className='flex-row items-center'>
-                  <Ionicons
-                    name='calendar-clear-outline'
-                    size={16}
-                    color={dark ? '#71717A' : '#A1A1AA'}
-                  />
-                  <Text
-                    className={`ml-2 text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                    Jeu. 25 avril • 18:30
-                  </Text>
-                </View>
-                <View className='flex-row items-center'>
-                  <Ionicons
-                    name='location-outline'
-                    size={16}
-                    color={dark ? '#71717A' : '#A1A1AA'}
-                  />
-                  <Text
-                    className={`ml-2 text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                    Salle du Conseil
-                  </Text>
-                </View>
-              </View>
-
-              <View className='flex-row items-center justify-between border-t border-zinc-100 pt-4 dark:border-zinc-800'>
-                <View className='flex-row -space-x-2'>
-                  {[1, 2, 3].map((i) => (
-                    <View
-                      key={i}
-                      className='h-6 w-6 rounded-full border-2 border-white bg-zinc-200 dark:border-zinc-900 dark:bg-zinc-700'
-                    />
-                  ))}
-                  <Text className='ml-4 text-xs font-bold text-zinc-400'>+ 42</Text>
-                </View>
-                <TouchableOpacity
-                  className='rounded-full px-4 py-2'
-                  style={{ backgroundColor: `${primaryColor}15` }}>
-                  <Text className='text-xs font-bold' style={{ color: primaryColor }}>
-                    Participer
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </TouchableOpacity>
-
-          {/* Card 2 */}
-          <TouchableOpacity
-            className={`overflow-hidden rounded-[28px] ${dark ? 'bg-zinc-900' : 'bg-white'} mb-4 border border-zinc-100 shadow-sm dark:border-zinc-800`}>
-            <View className='p-6'>
-              <View className='mb-4 flex-row items-center'>
-                <View className='mr-4 h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 dark:bg-orange-900/20'>
-                  <Ionicons name='basket' size={24} color='#FF9500' />
-                </View>
-                <View className='flex-1'>
-                  <Text className={`text-xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
-                    Marché Local
-                  </Text>
-                  <Text
-                    className={`text-sm font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                    Association des Commerçants
-                  </Text>
-                </View>
-              </View>
-
-              <View className='mb-6 space-y-2'>
-                <View className='flex-row items-center'>
-                  <Ionicons
-                    name='calendar-clear-outline'
-                    size={16}
-                    color={dark ? '#71717A' : '#A1A1AA'}
-                  />
-                  <Text
-                    className={`ml-2 text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                    Sam. 27 avril • 08:00
-                  </Text>
-                </View>
-                <View className='flex-row items-center'>
-                  <Ionicons
-                    name='location-outline'
-                    size={16}
-                    color={dark ? '#71717A' : '#A1A1AA'}
-                  />
-                  <Text
-                    className={`ml-2 text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                    Place de la Mairie
-                  </Text>
-                </View>
-              </View>
-
-              <View className='flex-row items-center justify-between border-t border-zinc-100 pt-4 dark:border-zinc-800'>
-                <View className='flex-row -space-x-2'>
-                  {[1, 2].map((i) => (
-                    <View
-                      key={i}
-                      className='h-6 w-6 rounded-full border-2 border-white bg-zinc-200 dark:border-zinc-900 dark:bg-zinc-700'
-                    />
-                  ))}
-                  <Text className='ml-4 text-xs font-bold text-zinc-400'>+ 120</Text>
-                </View>
-                <TouchableOpacity
-                  className='rounded-full px-4 py-2'
-                  style={{ backgroundColor: `${primaryColor}15` }}>
-                  <Text className='text-xs font-bold' style={{ color: primaryColor }}>
-                    Participer
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </View>
+            ) : (
+              filteredEvents.map((event) => (
+                <EventCard key={event.id} event={event} dark={dark} primaryColor={primaryColor} />
+              ))
+            )}
+          </>
+        )}
       </ScrollView>
       <FloatingMapButton />
       <BottomBar />

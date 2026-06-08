@@ -1,7 +1,12 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiClient from '../services/apiClient';
+import { resolveAvatarForUser } from '../utils/avatarImage';
 
+function userForStorage(user: User): User {
+  const { avatar_url: _avatar, ...rest } = user;
+  return rest;
+}
 export interface User {
   id: number;
   email: string;
@@ -9,6 +14,9 @@ export interface User {
   surname: string;
   role: string;
   avatar_url?: string;
+  cityId?: string;
+  neighborhood?: string;
+  points?: number;
 }
 
 type AuthContextType = {
@@ -28,9 +36,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const login = useCallback(async (token: string, userData: User) => {
+    const resolved = await resolveAvatarForUser(userData);
     await AsyncStorage.setItem('user_token', token);
-    await AsyncStorage.setItem('user_data', JSON.stringify(userData));
-    setUser(userData);
+    await AsyncStorage.setItem('user_data', JSON.stringify(userForStorage(resolved)));
+    setUser(resolved);
     setIsAuthenticated(true);
   }, []);
 
@@ -45,7 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser((currentUser) => {
       if (currentUser) {
         const newUser = { ...currentUser, ...userData };
-        AsyncStorage.setItem('user_data', JSON.stringify(newUser));
+        AsyncStorage.setItem('user_data', JSON.stringify(userForStorage(newUser)));
         return newUser;
       }
       return currentUser;
@@ -66,9 +75,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           try {
             const response = await apiClient.get('auth/me');
             if (response.data) {
-              const freshUser = response.data;
+              const freshUser = await resolveAvatarForUser(response.data as User);
               setUser(freshUser);
-              await AsyncStorage.setItem('user_data', JSON.stringify(freshUser));
+              await AsyncStorage.setItem('user_data', JSON.stringify(userForStorage(freshUser)));
             }
           } catch (e) {
             console.warn('Failed to refresh user profile from server', e);

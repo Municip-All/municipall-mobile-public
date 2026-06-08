@@ -5,10 +5,13 @@ import { useTheme } from '@context/themecontext';
 export interface MapComponentMethods {
   centerOnUserLocation: () => void;
   goToNearestCompost: () => Promise<void> | void;
+  zoomIn: () => void;
+  zoomOut: () => void;
 }
 
 const MapComponent = forwardRef<MapComponentMethods, object>((_props, ref) => {
-  const { theme } = useTheme();
+  const { colorScheme } = useTheme();
+  const dark = colorScheme === 'dark';
 
   useImperativeHandle(ref, () => ({
     centerOnUserLocation: () => {
@@ -17,12 +20,17 @@ const MapComponent = forwardRef<MapComponentMethods, object>((_props, ref) => {
     goToNearestCompost: async () => {
       console.info('[MapComponent.web] goToNearestCompost() noop');
     },
+    zoomIn: () => {
+      console.info('[MapComponent.web] zoomIn() noop');
+    },
+    zoomOut: () => {
+      console.info('[MapComponent.web] zoomOut() noop');
+    },
   }));
 
   return (
-    <View
-      className={`flex-1 items-center justify-center ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
-      <Text className={`${theme === 'dark' ? 'text-white' : 'text-black'} px-6 text-center`}>
+    <View className={`flex-1 items-center justify-center ${dark ? 'bg-black' : 'bg-white'}`}>
+      <Text className={`${dark ? 'text-white' : 'text-black'} px-6 text-center`}>
         {
           "La carte native n'est pas disponible sur le web pour l'instant.\nOuvre l'application mobile pour la carte interactive."
         }
