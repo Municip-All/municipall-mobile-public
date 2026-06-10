@@ -15,6 +15,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useAuth } from '@context/authcontext';
 import { contactService, ContactTicketDetail } from '../services/contactService';
+import { isTerminalContactStatus } from '../lib/contactTicketStatus';
+import SatisfactionPrompt from '@components/SatisfactionPrompt';
 import { useLiveChatRefresh } from '@hooks/useLiveChatRefresh';
 import { chatBubbleStyles as styles } from '../lib/chatBubbleStyles';
 
@@ -32,7 +34,9 @@ export default function ContactChatScreen() {
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
-  const isClosed = ticket?.status === 'Clôturé';
+  const isClosed = ticket
+    ? isTerminalContactStatus(ticket.ticketType ?? 'question', ticket.status)
+    : false;
 
   const loadTicket = useCallback(
     async (options?: { silent?: boolean }) => {
@@ -124,8 +128,9 @@ export default function ContactChatScreen() {
               {ticket.subject}
             </Text>
             <Text className={`text-xs ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              {ticket.ticketType === 'suggestion' ? 'Suggestion · ' : 'Question · '}
               {ticket.status}
-              {isClosed ? ' · Conversation terminée' : ''}
+              {isClosed ? ' · Archivée' : ''}
             </Text>
           </View>
         </View>
@@ -214,11 +219,28 @@ export default function ContactChatScreen() {
             </View>
           </View>
         ) : (
-          <View className={`border-t px-4 py-4 ${dark ? 'border-zinc-800' : 'border-zinc-200'}`}>
-            <Text className={`text-center text-sm ${classes.body}`}>
-              Cette conversation est clôturée par la mairie.
-            </Text>
-          </View>
+          <>
+            <SatisfactionPrompt
+              resourceType='contact_ticket'
+              resourceId={ticketId}
+              initialRating={ticket?.userRating}
+              title={
+                ticket?.ticketType === 'suggestion'
+                  ? 'Comment évaluez-vous le suivi de votre suggestion ?'
+                  : "Comment s'est passé votre échange avec la mairie ?"
+              }
+              onSubmitted={(rating) =>
+                setTicket((prev) => (prev ? { ...prev, userRating: rating } : prev))
+              }
+            />
+            <View
+              style={{ paddingBottom: insets.bottom + 8 }}
+              className={`px-4 pb-2 ${dark ? 'bg-black' : 'bg-white'}`}>
+              <Text className={`text-center text-xs ${classes.body}`}>
+                Cette conversation est terminée. Vous ne pouvez plus envoyer de messages.
+              </Text>
+            </View>
+          </>
         )}
       </KeyboardAvoidingView>
     </View>

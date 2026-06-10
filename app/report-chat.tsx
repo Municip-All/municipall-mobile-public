@@ -17,6 +17,7 @@ import { useAuth } from '@context/authcontext';
 import { reportService, ReportDetail } from '../services/reportService';
 import { useLiveChatRefresh } from '@hooks/useLiveChatRefresh';
 import { chatBubbleStyles as styles } from '../lib/chatBubbleStyles';
+import SatisfactionPrompt from '@components/SatisfactionPrompt';
 
 export default function ReportChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -233,11 +234,24 @@ export default function ReportChatScreen() {
             </View>
           </View>
         ) : (
-          <View className={`border-t px-4 py-4 ${dark ? 'border-zinc-800' : 'border-zinc-200'}`}>
-            <Text className={`text-center text-sm ${classes.body}`}>
-              Ce signalement est clôturé. Vous ne pouvez plus envoyer de messages.
-            </Text>
-          </View>
+          <>
+            <SatisfactionPrompt
+              resourceType='report'
+              resourceId={reportId}
+              initialRating={report?.userRating}
+              title="Comment s'est passé le traitement de votre signalement ?"
+              onSubmitted={(rating) =>
+                setReport((prev) => (prev ? { ...prev, userRating: rating } : prev))
+              }
+            />
+            <View
+              style={{ paddingBottom: insets.bottom + 8 }}
+              className={`px-4 pb-2 ${dark ? 'bg-black' : 'bg-white'}`}>
+              <Text className={`text-center text-xs ${classes.body}`}>
+                Ce signalement est clôturé. Vous ne pouvez plus envoyer de messages.
+              </Text>
+            </View>
+          </>
         )}
       </KeyboardAvoidingView>
     </View>

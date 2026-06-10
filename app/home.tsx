@@ -83,7 +83,7 @@ export default function Home() {
             </Text>
             <Text className={classes.title}>{appDisplayName}</Text>
           </View>
-          <TouchableOpacity onPress={() => router.push('/profile')} activeOpacity={0.85}>
+          <TouchableOpacity onPress={() => router.push('/ma-commune')} activeOpacity={0.85}>
             <BrandedLogo size={48} radius={24} mode='contain' />
           </TouchableOpacity>
         </View>
@@ -144,7 +144,7 @@ export default function Home() {
             ...(transportEnabled
               ? [{ label: 'Transports', icon: 'bus', color: '#007AFF', path: '/transport' }]
               : []),
-            { label: 'Social', icon: 'heart', color: '#AF52DE', path: '/contact' },
+            { label: 'Social', icon: 'heart', color: '#AF52DE', path: '/social' },
           ].map((item, i) => (
             <TouchableOpacity
               key={i}

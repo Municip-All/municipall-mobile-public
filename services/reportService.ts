@@ -27,9 +27,16 @@ export interface Report {
   };
 }
 
+export interface UserRating {
+  stars: number;
+  message?: string;
+  createdAt: string;
+}
+
 export interface ReportDetail extends Report {
   id: number;
   messages: ReportMessage[];
+  userRating?: UserRating;
 }
 
 function mapReport(r: Record<string, unknown>): Report {
@@ -62,7 +69,11 @@ export const reportService = {
     const data = response.data as Record<string, unknown>;
     const base = mapReport(data);
     const messages = Array.isArray(data.messages) ? (data.messages as ReportMessage[]) : [];
-    return { ...base, id: Number(data.id), messages };
+    const userRating =
+      data.userRating && typeof data.userRating === 'object'
+        ? (data.userRating as UserRating)
+        : undefined;
+    return { ...base, id: Number(data.id), messages, userRating };
   },
 
   reply: async (id: number, body: string): Promise<ReportDetail> => {
@@ -70,7 +81,11 @@ export const reportService = {
     const data = response.data as Record<string, unknown>;
     const base = mapReport(data);
     const messages = Array.isArray(data.messages) ? (data.messages as ReportMessage[]) : [];
-    return { ...base, id: Number(data.id), messages };
+    const userRating =
+      data.userRating && typeof data.userRating === 'object'
+        ? (data.userRating as UserRating)
+        : undefined;
+    return { ...base, id: Number(data.id), messages, userRating };
   },
 
   createReport: async (reportData: Partial<Report> & { userId?: number }): Promise<Report> => {
