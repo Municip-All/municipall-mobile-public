@@ -16,6 +16,8 @@ export interface CityConfig {
   theme: {
     primaryColor: string;
     secondaryColor?: string;
+    backgroundColorLight?: string;
+    backgroundColorDark?: string;
     useGradient: boolean;
     logoUrl: string;
   };
@@ -28,6 +30,8 @@ export interface CityConfig {
       time: string;
     }[];
   };
+  isTransportFeatureAllowed?: boolean;
+  isTransportFeatureEnabled?: boolean;
 }
 
 export const cityService = {
@@ -43,7 +47,9 @@ export const cityService = {
     return response.data;
   },
 
-  getAllCities: async (): Promise<{ id: string; name: string; logoUrl?: string }[]> => {
+  getAllCities: async (): Promise<
+    { id: string; name: string; officialName?: string; logoUrl?: string }[]
+  > => {
     const response = await apiClient.get(`city-config`);
     return response.data;
   },

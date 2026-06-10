@@ -18,7 +18,7 @@ import ProfileScreenHeader from '@components/ProfileScreenHeader';
 import { updateUserProfile } from '../services/userProfileService';
 
 export default function ProfilePersonalInfoScreen() {
-  const { dark, classes, primaryColor } = useAppTheme();
+  const { dark, classes, primaryColor, layoutStyles } = useAppTheme();
   const { user, updateUser, isAuthenticated } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -72,7 +72,7 @@ export default function ProfilePersonalInfoScreen() {
 
   return (
     <KeyboardAvoidingView
-      className={`flex-1 ${classes.page}`}
+      style={layoutStyles.page}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ProfileScreenHeader title='Informations personnelles' />
       <ScrollView

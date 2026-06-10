@@ -36,7 +36,7 @@ const OPTIONS: { key: keyof NotificationPreferences; label: string; description:
 ];
 
 export default function ProfileNotificationsScreen() {
-  const { dark, classes, primaryColor } = useAppTheme();
+  const { dark, classes, primaryColor, layoutStyles } = useAppTheme();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -66,7 +66,7 @@ export default function ProfileNotificationsScreen() {
 
   if (!prefs && loading) {
     return (
-      <View className={`flex-1 items-center justify-center ${classes.page}`}>
+      <View style={layoutStyles.page} className='items-center justify-center'>
         <ActivityIndicator color={primaryColor} />
       </View>
     );
@@ -77,7 +77,7 @@ export default function ProfileNotificationsScreen() {
   const pushAvailable = isPushSupportedEnvironment();
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <ProfileScreenHeader title='Notifications' />
       <ScrollView
         contentContainerStyle={{

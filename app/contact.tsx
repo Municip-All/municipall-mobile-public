@@ -22,7 +22,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { contactService, ContactTicketListItem } from '../services/contactService';
 
 const ContactScreen: React.FC = () => {
-  const { dark, primaryColor, classes, colors } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
   const { config } = useCity();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
@@ -130,7 +130,7 @@ const ContactScreen: React.FC = () => {
   const closedTickets = tickets.filter((t) => t.status === 'Clôturé');
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className='flex-1'

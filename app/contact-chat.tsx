@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,13 +15,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useAuth } from '@context/authcontext';
 import { contactService, ContactTicketDetail } from '../services/contactService';
+import { useLiveChatRefresh } from '@hooks/useLiveChatRefresh';
+import { chatBubbleStyles as styles } from '../lib/chatBubbleStyles';
 
 export default function ContactChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const ticketId = Number(id);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { dark, primaryColor, classes, colors } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
   const { user } = useAuth();
 
   const [ticket, setTicket] = useState<ContactTicketDetail | null>(null);
@@ -33,21 +34,39 @@ export default function ContactChatScreen() {
 
   const isClosed = ticket?.status === 'Clôturé';
 
-  const loadTicket = useCallback(async () => {
-    if (!ticketId || Number.isNaN(ticketId)) return;
-    try {
-      const data = await contactService.getTicket(ticketId);
-      setTicket(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }, [ticketId]);
+  const loadTicket = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!ticketId || Number.isNaN(ticketId)) return;
+      const silent = options?.silent ?? false;
+      try {
+        const data = await contactService.getTicket(ticketId);
+        setTicket((prev) => {
+          if (!prev) return data;
+          const prevLastId = prev.messages[prev.messages.length - 1]?.id;
+          const nextLastId = data.messages[data.messages.length - 1]?.id;
+          if (
+            prev.messages.length === data.messages.length &&
+            prevLastId === nextLastId &&
+            prev.status === data.status
+          ) {
+            return prev;
+          }
+          return data;
+        });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [ticketId]
+  );
 
   useEffect(() => {
-    loadTicket();
+    void loadTicket();
   }, [loadTicket]);
+
+  useLiveChatRefresh(() => loadTicket({ silent: true }), Boolean(ticket) && !isClosed);
 
   useEffect(() => {
     if (ticket?.messages.length) {
@@ -72,7 +91,7 @@ export default function ContactChatScreen() {
 
   if (loading) {
     return (
-      <View className={`flex-1 items-center justify-center ${classes.page}`}>
+      <View style={layoutStyles.page} className='items-center justify-center'>
         <ActivityIndicator color={primaryColor} />
       </View>
     );
@@ -80,7 +99,7 @@ export default function ContactChatScreen() {
 
   if (!ticket) {
     return (
-      <View className={`flex-1 items-center justify-center px-6 ${classes.page}`}>
+      <View style={layoutStyles.page} className='items-center justify-center px-6'>
         <Text className={classes.body}>Conversation introuvable.</Text>
         <TouchableOpacity onPress={() => router.back()} className='mt-4'>
           <Text style={{ color: primaryColor }}>Retour</Text>
@@ -90,7 +109,7 @@ export default function ContactChatScreen() {
   }
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <View
         style={{ paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: 12 }}
         className={`border-b ${dark ? 'border-zinc-800' : 'border-zinc-200'}`}>
@@ -118,7 +137,7 @@ export default function ContactChatScreen() {
         keyboardVerticalOffset={0}>
         <ScrollView
           ref={scrollRef}
-          className='flex-1 px-4'
+          className='flex-1'
           contentContainerStyle={styles.scrollContent}
           onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}>
           {ticket.messages.map((msg) => {
@@ -205,74 +224,3 @@ export default function ContactChatScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingVertical: 16,
-    paddingBottom: 24,
-    flexGrow: 1,
-  },
-  messageRow: {
-    width: '100%',
-    marginBottom: 12,
-  },
-  messageCol: {
-    maxWidth: '85%',
-  },
-  messageColMine: {
-    alignSelf: 'flex-end',
-    alignItems: 'flex-end',
-  },
-  messageColOther: {
-    alignSelf: 'flex-start',
-    alignItems: 'flex-start',
-  },
-  senderLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  senderLabelLight: {
-    color: '#a1a1aa',
-  },
-  senderLabelDark: {
-    color: '#71717a',
-  },
-  senderLabelMine: {
-    textAlign: 'right',
-  },
-  bubble: {
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  bubbleAgentLight: {
-    backgroundColor: '#e4e4e7',
-  },
-  bubbleAgentDark: {
-    backgroundColor: '#27272a',
-  },
-  bubbleOtherLight: {
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#e4e4e7',
-  },
-  bubbleOtherDark: {
-    backgroundColor: '#18181b',
-    borderWidth: 1,
-    borderColor: '#3f3f46',
-  },
-  bubbleText: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  bubbleTextMine: {
-    color: '#ffffff',
-  },
-  bubbleTextLight: {
-    color: '#27272a',
-  },
-  bubbleTextDark: {
-    color: '#e4e4e7',
-  },
-});
