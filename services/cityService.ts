@@ -6,6 +6,29 @@ export interface CityContactConfig {
   helpText?: string;
 }
 
+export type AssociationCategory = 'association' | 'groupe-parole' | 'autre';
+
+export interface CityAssociation {
+  id: string;
+  name: string;
+  category: AssociationCategory;
+  description?: string;
+  address?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  website?: string;
+}
+
+export interface CityPublicProfile {
+  mayorName?: string;
+  mayorTitle?: string;
+  welcomeText?: string;
+  description?: string;
+  address?: string;
+  website?: string;
+  openingHours?: string;
+}
+
 export interface CityConfig {
   id?: string;
   name: string;
@@ -16,6 +39,8 @@ export interface CityConfig {
   theme: {
     primaryColor: string;
     secondaryColor?: string;
+    backgroundColorLight?: string;
+    backgroundColorDark?: string;
     useGradient: boolean;
     logoUrl: string;
   };
@@ -28,6 +53,10 @@ export interface CityConfig {
       time: string;
     }[];
   };
+  associations?: CityAssociation[];
+  publicProfile?: CityPublicProfile;
+  isTransportFeatureAllowed?: boolean;
+  isTransportFeatureEnabled?: boolean;
 }
 
 export const cityService = {
@@ -43,7 +72,9 @@ export const cityService = {
     return response.data;
   },
 
-  getAllCities: async (): Promise<{ id: string; name: string; logoUrl?: string }[]> => {
+  getAllCities: async (): Promise<
+    { id: string; name: string; officialName?: string; logoUrl?: string }[]
+  > => {
     const response = await apiClient.get(`city-config`);
     return response.data;
   },

@@ -1,11 +1,36 @@
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import * as Location from 'expo-location';
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import MapView, { Circle } from 'react-native-maps';
+import MapPinMarker from '@components/MapPinMarker';
 import { useTheme } from '@context/themecontext';
 import { useCity } from '@context/citycontext';
+import { useAuth } from '@context/authcontext';
 import { reportService, Report } from '../services/reportService';
+import {
+  transportService,
+  TRANSPORT_SEARCH_RADIUS_M,
+  type TransportStopMarker,
+} from '../services/transportService';
+import {
+  groupReportsByLocation,
+  dominantReportStatusDot,
+  type ReportLocationGroup,
+} from '../lib/groupReportsByLocation';
+import { distanceMeters } from '../lib/geoDistance';
+
+const TRANSPORT_REFETCH_DEBOUNCE_MS = 1200;
+/** Ne relance l'API que si le centre carte a bougé d'au moins cette distance. */
+const TRANSPORT_REFETCH_MIN_MOVE_M = 600;
 
 export interface MapComponentMethods {
   centerOnUserLocation: () => void;
@@ -29,21 +54,44 @@ interface MapComponentProps {
   showComposts?: boolean;
   showToilets?: boolean;
   showReports?: boolean;
+  showTransports?: boolean;
+  onReportGroupPress?: (group: ReportLocationGroup) => void;
+  onTransportStopPress?: (stop: TransportStopMarker) => void;
 }
 
 const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, ref) => {
-  const { showComposts = true, showToilets = true, showReports = true } = props || {};
+  const {
+    showComposts = true,
+    showToilets = true,
+    showReports = true,
+    showTransports = false,
+    onReportGroupPress,
+    onTransportStopPress,
+  } = props || {};
   const { colorScheme } = useTheme();
   const dark = colorScheme === 'dark';
-  const { config } = useCity();
+  const { config, tenantId } = useCity();
+  const { isAuthenticated } = useAuth();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [compostMarkers, setCompostMarkers] = useState<Compost[]>([]);
   const [toiletsMarkers, setToiletsMarkers] = useState<Toilet[]>([]);
   const [citizenReports, setCitizenReports] = useState<Report[]>([]);
+  const [transportMarkers, setTransportMarkers] = useState<TransportStopMarker[]>([]);
+  const [transportZoneCenter, setTransportZoneCenter] = useState<{
+    lat: number;
+    lon: number;
+  } | null>(null);
   const mapRef = useRef<MapView>(null);
   const regionRef = useRef<Region | null>(null);
+  const transportFetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transportAbortRef = useRef<AbortController | null>(null);
+  const transportRequestIdRef = useRef(0);
+  const lastTransportFetchCenterRef = useRef<{ lat: number; lon: number } | null>(null);
+  const transportLoadingRef = useRef(false);
 
   const primaryColor = config?.theme.primaryColor || '#2563EB';
+  const transportEnabled =
+    (config?.isTransportFeatureAllowed && config?.isTransportFeatureEnabled) ?? false;
 
   const ZOOM_FACTOR = 0.5;
   const MIN_DELTA = 0.002;
@@ -158,6 +206,10 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
 
         const userLocation = await Location.getCurrentPositionAsync({});
         setLocation(userLocation);
+        setTransportZoneCenter({
+          lat: userLocation.coords.latitude,
+          lon: userLocation.coords.longitude,
+        });
         regionRef.current = {
           latitude: userLocation.coords.latitude,
           longitude: userLocation.coords.longitude,
@@ -165,7 +217,7 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
           longitudeDelta: 0.05,
         };
 
-        await Promise.all([fetchCompostMarkers(), fetchToiletsMarkers(), fetchCitizenReports()]);
+        await Promise.all([fetchCompostMarkers(), fetchToiletsMarkers()]);
       } catch (error) {
         console.error('Error during data initialization', error);
       }
@@ -174,18 +226,111 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
     initializeData();
   }, []);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'En attente':
-        return '#f97316'; // orange
-      case 'En cours':
-        return '#3b82f6'; // blue
-      case 'Résolu':
-        return '#22c55e'; // green
-      default:
-        return '#9ca3af';
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCitizenReports([]);
+      return;
     }
-  };
+    void fetchCitizenReports();
+  }, [isAuthenticated]);
+
+  const abortTransportFetch = useCallback(() => {
+    transportAbortRef.current?.abort();
+    transportAbortRef.current = null;
+  }, []);
+
+  const loadTransportMarkers = useCallback(
+    async (center: { lat: number; lon: number }, force = false) => {
+      if (!showTransports || !transportEnabled || !tenantId) return;
+
+      const last = lastTransportFetchCenterRef.current;
+      if (
+        !force &&
+        last &&
+        distanceMeters(last.lat, last.lon, center.lat, center.lon) < TRANSPORT_REFETCH_MIN_MOVE_M
+      ) {
+        return;
+      }
+
+      if (transportLoadingRef.current && !force) return;
+
+      abortTransportFetch();
+      const controller = new AbortController();
+      transportAbortRef.current = controller;
+      const requestId = ++transportRequestIdRef.current;
+      transportLoadingRef.current = true;
+
+      try {
+        const data = await transportService.getDisruptions(tenantId, center.lat, center.lon, {
+          signal: controller.signal,
+        });
+        if (requestId !== transportRequestIdRef.current) return;
+
+        lastTransportFetchCenterRef.current = center;
+        setTransportZoneCenter(center);
+        setTransportMarkers(data.stops ?? []);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        if (isAxiosError(error) && error.code === 'ERR_CANCELED') return;
+        console.error('Failed to fetch transport markers', error);
+      } finally {
+        if (requestId === transportRequestIdRef.current) {
+          transportLoadingRef.current = false;
+        }
+      }
+    },
+    [abortTransportFetch, showTransports, tenantId, transportEnabled]
+  );
+
+  useEffect(() => {
+    if (!showTransports || !transportEnabled || !tenantId) {
+      abortTransportFetch();
+      lastTransportFetchCenterRef.current = null;
+      setTransportMarkers([]);
+      setTransportZoneCenter(null);
+      return;
+    }
+
+    const center = regionRef.current
+      ? { lat: regionRef.current.latitude, lon: regionRef.current.longitude }
+      : location
+        ? { lat: location.coords.latitude, lon: location.coords.longitude }
+        : null;
+
+    if (center) {
+      void loadTransportMarkers(center, true);
+    }
+  }, [
+    showTransports,
+    transportEnabled,
+    tenantId,
+    location,
+    loadTransportMarkers,
+    abortTransportFetch,
+  ]);
+
+  useEffect(
+    () => () => {
+      if (transportFetchTimerRef.current) clearTimeout(transportFetchTimerRef.current);
+      abortTransportFetch();
+    },
+    [abortTransportFetch]
+  );
+
+  const scheduleTransportZoneUpdate = useCallback(
+    (region: Region) => {
+      if (!showTransports || !transportEnabled) return;
+      if (transportFetchTimerRef.current) clearTimeout(transportFetchTimerRef.current);
+      transportFetchTimerRef.current = setTimeout(() => {
+        void loadTransportMarkers({ lat: region.latitude, lon: region.longitude });
+      }, TRANSPORT_REFETCH_DEBOUNCE_MS);
+    },
+    [loadTransportMarkers, showTransports, transportEnabled]
+  );
+
+  const transportZoneHasDisruption = transportMarkers.some((m) => m.status === 'disrupted');
+
+  const reportGroups = useMemo(() => groupReportsByLocation(citizenReports), [citizenReports]);
 
   const findNearestCompost = (
     userLocation: Location.LocationObject,
@@ -245,58 +390,82 @@ const MapComponent = forwardRef<MapComponentMethods, MapComponentProps>((props, 
           showsUserLocation
           onRegionChangeComplete={(region) => {
             regionRef.current = region;
+            scheduleTransportZoneUpdate(region);
           }}>
+          {showTransports && transportEnabled && transportZoneCenter ? (
+            <Circle
+              center={{
+                latitude: transportZoneCenter.lat,
+                longitude: transportZoneCenter.lon,
+              }}
+              radius={TRANSPORT_SEARCH_RADIUS_M}
+              strokeColor={
+                transportZoneHasDisruption ? 'rgba(255, 149, 0, 0.85)' : 'rgba(0, 122, 255, 0.75)'
+              }
+              fillColor={
+                transportZoneHasDisruption ? 'rgba(255, 149, 0, 0.12)' : 'rgba(0, 122, 255, 0.1)'
+              }
+              strokeWidth={2}
+            />
+          ) : null}
+
           {/* Public Infrastructure */}
           {showComposts &&
             compostMarkers.map((marker, index) => (
-              <Marker
+              <MapPinMarker
                 key={`compost-${index}`}
+                kind='composte'
                 coordinate={{
                   latitude: marker.geo_point_2d.lat,
                   longitude: marker.geo_point_2d.lon,
                 }}
                 title={marker.operateur || 'Composteur'}
                 description={marker.adresse}
-                pinColor='#22c55e'
               />
             ))}
 
           {showToilets &&
             toiletsMarkers.map((marker, index) => (
-              <Marker
+              <MapPinMarker
                 key={`toilet-${index}`}
+                kind='toilet'
                 coordinate={{
                   latitude: marker.geo_point_2d.lat,
                   longitude: marker.geo_point_2d.lon,
                 }}
                 title='Toilette publique'
                 description={marker.adresse}
-                pinColor='#0ea5e9'
               />
             ))}
 
-          {/* Citizen Reports */}
           {showReports &&
-            citizenReports.map((report) => (
-              <Marker
-                key={`report-${report.id}`}
+            reportGroups.map((group) => (
+              <MapPinMarker
+                key={`report-group-${group.key}`}
+                kind='report'
+                statusDot={dominantReportStatusDot(group.reports)}
+                badgeCount={group.reports.length}
                 coordinate={{
-                  latitude: report.lat,
-                  longitude: report.lon,
+                  latitude: group.lat,
+                  longitude: group.lon,
                 }}
-                pinColor={getStatusColor(report.status)}>
-                <Callout>
-                  <View className='min-w-[150px] p-2'>
-                    <Text className='font-bold text-slate-900'>{report.category}</Text>
-                    <Text className='mt-1 text-xs text-slate-600'>{report.description}</Text>
-                    <Text
-                      className='mt-2 text-[10px] font-bold'
-                      style={{ color: getStatusColor(report.status) }}>
-                      {report.status.toUpperCase()}
-                    </Text>
-                  </View>
-                </Callout>
-              </Marker>
+                onPress={() => onReportGroupPress?.(group)}
+              />
+            ))}
+
+          {showTransports &&
+            transportEnabled &&
+            transportMarkers.map((marker) => (
+              <MapPinMarker
+                key={`transport-${marker.stopId}`}
+                kind='transport'
+                statusDot={marker.status === 'disrupted' ? 'orange' : undefined}
+                coordinate={{
+                  latitude: marker.lat,
+                  longitude: marker.lon,
+                }}
+                onPress={() => onTransportStopPress?.(marker)}
+              />
             ))}
         </MapView>
       ) : (

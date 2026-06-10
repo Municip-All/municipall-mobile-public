@@ -12,11 +12,11 @@ type Props = {
 };
 
 export default function LegalDocumentScreen({ document, showBackHeader = true }: Props) {
-  const { dark, classes } = useAppTheme();
+  const { dark, classes, layoutStyles } = useAppTheme();
   const insets = useSafeAreaInsets();
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       {showBackHeader ? <ProfileScreenHeader title={document.title} /> : null}
       <ScrollView
         contentContainerStyle={{

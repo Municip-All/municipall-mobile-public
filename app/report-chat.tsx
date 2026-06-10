@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,13 +15,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useAuth } from '@context/authcontext';
 import { reportService, ReportDetail } from '../services/reportService';
+import { useLiveChatRefresh } from '@hooks/useLiveChatRefresh';
+import { chatBubbleStyles as styles } from '../lib/chatBubbleStyles';
+import SatisfactionPrompt from '@components/SatisfactionPrompt';
 
 export default function ReportChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const reportId = Number(id);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { dark, primaryColor, classes, colors } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
   const { user } = useAuth();
 
   const [report, setReport] = useState<ReportDetail | null>(null);
@@ -33,21 +35,39 @@ export default function ReportChatScreen() {
 
   const isClosed = report?.status === 'Résolu' || report?.status === 'Clôturé';
 
-  const loadReport = useCallback(async () => {
-    if (!reportId || Number.isNaN(reportId)) return;
-    try {
-      const data = await reportService.getReport(reportId);
-      setReport(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }, [reportId]);
+  const loadReport = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!reportId || Number.isNaN(reportId)) return;
+      const silent = options?.silent ?? false;
+      try {
+        const data = await reportService.getReport(reportId);
+        setReport((prev) => {
+          if (!prev) return data;
+          const prevLastId = prev.messages[prev.messages.length - 1]?.id;
+          const nextLastId = data.messages[data.messages.length - 1]?.id;
+          if (
+            prev.messages.length === data.messages.length &&
+            prevLastId === nextLastId &&
+            prev.status === data.status
+          ) {
+            return prev;
+          }
+          return data;
+        });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [reportId]
+  );
 
   useEffect(() => {
-    loadReport();
+    void loadReport();
   }, [loadReport]);
+
+  useLiveChatRefresh(() => loadReport({ silent: true }), Boolean(report) && !isClosed);
 
   useEffect(() => {
     if (report?.messages.length) {
@@ -72,7 +92,7 @@ export default function ReportChatScreen() {
 
   if (loading) {
     return (
-      <View className={`flex-1 items-center justify-center ${classes.page}`}>
+      <View style={layoutStyles.page} className='items-center justify-center'>
         <ActivityIndicator color={primaryColor} />
       </View>
     );
@@ -80,7 +100,7 @@ export default function ReportChatScreen() {
 
   if (!report) {
     return (
-      <View className={`flex-1 items-center justify-center px-6 ${classes.page}`}>
+      <View style={layoutStyles.page} className='items-center justify-center px-6'>
         <Text className={classes.body}>Signalement introuvable.</Text>
         <TouchableOpacity onPress={() => router.back()} className='mt-4'>
           <Text style={{ color: primaryColor }}>Retour</Text>
@@ -90,7 +110,7 @@ export default function ReportChatScreen() {
   }
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <View
         style={{ paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: 12 }}
         className={`border-b ${dark ? 'border-zinc-800' : 'border-zinc-200'}`}>
@@ -131,7 +151,7 @@ export default function ReportChatScreen() {
         keyboardVerticalOffset={0}>
         <ScrollView
           ref={scrollRef}
-          className='flex-1 px-4'
+          className='flex-1'
           contentContainerStyle={styles.scrollContent}
           onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}>
           {report.messages.length === 0 ? (
@@ -214,84 +234,26 @@ export default function ReportChatScreen() {
             </View>
           </View>
         ) : (
-          <View className={`border-t px-4 py-4 ${dark ? 'border-zinc-800' : 'border-zinc-200'}`}>
-            <Text className={`text-center text-sm ${classes.body}`}>
-              Ce signalement est clôturé. Vous ne pouvez plus envoyer de messages.
-            </Text>
-          </View>
+          <>
+            <SatisfactionPrompt
+              resourceType='report'
+              resourceId={reportId}
+              initialRating={report?.userRating}
+              title="Comment s'est passé le traitement de votre signalement ?"
+              onSubmitted={(rating) =>
+                setReport((prev) => (prev ? { ...prev, userRating: rating } : prev))
+              }
+            />
+            <View
+              style={{ paddingBottom: insets.bottom + 8 }}
+              className={`px-4 pb-2 ${dark ? 'bg-black' : 'bg-white'}`}>
+              <Text className={`text-center text-xs ${classes.body}`}>
+                Ce signalement est clôturé. Vous ne pouvez plus envoyer de messages.
+              </Text>
+            </View>
+          </>
         )}
       </KeyboardAvoidingView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingVertical: 16,
-    paddingBottom: 24,
-    flexGrow: 1,
-  },
-  messageRow: {
-    width: '100%',
-    marginBottom: 12,
-  },
-  messageCol: {
-    maxWidth: '85%',
-  },
-  messageColMine: {
-    alignSelf: 'flex-end',
-    alignItems: 'flex-end',
-  },
-  messageColOther: {
-    alignSelf: 'flex-start',
-    alignItems: 'flex-start',
-  },
-  senderLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  senderLabelLight: {
-    color: '#a1a1aa',
-  },
-  senderLabelDark: {
-    color: '#71717a',
-  },
-  senderLabelMine: {
-    textAlign: 'right',
-  },
-  bubble: {
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  bubbleAgentLight: {
-    backgroundColor: '#e4e4e7',
-  },
-  bubbleAgentDark: {
-    backgroundColor: '#27272a',
-  },
-  bubbleOtherLight: {
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#e4e4e7',
-  },
-  bubbleOtherDark: {
-    backgroundColor: '#18181b',
-    borderWidth: 1,
-    borderColor: '#3f3f46',
-  },
-  bubbleText: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  bubbleTextMine: {
-    color: '#ffffff',
-  },
-  bubbleTextLight: {
-    color: '#27272a',
-  },
-  bubbleTextDark: {
-    color: '#e4e4e7',
-  },
-});

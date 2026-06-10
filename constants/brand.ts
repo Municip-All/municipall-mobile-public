@@ -5,6 +5,8 @@ export type BrandTheme = {
   appName: string;
   primaryColor: string;
   secondaryColor: string;
+  backgroundColorLight?: string;
+  backgroundColorDark?: string;
   useGradient: boolean;
   logoUrl?: string;
   /** Texte/icônes sur fond primary (boutons, FAB) */
@@ -55,10 +57,19 @@ export function buildBrandTheme(config: CityConfig | null | undefined): BrandThe
   const primaryColor = normalizeHex(config?.theme?.primaryColor ?? DEFAULT_PRIMARY);
   const secondaryColor = normalizeHex(config?.theme?.secondaryColor ?? primaryColor);
 
+  const backgroundColorLight = config?.theme?.backgroundColorLight?.trim()
+    ? normalizeHex(config.theme.backgroundColorLight)
+    : undefined;
+  const backgroundColorDark = config?.theme?.backgroundColorDark?.trim()
+    ? normalizeHex(config.theme.backgroundColorDark)
+    : undefined;
+
   return {
     appName: config?.name?.trim() || "Municip'All",
     primaryColor,
     secondaryColor,
+    backgroundColorLight,
+    backgroundColorDark,
     useGradient: config?.theme?.useGradient ?? false,
     logoUrl: config?.theme?.logoUrl,
     onPrimary: getOnPrimaryColor(primaryColor),
