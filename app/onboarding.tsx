@@ -31,7 +31,7 @@ const steps = [
 
 export default function Onboarding() {
   const router = useRouter();
-  const { dark, primaryColor, classes } = useAppTheme();
+  const { dark, primaryColor, classes, layoutStyles } = useAppTheme();
   const [index, setIndex] = useState(0);
   const total = steps.length;
 
@@ -57,7 +57,7 @@ export default function Onboarding() {
   };
 
   return (
-    <View className={`flex-1 items-center justify-between px-6 pt-20 pb-14 ${classes.page}`}>
+    <View style={layoutStyles.page} className='items-center justify-between px-6 pt-20 pb-14'>
       <View className='items-center'>
         <View
           className='mb-5 h-16 w-16 items-center justify-center rounded-full'

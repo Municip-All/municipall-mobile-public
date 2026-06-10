@@ -8,6 +8,7 @@ import { useAppTheme } from '@hooks/useAppTheme';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
+import { ensureAuthenticatedForReport } from '../lib/requireAuthForReport';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -124,7 +125,10 @@ const BottomBar: React.FC = () => {
       {/* Floating Center Button */}
       <View style={styles.centerButtonContainer} pointerEvents='box-none'>
         <Pressable
-          onPress={() => router.push({ pathname: '/carte', params: { action: 'report' } as any })}
+          onPress={() => {
+            if (!ensureAuthenticatedForReport(isAuthenticated, router)) return;
+            router.push({ pathname: '/carte', params: { action: 'report' } as any });
+          }}
           style={[
             styles.centerButton,
             styles.centerButtonShadow,

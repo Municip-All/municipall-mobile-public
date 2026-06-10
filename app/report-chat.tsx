@@ -14,37 +14,34 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useAuth } from '@context/authcontext';
-import { contactService, ContactTicketDetail } from '../services/contactService';
-import { isTerminalContactStatus } from '../lib/contactTicketStatus';
-import SatisfactionPrompt from '@components/SatisfactionPrompt';
+import { reportService, ReportDetail } from '../services/reportService';
 import { useLiveChatRefresh } from '@hooks/useLiveChatRefresh';
 import { chatBubbleStyles as styles } from '../lib/chatBubbleStyles';
+import SatisfactionPrompt from '@components/SatisfactionPrompt';
 
-export default function ContactChatScreen() {
+export default function ReportChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const ticketId = Number(id);
+  const reportId = Number(id);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
   const { user } = useAuth();
 
-  const [ticket, setTicket] = useState<ContactTicketDetail | null>(null);
+  const [report, setReport] = useState<ReportDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [reply, setReply] = useState('');
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
-  const isClosed = ticket
-    ? isTerminalContactStatus(ticket.ticketType ?? 'question', ticket.status)
-    : false;
+  const isClosed = report?.status === 'Résolu' || report?.status === 'Clôturé';
 
-  const loadTicket = useCallback(
+  const loadReport = useCallback(
     async (options?: { silent?: boolean }) => {
-      if (!ticketId || Number.isNaN(ticketId)) return;
+      if (!reportId || Number.isNaN(reportId)) return;
       const silent = options?.silent ?? false;
       try {
-        const data = await contactService.getTicket(ticketId);
-        setTicket((prev) => {
+        const data = await reportService.getReport(reportId);
+        setReport((prev) => {
           if (!prev) return data;
           const prevLastId = prev.messages[prev.messages.length - 1]?.id;
           const nextLastId = data.messages[data.messages.length - 1]?.id;
@@ -63,28 +60,28 @@ export default function ContactChatScreen() {
         if (!silent) setLoading(false);
       }
     },
-    [ticketId]
+    [reportId]
   );
 
   useEffect(() => {
-    void loadTicket();
-  }, [loadTicket]);
+    void loadReport();
+  }, [loadReport]);
 
-  useLiveChatRefresh(() => loadTicket({ silent: true }), Boolean(ticket) && !isClosed);
+  useLiveChatRefresh(() => loadReport({ silent: true }), Boolean(report) && !isClosed);
 
   useEffect(() => {
-    if (ticket?.messages.length) {
+    if (report?.messages.length) {
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  }, [ticket?.messages.length]);
+  }, [report?.messages.length]);
 
   const handleSend = async () => {
     const text = reply.trim();
     if (!text || isClosed) return;
     setSending(true);
     try {
-      const updated = await contactService.reply(ticketId, text);
-      setTicket(updated);
+      const updated = await reportService.reply(reportId, text);
+      setReport(updated);
       setReply('');
     } catch (e) {
       console.error(e);
@@ -101,10 +98,10 @@ export default function ContactChatScreen() {
     );
   }
 
-  if (!ticket) {
+  if (!report) {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
-        <Text className={classes.body}>Conversation introuvable.</Text>
+        <Text className={classes.body}>Signalement introuvable.</Text>
         <TouchableOpacity onPress={() => router.back()} className='mt-4'>
           <Text style={{ color: primaryColor }}>Retour</Text>
         </TouchableOpacity>
@@ -125,16 +122,28 @@ export default function ContactChatScreen() {
             <Text
               numberOfLines={1}
               className={`text-base font-bold ${dark ? 'text-white' : 'text-black'}`}>
-              {ticket.subject}
+              {report.category}
             </Text>
             <Text className={`text-xs ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-              {ticket.ticketType === 'suggestion' ? 'Suggestion · ' : 'Question · '}
-              {ticket.status}
-              {isClosed ? ' · Archivée' : ''}
+              REF-{String(report.id).padStart(4, '0')} · {report.status}
+              {isClosed ? ' · Dossier clôturé' : ''}
             </Text>
           </View>
         </View>
       </View>
+
+      {report.description ? (
+        <View
+          className={`border-b px-4 py-3 ${dark ? 'border-zinc-800 bg-zinc-900/50' : 'border-zinc-100 bg-zinc-50'}`}>
+          <Text
+            className={`text-xs font-bold tracking-wide uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+            Votre signalement
+          </Text>
+          <Text className={`mt-1 text-sm leading-5 ${dark ? 'text-zinc-300' : 'text-zinc-700'}`}>
+            {report.description}
+          </Text>
+        </View>
+      ) : null}
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -145,48 +154,54 @@ export default function ContactChatScreen() {
           className='flex-1'
           contentContainerStyle={styles.scrollContent}
           onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}>
-          {ticket.messages.map((msg) => {
-            const isMine = msg.senderRole === 'citizen' && msg.senderId === user?.id;
-            const isAgent = msg.senderRole === 'agent';
+          {report.messages.length === 0 ? (
+            <Text className={`py-8 text-center text-sm ${classes.body}`}>
+              La mairie vous écrira ici si des précisions sont nécessaires.
+            </Text>
+          ) : (
+            report.messages.map((msg) => {
+              const isMine = msg.senderRole === 'citizen' && msg.senderId === user?.id;
+              const isAgent = msg.senderRole === 'agent';
 
-            const bubbleStyle = isMine
-              ? { backgroundColor: primaryColor }
-              : isAgent
-                ? dark
-                  ? styles.bubbleAgentDark
-                  : styles.bubbleAgentLight
+              const bubbleStyle = isMine
+                ? { backgroundColor: primaryColor }
+                : isAgent
+                  ? dark
+                    ? styles.bubbleAgentDark
+                    : styles.bubbleAgentLight
+                  : dark
+                    ? styles.bubbleOtherDark
+                    : styles.bubbleOtherLight;
+
+              const textStyle = isMine
+                ? styles.bubbleTextMine
                 : dark
-                  ? styles.bubbleOtherDark
-                  : styles.bubbleOtherLight;
+                  ? styles.bubbleTextDark
+                  : styles.bubbleTextLight;
 
-            const textStyle = isMine
-              ? styles.bubbleTextMine
-              : dark
-                ? styles.bubbleTextDark
-                : styles.bubbleTextLight;
-
-            return (
-              <View key={msg.id} style={styles.messageRow}>
-                <View
-                  style={[
-                    styles.messageCol,
-                    isMine ? styles.messageColMine : styles.messageColOther,
-                  ]}>
-                  <Text
+              return (
+                <View key={msg.id} style={styles.messageRow}>
+                  <View
                     style={[
-                      styles.senderLabel,
-                      dark ? styles.senderLabelDark : styles.senderLabelLight,
-                      isMine ? styles.senderLabelMine : undefined,
+                      styles.messageCol,
+                      isMine ? styles.messageColMine : styles.messageColOther,
                     ]}>
-                    {msg.senderName}
-                  </Text>
-                  <View style={[styles.bubble, bubbleStyle]}>
-                    <Text style={[styles.bubbleText, textStyle]}>{msg.body}</Text>
+                    <Text
+                      style={[
+                        styles.senderLabel,
+                        dark ? styles.senderLabelDark : styles.senderLabelLight,
+                        isMine ? styles.senderLabelMine : undefined,
+                      ]}>
+                      {msg.senderName}
+                    </Text>
+                    <View style={[styles.bubble, bubbleStyle]}>
+                      <Text style={[styles.bubbleText, textStyle]}>{msg.body}</Text>
+                    </View>
                   </View>
                 </View>
-              </View>
-            );
-          })}
+              );
+            })
+          )}
         </ScrollView>
 
         {!isClosed ? (
@@ -197,7 +212,7 @@ export default function ContactChatScreen() {
               <TextInput
                 value={reply}
                 onChangeText={setReply}
-                placeholder='Votre message…'
+                placeholder='Votre réponse…'
                 placeholderTextColor={colors.placeholder}
                 multiline
                 className={`max-h-28 flex-1 rounded-2xl px-4 py-3 text-base ${classes.formField} ${classes.formFieldText}`}
@@ -221,23 +236,19 @@ export default function ContactChatScreen() {
         ) : (
           <>
             <SatisfactionPrompt
-              resourceType='contact_ticket'
-              resourceId={ticketId}
-              initialRating={ticket?.userRating}
-              title={
-                ticket?.ticketType === 'suggestion'
-                  ? 'Comment évaluez-vous le suivi de votre suggestion ?'
-                  : "Comment s'est passé votre échange avec la mairie ?"
-              }
+              resourceType='report'
+              resourceId={reportId}
+              initialRating={report?.userRating}
+              title="Comment s'est passé le traitement de votre signalement ?"
               onSubmitted={(rating) =>
-                setTicket((prev) => (prev ? { ...prev, userRating: rating } : prev))
+                setReport((prev) => (prev ? { ...prev, userRating: rating } : prev))
               }
             />
             <View
               style={{ paddingBottom: insets.bottom + 8 }}
               className={`px-4 pb-2 ${dark ? 'bg-black' : 'bg-white'}`}>
               <Text className={`text-center text-xs ${classes.body}`}>
-                Cette conversation est terminée. Vous ne pouvez plus envoyer de messages.
+                Ce signalement est clôturé. Vous ne pouvez plus envoyer de messages.
               </Text>
             </View>
           </>

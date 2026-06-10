@@ -20,7 +20,7 @@ import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Home() {
-  const { dark, primaryColor, classes, brand } = useAppTheme();
+  const { dark, primaryColor, classes, brand, layoutStyles } = useAppTheme();
   const { config, weatherData, weatherLoading, weatherError, fetchWeather, refreshConfig } =
     useCity();
   const {
@@ -56,12 +56,14 @@ export default function Home() {
   const insets = useSafeAreaInsets();
 
   const weatherEnabled = config?.features?.includes('weather') ?? false;
+  const transportEnabled =
+    (config?.isTransportFeatureAllowed && config?.isTransportFeatureEnabled) ?? false;
   /** Nom d'app marque blanche (backoffice) — pas le libellé météo géolocalisé */
   const appDisplayName = brand.appName;
   const weatherLocation = weatherData?.city;
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 20,
@@ -81,7 +83,7 @@ export default function Home() {
             </Text>
             <Text className={classes.title}>{appDisplayName}</Text>
           </View>
-          <TouchableOpacity onPress={() => router.push('/profile')} activeOpacity={0.85}>
+          <TouchableOpacity onPress={() => router.push('/ma-commune')} activeOpacity={0.85}>
             <BrandedLogo size={48} radius={24} mode='contain' />
           </TouchableOpacity>
         </View>
@@ -90,7 +92,7 @@ export default function Home() {
           <Pressable
             onPress={() => void fetchWeather()}
             disabled={weatherLoading}
-            className='mb-6 shadow-sm active:opacity-90'
+            className='mb-6 rounded-[28px] shadow-sm active:opacity-90'
             accessibilityRole='button'
             accessibilityLabel='Actualiser la météo'>
             <BlurView
@@ -134,17 +136,20 @@ export default function Home() {
         )}
 
         {/* Quick Actions Grid */}
-        <View className='mb-8 flex-row justify-between'>
+        <View className='mb-8 flex-row flex-wrap justify-between gap-y-4'>
           {[
             { label: 'Signalement', icon: 'alert-circle', color: '#FF3B30', path: '/demandes' },
             { label: 'Déchets', icon: 'trash', color: '#34C759', path: '/collecte' },
             { label: 'Travaux', icon: 'construct', color: '#FF9500', path: '/travaux' },
-            { label: 'Social', icon: 'heart', color: '#AF52DE', path: '/contact' },
+            ...(transportEnabled
+              ? [{ label: 'Transports', icon: 'bus', color: '#007AFF', path: '/transport' }]
+              : []),
+            { label: 'Social', icon: 'heart', color: '#AF52DE', path: '/social' },
           ].map((item, i) => (
             <TouchableOpacity
               key={i}
               onPress={() => router.push(item.path as any)}
-              className='items-center'>
+              className='w-[18%] min-w-[64px] items-center'>
               <View
                 className='mb-2 h-16 w-16 items-center justify-center rounded-2xl shadow-sm'
                 style={{ backgroundColor: dark ? '#1C1C1E' : '#FFFFFF' }}>

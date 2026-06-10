@@ -11,7 +11,7 @@ import { LEGAL_ENTITY } from '../../constants/legalEntity';
 import { useCityLegalContext } from '@hooks/useCityLegalContext';
 
 export default function LegalHubScreen() {
-  const { dark, classes, colors } = useAppTheme();
+  const { dark, classes, colors, layoutStyles } = useAppTheme();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -20,7 +20,7 @@ export default function LegalHubScreen() {
   const items = LEGAL_HUB_ITEMS.filter((item) => !item.requiresAuth || isAuthenticated);
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <ProfileScreenHeader title='Informations légales' />
       <ScrollView
         contentContainerStyle={{

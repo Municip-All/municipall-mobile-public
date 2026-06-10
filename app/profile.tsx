@@ -7,7 +7,6 @@ import {
   Image,
   ActivityIndicator,
   Alert,
-  Linking,
 } from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
@@ -20,18 +19,26 @@ import { useRouter } from 'expo-router';
 import { pickProofImage } from '../utils/pickProofImage';
 import apiClient from '../services/apiClient';
 import { cityService } from '../services/cityService';
+import { isPartnerCity, partnerCityName } from '../lib/partnerCities';
+import { cityDisplayName } from '../lib/cityDisplay';
+import ConvinceMayorModal from '@components/ConvinceMayorModal';
+import CityNotListedChip from '@components/CityNotListedChip';
+import { openReferCityEmail } from '../lib/referCity';
 import { uploadUserAvatar } from '../services/userProfileService';
 import { isPersistentAvatarUrl } from '../utils/avatarImage';
 
 export default function Profile() {
-  const { theme, dark, primaryColor, classes, colors, setTheme } = useAppTheme();
+  const { theme, dark, primaryColor, classes, colors, setTheme, layoutStyles } = useAppTheme();
   const { applyBrandingCity } = useCity();
   const { user, logout, updateUser, isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
   const [showCityPicker, setShowCityPicker] = useState(false);
-  const [availableCities, setAvailableCities] = useState<{ id: string; name: string }[]>([]);
+  const [availableCities, setAvailableCities] = useState<
+    { id: string; name: string; officialName?: string }[]
+  >([]);
+  const [showConvinceModal, setShowConvinceModal] = useState(false);
   const [userStats, setUserStats] = useState({ reports: 0, participations: 0, points: 0 });
 
   React.useEffect(() => {
@@ -64,19 +71,6 @@ export default function Profile() {
     } catch {
       Alert.alert('Erreur', 'Impossible de mettre à jour la ville.');
     }
-  };
-
-  const handleReferCity = () => {
-    const subject = encodeURIComponent("Suggestion d'adoption de la solution Municip'All");
-    const body = encodeURIComponent(
-      'Monsieur le Maire / Madame la Maire,\n\n' +
-        "En tant que citoyen engagé, je souhaiterais vous suggérer d'adopter la solution Municip'All pour faciliter la communication entre les services municipaux et les habitants.\n\n" +
-        "Cette solution permet de signaler des incidents en temps réel, de suivre les travaux et d'être alerté des événements importants de notre ville.\n\n" +
-        "Plusieurs villes partenaires l'utilisent déjà avec succès. Vous pouvez trouver plus d'informations sur https://municipall.dev\n\n" +
-        'En espérant que cette suggestion retiendra votre attention.\n\n' +
-        'Bien cordialement,'
-    );
-    Linking.openURL(`mailto:?subject=${subject}&body=${body}`);
   };
 
   const handleLogout = async () => {
@@ -122,8 +116,12 @@ export default function Profile() {
       ? user.avatar_url
       : undefined;
 
+  const residenceIsPartner = isPartnerCity(user.cityId, availableCities);
+  const residenceName =
+    partnerCityName(user.cityId, availableCities) || (user.cityId ? undefined : 'Non définie');
+
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 20,
@@ -207,10 +205,12 @@ export default function Profile() {
               </View>
               <View>
                 <Text className={`text-sm font-bold ${dark ? 'text-white' : 'text-zinc-900'}`}>
-                  {availableCities.find((c) => c.id === user.cityId)?.name || 'Non définie'}
+                  {residenceName ?? 'Commune non référencée'}
                 </Text>
                 <Text className={`text-[11px] ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                  Ville de résidence actuelle
+                  {residenceIsPartner
+                    ? "Commune partenaire Municip'All"
+                    : 'Ville de résidence actuelle'}
                 </Text>
               </View>
             </View>
@@ -222,7 +222,7 @@ export default function Profile() {
           </View>
 
           {showCityPicker && (
-            <View className='flex-row flex-wrap gap-2 border-t border-zinc-50 pt-2 dark:border-zinc-800'>
+            <View className='flex-row flex-wrap gap-2 border-t border-zinc-50 pt-3 dark:border-zinc-800'>
               {availableCities.map((city) => (
                 <TouchableOpacity
                   key={city.id}
@@ -235,21 +235,19 @@ export default function Profile() {
                   }>
                   <Text
                     className={`text-xs font-bold ${user.cityId === city.id ? 'text-white' : dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                    {city.name}
+                    {cityDisplayName(city)}
                   </Text>
                 </TouchableOpacity>
               ))}
+              <CityNotListedChip
+                dark={dark}
+                onPress={() => {
+                  setShowCityPicker(false);
+                  setShowConvinceModal(true);
+                }}
+              />
             </View>
           )}
-
-          <TouchableOpacity
-            onPress={handleReferCity}
-            className='mt-4 flex-row items-center justify-center rounded-xl border border-indigo-100 bg-indigo-50 py-3 dark:border-indigo-900/40 dark:bg-indigo-900/20'>
-            <Ionicons name='megaphone' size={16} color='#6366F1' className='mr-2' />
-            <Text className='ml-2 text-xs font-bold text-indigo-600 dark:text-indigo-400'>
-              Convaincre ma mairie d&apos;adopter Municip&apos;All
-            </Text>
-          </TouchableOpacity>
         </View>
 
         {/* Settings List (Apple Style) */}
@@ -389,6 +387,16 @@ export default function Profile() {
           <Text className='text-base font-bold text-red-500'>Se déconnecter</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <ConvinceMayorModal
+        visible={showConvinceModal}
+        onClose={() => setShowConvinceModal(false)}
+        onSendEmail={openReferCityEmail}
+        dark={dark}
+        primaryColor={primaryColor}
+        bottomInset={insets.bottom}
+      />
+
       <FloatingMapButton />
       <BottomBar />
     </View>

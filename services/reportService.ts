@@ -1,6 +1,15 @@
 import apiClient from './apiClient';
 import { prepareImageForUpload } from '../utils/avatarImage';
 
+export interface ReportMessage {
+  id: number;
+  senderId: number;
+  senderRole: 'citizen' | 'agent';
+  senderName: string;
+  body: string;
+  createdAt: string;
+}
+
 export interface Report {
   id?: number;
   category: string;
@@ -10,17 +19,73 @@ export interface Report {
   lon: number;
   status: string;
   createdAt?: string;
+  updatedAt?: string;
+  lastMessage?: {
+    body: string;
+    senderRole: 'citizen' | 'agent';
+    createdAt: string;
+  };
+}
+
+export interface UserRating {
+  stars: number;
+  message?: string;
+  createdAt: string;
+}
+
+export interface ReportDetail extends Report {
+  id: number;
+  messages: ReportMessage[];
+  userRating?: UserRating;
+}
+
+function mapReport(r: Record<string, unknown>): Report {
+  const location = r.location as { coordinates?: number[] } | undefined;
+  return {
+    id: typeof r.id === 'number' ? r.id : undefined,
+    category: String(r.category ?? ''),
+    description: typeof r.description === 'string' ? r.description : undefined,
+    imageUrl: typeof r.imageUrl === 'string' ? r.imageUrl : undefined,
+    lat: location?.coordinates?.[1] ?? Number(r.lat ?? 0),
+    lon: location?.coordinates?.[0] ?? Number(r.lon ?? 0),
+    status: String(r.status ?? 'En attente'),
+    createdAt: typeof r.createdAt === 'string' ? r.createdAt : undefined,
+    updatedAt: typeof r.updatedAt === 'string' ? r.updatedAt : undefined,
+    lastMessage:
+      r.lastMessage && typeof r.lastMessage === 'object'
+        ? (r.lastMessage as Report['lastMessage'])
+        : undefined,
+  };
 }
 
 export const reportService = {
   getReports: async (): Promise<Report[]> => {
     const response = await apiClient.get('reports');
-    // Map the backend Point geometry back to flat lat/lon for the UI if needed
-    return response.data.map((r: any) => ({
-      ...r,
-      lat: r.location?.coordinates[1] ?? 0,
-      lon: r.location?.coordinates[0] ?? 0,
-    }));
+    return (response.data as Record<string, unknown>[]).map(mapReport);
+  },
+
+  getReport: async (id: number): Promise<ReportDetail> => {
+    const response = await apiClient.get(`reports/${id}`);
+    const data = response.data as Record<string, unknown>;
+    const base = mapReport(data);
+    const messages = Array.isArray(data.messages) ? (data.messages as ReportMessage[]) : [];
+    const userRating =
+      data.userRating && typeof data.userRating === 'object'
+        ? (data.userRating as UserRating)
+        : undefined;
+    return { ...base, id: Number(data.id), messages, userRating };
+  },
+
+  reply: async (id: number, body: string): Promise<ReportDetail> => {
+    const response = await apiClient.post(`reports/${id}/messages`, { body });
+    const data = response.data as Record<string, unknown>;
+    const base = mapReport(data);
+    const messages = Array.isArray(data.messages) ? (data.messages as ReportMessage[]) : [];
+    const userRating =
+      data.userRating && typeof data.userRating === 'object'
+        ? (data.userRating as UserRating)
+        : undefined;
+    return { ...base, id: Number(data.id), messages, userRating };
   },
 
   createReport: async (reportData: Partial<Report> & { userId?: number }): Promise<Report> => {
@@ -29,12 +94,6 @@ export const reportService = {
       payload.imageUrl = await prepareImageForUpload(payload.imageUrl);
     }
     const response = await apiClient.post('reports', payload);
-    const r = response.data;
-    return {
-      ...r,
-      lat: r.location?.coordinates?.[1] ?? reportData.lat ?? 0,
-      lon: r.location?.coordinates?.[0] ?? reportData.lon ?? 0,
-      status: r.status ?? reportData.status ?? 'En attente',
-    };
+    return mapReport(response.data as Record<string, unknown>);
   },
 };

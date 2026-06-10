@@ -10,7 +10,7 @@ import ProfileScreenHeader from '@components/ProfileScreenHeader';
 const FAQ = [
   {
     q: 'Comment signaler un problème dans ma ville ?',
-    a: "Depuis l'onglet Carte ou l'accueil, créez un signalement en indiquant le lieu et une description. Vous pouvez joindre une photo.",
+    a: "Depuis l'onglet Carte ou l'accueil, créez un signalement en indiquant le lieu et une description. Vous pouvez joindre une photo. La mairie peut vous répondre dans la conversation du signalement (onglet Signalements).",
   },
   {
     q: 'Comment changer ma ville de résidence ?',
@@ -23,7 +23,7 @@ const FAQ = [
 ];
 
 export default function ProfileHelpScreen() {
-  const { dark, classes, primaryColor, colors } = useAppTheme();
+  const { dark, classes, primaryColor, colors, layoutStyles } = useAppTheme();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -55,7 +55,7 @@ export default function ProfileHelpScreen() {
   ];
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <ProfileScreenHeader title="Centre d'aide" />
       <ScrollView
         contentContainerStyle={{
