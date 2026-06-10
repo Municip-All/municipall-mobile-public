@@ -130,7 +130,7 @@ function EventCard({
 }
 
 export default function Events() {
-  const { dark, primaryColor, classes } = useAppTheme();
+  const { dark, primaryColor, classes, layoutStyles } = useAppTheme();
   const { config, refreshConfig } = useCity();
   const insets = useSafeAreaInsets();
   const [activeFilter, setActiveFilter] = useState<(typeof FILTERS)[number]>('Tous');
@@ -177,7 +177,7 @@ export default function Events() {
   }, [events, activeFilter]);
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 20,

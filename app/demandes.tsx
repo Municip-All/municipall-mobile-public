@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useAuth } from '@context/authcontext';
@@ -8,9 +15,144 @@ import BottomBar from '@components/bottombar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { reportService, Report } from '../services/reportService';
+import { ensureAuthenticatedForReport } from '../lib/requireAuthForReport';
+
+function normalizeStatus(status: string): string {
+  return status.trim().toLowerCase();
+}
+
+function getStatusColor(status: string): string {
+  switch (normalizeStatus(status)) {
+    case 'en attente':
+      return '#FF9500';
+    case 'en cours':
+      return '#007AFF';
+    case 'résolu':
+      return '#34C759';
+    case 'clôturé':
+      return '#8E8E93';
+    default:
+      return '#8E8E93';
+  }
+}
+
+function matchesFilter(report: Report, filter: string): boolean {
+  const status = normalizeStatus(report.status);
+  if (filter === 'Tous') return true;
+  if (filter === 'En attente') return status === 'en attente';
+  if (filter === 'En cours') return status === 'en cours';
+  if (filter === 'Résolu') return status === 'résolu' || status === 'clôturé';
+  return report.status === filter;
+}
+
+function formatDate(value?: string): string {
+  if (!value) return new Date().toLocaleDateString('fr-FR');
+  return new Date(value).toLocaleDateString('fr-FR');
+}
+
+function ReportCard({
+  report,
+  dark,
+  primaryColor,
+  onPress,
+}: {
+  report: Report;
+  dark: boolean;
+  primaryColor: string;
+  onPress: () => void;
+}) {
+  const statusColor = getStatusColor(report.status);
+  const lastFromAgent = report.lastMessage?.senderRole === 'agent';
+
+  const previewBody = report.lastMessage
+    ? report.lastMessage.body
+    : report.description?.trim() || "Signalement envoyé depuis l'application.";
+
+  const previewCaption = report.lastMessage
+    ? lastFromAgent
+      ? 'Dernier message · Mairie'
+      : 'Dernier message · Vous'
+    : 'Votre signalement';
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.85}
+      style={styles.reportCard}
+      className={`overflow-hidden rounded-3xl border ${
+        dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
+      } ${lastFromAgent ? (dark ? 'border-blue-900/50' : 'border-blue-100') : ''}`}>
+      {lastFromAgent ? (
+        <View className='h-1 w-full' style={{ backgroundColor: dark ? '#3B82F6' : '#007AFF' }} />
+      ) : null}
+
+      <View className='p-5'>
+        <View className='flex-row items-start justify-between gap-3'>
+          <View className='min-w-0 flex-1'>
+            <Text
+              className={`text-lg font-bold ${dark ? 'text-white' : 'text-black'}`}
+              numberOfLines={1}>
+              {report.category}
+            </Text>
+            <Text
+              className={`mt-0.5 text-[11px] font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+              Réf. {report.id ?? '—'} · {formatDate(report.createdAt)}
+            </Text>
+          </View>
+          <View
+            className='shrink-0 rounded-full px-2.5 py-1'
+            style={{ backgroundColor: `${statusColor}18` }}>
+            <Text className='text-[10px] font-black uppercase' style={{ color: statusColor }}>
+              {report.status}
+            </Text>
+          </View>
+        </View>
+
+        <View className={`mt-4 rounded-2xl px-3.5 py-3 ${dark ? 'bg-zinc-800/60' : 'bg-zinc-50'}`}>
+          <Text
+            className={`text-[10px] font-bold tracking-wide uppercase ${
+              lastFromAgent
+                ? 'text-blue-600 dark:text-blue-400'
+                : dark
+                  ? 'text-zinc-500'
+                  : 'text-zinc-400'
+            }`}>
+            {previewCaption}
+          </Text>
+          <Text
+            className={`mt-1 text-sm leading-5 ${dark ? 'text-zinc-200' : 'text-zinc-700'}`}
+            numberOfLines={3}>
+            {previewBody}
+          </Text>
+        </View>
+
+        <View className='mt-4 flex-row items-center justify-between'>
+          <View className='flex-row items-center gap-2'>
+            <Ionicons
+              name={lastFromAgent ? 'mail-unread-outline' : 'chatbubbles-outline'}
+              size={16}
+              color={lastFromAgent ? '#007AFF' : primaryColor}
+            />
+            <Text
+              className={`text-xs font-semibold ${
+                lastFromAgent
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : dark
+                    ? 'text-zinc-400'
+                    : 'text-zinc-500'
+              }`}>
+              {lastFromAgent ? 'Réponse à lire' : 'Voir la conversation'}
+            </Text>
+          </View>
+          <Ionicons name='chevron-forward' size={16} color={dark ? '#71717a' : '#a1a1aa'} />
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 export default function SignalementsList() {
-  const { dark, primaryColor, classes } = useAppTheme();
+  const { dark, primaryColor, classes, layoutStyles } = useAppTheme();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -41,29 +183,15 @@ export default function SignalementsList() {
     loadReports();
   }, [loadReports]);
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'en attente':
-        return '#FF9500';
-      case 'en cours':
-        return '#007AFF';
-      case 'résolu':
-        return '#34C759';
-      default:
-        return '#8E8E93';
-    }
-  };
+  const filteredReports = reports.filter((r) => matchesFilter(r, activeFilter));
 
-  const filteredReports =
-    activeFilter === 'Tous' ? reports : reports.filter((r) => r.status === activeFilter);
-
-  const formatDate = (value?: string) => {
-    if (!value) return new Date().toLocaleDateString('fr-FR');
-    return new Date(value).toLocaleDateString('fr-FR');
+  const openNewReport = () => {
+    if (!ensureAuthenticatedForReport(isAuthenticated, router)) return;
+    router.push({ pathname: '/carte', params: { action: 'report' } });
   };
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 20,
@@ -71,13 +199,13 @@ export default function SignalementsList() {
           paddingHorizontal: 20,
         }}
         showsVerticalScrollIndicator={false}>
-        <View className='mb-8'>
+        <View className='mb-6'>
           <Text
             className={`text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
             Vigilance
           </Text>
           <Text
-            className={`text-4xl font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
+            className={`text-3xl font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
             Signalements
           </Text>
         </View>
@@ -97,128 +225,70 @@ export default function SignalementsList() {
           </View>
         ) : (
           <>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className='mb-6'>
-              {['Tous', 'En attente', 'En cours', 'Résolu'].map((filter) => (
-                <TouchableOpacity
-                  key={filter}
-                  onPress={() => setActiveFilter(filter)}
-                  className={`mr-2 rounded-full border px-6 py-2.5 ${
-                    activeFilter === filter
-                      ? 'border-transparent'
-                      : dark
-                        ? 'border-zinc-800 bg-zinc-900'
-                        : 'border-zinc-200 bg-white'
-                  }`}
-                  style={activeFilter === filter ? { backgroundColor: primaryColor } : {}}>
-                  <Text
-                    className={`text-sm font-bold ${activeFilter === filter ? 'text-white' : dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                    {filter}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            <View style={styles.filterRow}>
+              {(['Tous', 'En attente', 'En cours', 'Résolu'] as const).map((filter) => {
+                const isActive = activeFilter === filter;
+                return (
+                  <TouchableOpacity
+                    key={filter}
+                    onPress={() => setActiveFilter(filter)}
+                    activeOpacity={0.8}
+                    style={[
+                      styles.filterChip,
+                      isActive
+                        ? { backgroundColor: primaryColor, borderColor: primaryColor }
+                        : {
+                            backgroundColor: dark ? '#18181b' : '#ffffff',
+                            borderColor: dark ? '#27272a' : '#e4e4e7',
+                          },
+                    ]}>
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        isActive
+                          ? styles.filterChipTextActive
+                          : { color: dark ? '#a1a1aa' : '#71717a' },
+                      ]}>
+                      {filter}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
 
             {loading ? (
               <ActivityIndicator color={primaryColor} className='mt-10' />
             ) : filteredReports.length === 0 ? (
-              <View className='mt-20 items-center'>
+              <View className='mt-16 items-center'>
                 <Ionicons
                   name='document-text-outline'
-                  size={64}
+                  size={56}
                   color={dark ? '#27272A' : '#E4E4E7'}
                 />
                 <Text
                   className={`mt-4 text-sm font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                  Aucun signalement trouvé
+                  Aucun signalement pour ce filtre
                 </Text>
-                <TouchableOpacity
-                  onPress={() => router.push({ pathname: '/carte', params: { action: 'report' } })}
-                  className='mt-6'>
+                <TouchableOpacity onPress={openNewReport} className='mt-6'>
                   <Text style={{ color: primaryColor }} className='text-sm font-bold'>
                     Faire un signalement
                   </Text>
                 </TouchableOpacity>
               </View>
             ) : (
-              <View className='space-y-4'>
-                {filteredReports.map((report, i) => {
-                  const hasAgentReply = report.lastMessage?.senderRole === 'agent';
-                  return (
-                    <TouchableOpacity
-                      key={report.id || i}
-                      onPress={() =>
-                        report.id &&
-                        router.push({ pathname: '/report-chat', params: { id: String(report.id) } })
-                      }
-                      className={`mb-4 overflow-hidden rounded-[28px] ${dark ? 'bg-zinc-900' : 'bg-white'} border border-zinc-100 shadow-sm dark:border-zinc-800`}>
-                      <View className='p-6'>
-                        <View className='mb-4 flex-row items-start justify-between'>
-                          <View className='mr-4 flex-1'>
-                            <Text
-                              className={`text-xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
-                              {report.category}
-                            </Text>
-                            <Text
-                              className={`mt-1 text-xs font-bold tracking-tighter uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                              REF-{report.id || 'N/A'} • {formatDate(report.createdAt)}
-                            </Text>
-                          </View>
-                          <View className='items-end gap-2'>
-                            <View
-                              className='rounded-full px-3 py-1'
-                              style={{ backgroundColor: `${getStatusColor(report.status)}15` }}>
-                              <Text
-                                className='text-[10px] font-black uppercase'
-                                style={{ color: getStatusColor(report.status) }}>
-                                {report.status}
-                              </Text>
-                            </View>
-                            {hasAgentReply ? (
-                              <View className='flex-row items-center gap-1'>
-                                <View className='h-2 w-2 rounded-full bg-[#007AFF]' />
-                                <Text className='text-[10px] font-bold text-[#007AFF]'>Mairie</Text>
-                              </View>
-                            ) : null}
-                          </View>
-                        </View>
-
-                        <Text
-                          className={`mb-3 text-sm leading-5 ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}
-                          numberOfLines={2}>
-                          {report.description ||
-                            "Signalement effectué via l'application citoyenne."}
-                        </Text>
-
-                        {report.lastMessage ? (
-                          <View
-                            className={`mb-3 rounded-2xl px-3 py-2 ${dark ? 'bg-zinc-800/80' : 'bg-zinc-50'}`}>
-                            <Text
-                              className={`text-xs leading-5 ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}
-                              numberOfLines={2}>
-                              {report.lastMessage.senderRole === 'agent' ? 'Mairie : ' : 'Vous : '}
-                              {report.lastMessage.body}
-                            </Text>
-                          </View>
-                        ) : null}
-
-                        <View className='flex-row items-center justify-between border-t border-zinc-50 pt-4 dark:border-zinc-800'>
-                          <View className='flex-row items-center'>
-                            <Ionicons name='chatbubbles-outline' size={14} color={primaryColor} />
-                            <Text
-                              className={`ml-2 text-xs font-semibold ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                              Voir la conversation
-                            </Text>
-                          </View>
-                          <Ionicons
-                            name='chevron-forward'
-                            size={16}
-                            color={dark ? '#71717a' : '#a1a1aa'}
-                          />
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
+              <View style={styles.reportList}>
+                {filteredReports.map((report, i) => (
+                  <ReportCard
+                    key={report.id ?? i}
+                    report={report}
+                    dark={dark}
+                    primaryColor={primaryColor}
+                    onPress={() =>
+                      report.id &&
+                      router.push({ pathname: '/report-chat', params: { id: String(report.id) } })
+                    }
+                  />
+                ))}
               </View>
             )}
           </>
@@ -230,3 +300,33 @@ export default function SignalementsList() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 24,
+    marginTop: 4,
+  },
+  filterChip: {
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  filterChipText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  filterChipTextActive: {
+    color: '#ffffff',
+  },
+  reportList: {
+    marginTop: 8,
+  },
+  reportCard: {
+    marginBottom: 12,
+  },
+});

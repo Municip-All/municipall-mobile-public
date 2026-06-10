@@ -22,7 +22,7 @@ import LegalFooterLinks from '@components/LegalFooterLinks';
 import apiClient from '../services/apiClient';
 
 const LoginScreen: React.FC = () => {
-  const { dark, primaryColor, classes, colors, brand } = useAppTheme();
+  const { dark, primaryColor, classes, colors, brand, layoutStyles } = useAppTheme();
   const router = useRouter();
   const { login } = useAuth();
   const { redirectTo } = useLocalSearchParams<{ redirectTo?: string }>();
@@ -66,7 +66,7 @@ const LoginScreen: React.FC = () => {
   };
 
   return (
-    <View className={`flex-1 px-6 ${classes.pageAuth}`}>
+    <View style={layoutStyles.pageAuth} className='px-6'>
       <LinearGradient
         colors={[
           dark

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Stack, Redirect, usePathname } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from '@context/themecontext';
 import { AuthProvider } from '@context/authcontext';
 import PushNotificationRegistrar from '@components/PushNotificationRegistrar';
@@ -63,29 +64,33 @@ export default function RootLayout() {
 
   if (!fontsLoaded || !onboardingChecked) {
     return (
-      <ThemeProvider>
-        <LoadingScreen />
-      </ThemeProvider>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <LoadingScreen />
+        </ThemeProvider>
+      </SafeAreaProvider>
     );
   }
 
   return (
-    <ThemeProvider>
-      <CityProvider>
-        <AuthProvider>
-          <BrandingSync />
-          <PushNotificationRegistrar />
-          {needsOnboarding && pathname !== '/onboarding' ? <Redirect href='/onboarding' /> : null}
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              gestureEnabled: true,
-              animation: 'slide_from_right',
-            }}
-          />
-        </AuthProvider>
-      </CityProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <CityProvider>
+          <AuthProvider>
+            <BrandingSync />
+            <PushNotificationRegistrar />
+            {needsOnboarding && pathname !== '/onboarding' ? <Redirect href='/onboarding' /> : null}
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                gestureEnabled: true,
+                animation: 'slide_from_right',
+              }}
+            />
+          </AuthProvider>
+        </CityProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 

@@ -20,13 +20,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import apiClient from '../services/apiClient';
 import { cityService } from '../services/cityService';
+import { cityDisplayName } from '../lib/cityDisplay';
+import ConvinceMayorModal from '@components/ConvinceMayorModal';
+import CityNotListedChip from '@components/CityNotListedChip';
+import { openReferCityEmail } from '../lib/referCity';
 import BottomBar from '@components/bottombar';
 import LegalConsentBlock from '@components/LegalConsentBlock';
 import LegalFooterLinks from '@components/LegalFooterLinks';
 import { recordLegalConsent } from '../services/legalConsent';
 
 const SignupScreen: React.FC = () => {
-  const { dark, primaryColor, classes, colors } = useAppTheme();
+  const { dark, primaryColor, colors, layoutStyles } = useAppTheme();
   const { config } = useCity();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -36,7 +40,10 @@ const SignupScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  const [availableCities, setAvailableCities] = useState<{ id: string; name: string }[]>([]);
+  const [availableCities, setAvailableCities] = useState<
+    { id: string; name: string; officialName?: string }[]
+  >([]);
+  const [showConvinceModal, setShowConvinceModal] = useState(false);
 
   const secondaryColor = config?.theme.secondaryColor || '#3B82F6';
   const useGradient = config?.theme.useGradient ?? false;
@@ -107,7 +114,7 @@ const SignupScreen: React.FC = () => {
   };
 
   return (
-    <View className={`flex-1 ${classes.pageAuth}`}>
+    <View style={layoutStyles.pageAuth}>
       <LinearGradient
         colors={[
           dark
@@ -274,10 +281,11 @@ const SignupScreen: React.FC = () => {
                           fontWeight: 'bold',
                           fontSize: 13,
                         }}>
-                        {city.name}
+                        {cityDisplayName(city)}
                       </Text>
                     </TouchableOpacity>
                   ))}
+                  <CityNotListedChip dark={dark} onPress={() => setShowConvinceModal(true)} />
                 </View>
               </View>
 
@@ -327,6 +335,16 @@ const SignupScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
+
+      <ConvinceMayorModal
+        visible={showConvinceModal}
+        onClose={() => setShowConvinceModal(false)}
+        onSendEmail={openReferCityEmail}
+        dark={dark}
+        primaryColor={primaryColor}
+        bottomInset={insets.bottom}
+      />
+
       <BottomBar />
     </View>
   );

@@ -23,7 +23,7 @@ const FAQ = [
 ];
 
 export default function ProfileHelpScreen() {
-  const { dark, classes, primaryColor, colors } = useAppTheme();
+  const { dark, classes, primaryColor, colors, layoutStyles } = useAppTheme();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -55,7 +55,7 @@ export default function ProfileHelpScreen() {
   ];
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <ProfileScreenHeader title="Centre d'aide" />
       <ScrollView
         contentContainerStyle={{

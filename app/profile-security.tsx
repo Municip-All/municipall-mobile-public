@@ -19,7 +19,7 @@ import ProfileScreenHeader from '@components/ProfileScreenHeader';
 import { updateUserPassword } from '../services/userProfileService';
 
 export default function ProfileSecurityScreen() {
-  const { classes, primaryColor, colors } = useAppTheme();
+  const { classes, primaryColor, colors, layoutStyles } = useAppTheme();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -90,7 +90,7 @@ export default function ProfileSecurityScreen() {
 
   return (
     <KeyboardAvoidingView
-      className={`flex-1 ${classes.page}`}
+      style={layoutStyles.page}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ProfileScreenHeader title='Sécurité et mot de passe' />
       <ScrollView

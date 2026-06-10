@@ -10,7 +10,7 @@ import { BlurView } from 'expo-blur';
 import { getNextCollection, formatCollectionDay } from '../utils/wasteSchedule';
 
 export default function Collecte() {
-  const { dark, primaryColor, classes } = useAppTheme();
+  const { dark, primaryColor, layoutStyles } = useAppTheme();
   const { config } = useCity();
   const insets = useSafeAreaInsets();
 
@@ -40,7 +40,7 @@ export default function Collecte() {
   };
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 20,
@@ -61,7 +61,7 @@ export default function Collecte() {
         </View>
 
         {/* Next Collection Card */}
-        <View className='mb-8 shadow-sm'>
+        <View className='mb-8 rounded-[28px] shadow-sm'>
           <BlurView
             intensity={dark ? 40 : 80}
             tint={dark ? 'dark' : 'light'}

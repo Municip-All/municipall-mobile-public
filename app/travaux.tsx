@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import apiClient from '../services/apiClient';
 
 export default function Travaux() {
-  const { dark, primaryColor, classes } = useAppTheme();
+  const { dark, primaryColor, layoutStyles } = useAppTheme();
   const insets = useSafeAreaInsets();
 
   const [works, setWorks] = React.useState<any[]>([]);
@@ -55,7 +55,7 @@ export default function Travaux() {
   };
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 20,

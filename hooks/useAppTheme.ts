@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { type ViewStyle } from 'react-native';
 import { useTheme } from '@context/themecontext';
 import { useCity } from '@context/citycontext';
 import { DEFAULT_PRIMARY, semanticColors, tintColor } from '@constants/design';
@@ -15,10 +16,24 @@ export function useAppTheme() {
   const brand = useMemo(() => buildBrandTheme(config), [config]);
   const primaryColor = brand.primaryColor || DEFAULT_PRIMARY;
 
+  const pageBackground = dark
+    ? (brand.backgroundColorDark ?? semanticColors.surface.dark)
+    : (brand.backgroundColorLight ?? semanticColors.surface.light);
+
+  const pageAuthBackground = dark
+    ? (brand.backgroundColorDark ?? semanticColors.surfaceAuth.dark)
+    : (brand.backgroundColorLight ?? semanticColors.surfaceAuth.light);
+
+  const layoutStyles = useMemo(
+    () => ({
+      page: { flex: 1, backgroundColor: pageBackground } satisfies ViewStyle,
+      pageAuth: { flex: 1, backgroundColor: pageAuthBackground } satisfies ViewStyle,
+    }),
+    [pageBackground, pageAuthBackground]
+  );
+
   const classes = useMemo(
     () => ({
-      page: dark ? 'bg-black' : 'bg-surface',
-      pageAuth: dark ? 'bg-zinc-950' : 'bg-surface-auth',
       card: dark ? 'bg-zinc-900 border border-zinc-800' : 'bg-white border border-zinc-200',
       cardRounded: dark
         ? 'overflow-hidden rounded-[28px] bg-zinc-900 border border-zinc-800 shadow-sm'
@@ -69,7 +84,7 @@ export function useAppTheme() {
       primaryTint: tintColor(primaryColor),
       iconMuted: dark ? semanticColors.muted.dark : semanticColors.muted.light,
       chevron: dark ? semanticColors.muted.dark : semanticColors.muted.light,
-      surface: dark ? semanticColors.surface.dark : semanticColors.surface.light,
+      surface: pageBackground,
       card: dark ? semanticColors.card.dark : semanticColors.card.light,
       elevated: dark ? semanticColors.elevated.dark : semanticColors.elevated.light,
       tabBar: dark ? '#18181B' : '#FFFFFF',
@@ -83,7 +98,7 @@ export function useAppTheme() {
       modalSheet: dark ? semanticColors.card.dark : semanticColors.surface.light,
       handle: dark ? '#52525B' : '#D1D1D6',
     }),
-    [dark, primaryColor, brand.onPrimary, brand.primarySoft]
+    [dark, primaryColor, brand.onPrimary, brand.primarySoft, pageBackground]
   );
 
   return {
@@ -94,6 +109,7 @@ export function useAppTheme() {
     primaryColor,
     brand,
     classes,
+    layoutStyles,
     colors,
     tintColor,
   };

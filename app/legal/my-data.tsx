@@ -18,7 +18,7 @@ type Action = {
 };
 
 export default function LegalMyDataScreen() {
-  const { dark, classes, primaryColor, colors } = useAppTheme();
+  const { dark, classes, primaryColor, colors, layoutStyles } = useAppTheme();
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -113,7 +113,7 @@ export default function LegalMyDataScreen() {
   ];
 
   return (
-    <View className={`flex-1 ${classes.page}`}>
+    <View style={layoutStyles.page}>
       <ProfileScreenHeader title='Mes données personnelles' />
       <ScrollView
         contentContainerStyle={{

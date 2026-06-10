@@ -26,7 +26,12 @@ import { reportService } from '../services/reportService';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '../context/authcontext';
 import { isAxiosError } from 'axios';
+import { ensureAuthenticatedForReport } from '../lib/requireAuthForReport';
 import { BlurView } from 'expo-blur';
+import ReportMapSummarySheet from '@components/ReportMapCallout';
+import TransportMapCallout from '@components/TransportMapCallout';
+import type { ReportLocationGroup } from '../lib/groupReportsByLocation';
+import type { TransportStopMarker } from '../services/transportService';
 
 function MapToolButton({
   onPress,
@@ -65,8 +70,10 @@ function MapToolButton({
 export default function Carte() {
   const mapRef = useRef<MapComponentMethods>(null);
   const modalizeRef = useRef<Modalize>(null);
-  const { dark, primaryColor, classes, colors } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
   const { config } = useCity();
+  const transportEnabled =
+    (config?.isTransportFeatureAllowed && config?.isTransportFeatureEnabled) ?? false;
   const { isAuthenticated, user } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -83,6 +90,11 @@ export default function Carte() {
   const [showComposts, setShowComposts] = useState(true);
   const [showToilets, setShowToilets] = useState(true);
   const [showReports, setShowReports] = useState(true);
+  const [showTransports, setShowTransports] = useState(true);
+  const [selectedReportGroup, setSelectedReportGroup] = useState<ReportLocationGroup | null>(null);
+  const [selectedTransportStop, setSelectedTransportStop] = useState<TransportStopMarker | null>(
+    null
+  );
 
   const categories = ['Voirie', 'Éclairage', 'Déchets', 'Espaces Verts', 'Autre'];
 
@@ -99,6 +111,12 @@ export default function Carte() {
     { label: 'En attente', color: '#FF9500' },
     { label: 'En cours', color: '#007AFF' },
     { label: 'Résolu', color: '#34C759' },
+    ...(transportEnabled
+      ? [
+          { label: 'Zone transports', color: '#007AFF' },
+          { label: 'Perturbation', color: '#FF9500' },
+        ]
+      : []),
   ] as const;
 
   const mapLayers = [
@@ -109,6 +127,17 @@ export default function Carte() {
       active: showReports,
       toggle: () => setShowReports((v) => !v),
     },
+    ...(transportEnabled
+      ? [
+          {
+            id: 'transports' as const,
+            label: 'Transports',
+            icon: 'bus' as const,
+            active: showTransports,
+            toggle: () => setShowTransports((v) => !v),
+          },
+        ]
+      : []),
     {
       id: 'composts',
       label: 'Composteurs',
@@ -123,7 +152,7 @@ export default function Carte() {
       active: showToilets,
       toggle: () => setShowToilets((v) => !v),
     },
-  ] as const;
+  ];
 
   const chipBg = dark ? 'rgba(39,39,42,0.9)' : 'rgba(228,228,231,0.9)';
   const dividerColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
@@ -156,14 +185,20 @@ export default function Carte() {
   };
 
   const onOpenReport = () => {
+    if (!ensureAuthenticatedForReport(isAuthenticated, router)) return;
     modalizeRef.current?.open();
   };
 
   useEffect(() => {
-    if (action === 'report') {
-      onOpenReport();
+    if (action !== 'report') return;
+    if (!isAuthenticated) {
+      ensureAuthenticatedForReport(false, router);
+      router.replace('/carte');
+      return;
     }
-  }, [action]);
+    onOpenReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ouverture liée au deep link ?action=report
+  }, [action, isAuthenticated]);
 
   const pickImage = async () => {
     const uri = await pickProofImage({
@@ -181,10 +216,7 @@ export default function Carte() {
     }
 
     if (!isAuthenticated || !user) {
-      Alert.alert('Connexion requise', 'Connectez-vous pour envoyer un signalement.', [
-        { text: 'Annuler', style: 'cancel' },
-        { text: 'Se connecter', onPress: () => router.push('/login') },
-      ]);
+      ensureAuthenticatedForReport(false, router);
       return;
     }
 
@@ -252,7 +284,7 @@ export default function Carte() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View className={`flex-1 ${classes.page}`}>
+      <View style={layoutStyles.page}>
         {/* Map Container */}
         <View className='absolute inset-0'>
           <MapComponent
@@ -260,6 +292,15 @@ export default function Carte() {
             showComposts={showComposts}
             showToilets={showToilets}
             showReports={showReports}
+            showTransports={showTransports}
+            onReportGroupPress={(group) => {
+              setSelectedTransportStop(null);
+              setSelectedReportGroup(group);
+            }}
+            onTransportStopPress={(stop) => {
+              setSelectedReportGroup(null);
+              setSelectedTransportStop(stop);
+            }}
           />
         </View>
 
@@ -565,6 +606,24 @@ export default function Carte() {
             </ScrollView>
           </KeyboardAvoidingView>
         </Modalize>
+
+        <ReportMapSummarySheet
+          visible={selectedReportGroup != null}
+          reports={selectedReportGroup?.reports ?? []}
+          bottomInset={insets.bottom}
+          onClose={() => setSelectedReportGroup(null)}
+          onOpenReport={(reportId) => {
+            if (!ensureAuthenticatedForReport(isAuthenticated, router)) return;
+            router.push({ pathname: '/report-chat', params: { id: String(reportId) } });
+          }}
+        />
+
+        <TransportMapCallout
+          visible={selectedTransportStop != null}
+          stop={selectedTransportStop}
+          bottomInset={insets.bottom + 72}
+          onClose={() => setSelectedTransportStop(null)}
+        />
       </View>
     </GestureHandlerRootView>
   );
