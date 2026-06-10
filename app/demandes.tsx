@@ -36,12 +36,16 @@ function getStatusColor(status: string): string {
   }
 }
 
+function isArchivedReport(status: string): boolean {
+  const s = normalizeStatus(status);
+  return s === 'résolu' || s === 'clôturé';
+}
+
 function matchesFilter(report: Report, filter: string): boolean {
   const status = normalizeStatus(report.status);
   if (filter === 'Tous') return true;
   if (filter === 'En attente') return status === 'en attente';
   if (filter === 'En cours') return status === 'en cours';
-  if (filter === 'Résolu') return status === 'résolu' || status === 'clôturé';
   return report.status === filter;
 }
 
@@ -160,6 +164,7 @@ export default function SignalementsList() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('Tous');
+  const [showArchives, setShowArchives] = useState(false);
 
   const loadReports = useCallback(async () => {
     if (!isAuthenticated) {
@@ -183,7 +188,9 @@ export default function SignalementsList() {
     loadReports();
   }, [loadReports]);
 
-  const filteredReports = reports.filter((r) => matchesFilter(r, activeFilter));
+  const activeReports = reports.filter((r) => !isArchivedReport(r.status));
+  const archivedReports = reports.filter((r) => isArchivedReport(r.status));
+  const filteredReports = activeReports.filter((r) => matchesFilter(r, activeFilter));
 
   const openNewReport = () => {
     if (!ensureAuthenticatedForReport(isAuthenticated, router)) return;
@@ -226,7 +233,7 @@ export default function SignalementsList() {
         ) : (
           <>
             <View style={styles.filterRow}>
-              {(['Tous', 'En attente', 'En cours', 'Résolu'] as const).map((filter) => {
+              {(['Tous', 'En attente', 'En cours'] as const).map((filter) => {
                 const isActive = activeFilter === filter;
                 return (
                   <TouchableOpacity
@@ -258,7 +265,7 @@ export default function SignalementsList() {
 
             {loading ? (
               <ActivityIndicator color={primaryColor} className='mt-10' />
-            ) : filteredReports.length === 0 ? (
+            ) : filteredReports.length === 0 && activeReports.length === 0 ? (
               <View className='mt-16 items-center'>
                 <Ionicons
                   name='document-text-outline'
@@ -267,7 +274,7 @@ export default function SignalementsList() {
                 />
                 <Text
                   className={`mt-4 text-sm font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                  Aucun signalement pour ce filtre
+                  Aucun signalement en cours
                 </Text>
                 <TouchableOpacity onPress={openNewReport} className='mt-6'>
                   <Text style={{ color: primaryColor }} className='text-sm font-bold'>
@@ -276,20 +283,75 @@ export default function SignalementsList() {
                 </TouchableOpacity>
               </View>
             ) : (
-              <View style={styles.reportList}>
-                {filteredReports.map((report, i) => (
-                  <ReportCard
-                    key={report.id ?? i}
-                    report={report}
-                    dark={dark}
-                    primaryColor={primaryColor}
-                    onPress={() =>
-                      report.id &&
-                      router.push({ pathname: '/report-chat', params: { id: String(report.id) } })
-                    }
-                  />
-                ))}
-              </View>
+              <>
+                {filteredReports.length === 0 ? (
+                  <Text
+                    className={`mb-4 text-center text-sm ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    Aucun signalement pour ce filtre
+                  </Text>
+                ) : (
+                  <View style={styles.reportList}>
+                    {filteredReports.map((report, i) => (
+                      <ReportCard
+                        key={report.id ?? i}
+                        report={report}
+                        dark={dark}
+                        primaryColor={primaryColor}
+                        onPress={() =>
+                          report.id &&
+                          router.push({
+                            pathname: '/report-chat',
+                            params: { id: String(report.id) },
+                          })
+                        }
+                      />
+                    ))}
+                  </View>
+                )}
+
+                {archivedReports.length > 0 && (
+                  <View className='mt-6'>
+                    <TouchableOpacity
+                      onPress={() => setShowArchives((v) => !v)}
+                      activeOpacity={0.8}
+                      className={`mb-3 flex-row items-center justify-between rounded-2xl px-4 py-3 ${
+                        dark ? 'bg-zinc-900' : 'bg-zinc-100'
+                      }`}>
+                      <View className='flex-row items-center gap-2'>
+                        <Ionicons name='archive-outline' size={18} color='#8E8E93' />
+                        <Text
+                          className={`text-xs font-bold tracking-wide uppercase ${
+                            dark ? 'text-zinc-400' : 'text-zinc-500'
+                          }`}>
+                          Archives ({archivedReports.length})
+                        </Text>
+                      </View>
+                      <Ionicons
+                        name={showArchives ? 'chevron-up' : 'chevron-down'}
+                        size={18}
+                        color='#8E8E93'
+                      />
+                    </TouchableOpacity>
+                    {showArchives &&
+                      archivedReports.map((report, i) => (
+                        <View key={report.id ?? i} style={{ opacity: 0.75 }}>
+                          <ReportCard
+                            report={report}
+                            dark={dark}
+                            primaryColor={primaryColor}
+                            onPress={() =>
+                              report.id &&
+                              router.push({
+                                pathname: '/report-chat',
+                                params: { id: String(report.id) },
+                              })
+                            }
+                          />
+                        </View>
+                      ))}
+                  </View>
+                )}
+              </>
             )}
           </>
         )}
