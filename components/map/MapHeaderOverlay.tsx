@@ -76,9 +76,7 @@ export default function MapHeaderOverlay({
   const iconColor = dark ? '#E4E4E7' : '#3F3F46';
 
   return (
-    <View
-      pointerEvents='box-none'
-      style={[styles.wrapper, { paddingTop: insets.top + 6 }]}>
+    <View pointerEvents='box-none' style={[styles.wrapper, { paddingTop: insets.top + 6 }]}>
       <BlurView
         intensity={dark ? 28 : 45}
         tint={dark ? 'dark' : 'light'}

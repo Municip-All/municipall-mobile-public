@@ -11,10 +11,7 @@ import {
 import type { CompostMarker, ToiletMarker } from '../../lib/map/types';
 import { fetchCompostMarkers, fetchPublicToilets } from '../../services/openDataService';
 import { reportService } from '../../services/reportService';
-import {
-  transportService,
-  type TransportStopMarker,
-} from '../../services/transportService';
+import { transportService, type TransportStopMarker } from '../../services/transportService';
 
 const TRANSPORT_REFETCH_DEBOUNCE_MS = 1200;
 const TRANSPORT_REFETCH_MIN_MOVE_M = 600;
@@ -36,9 +33,9 @@ export function useMapMarkerData({ showReports, showTransports, mapLat, mapLon }
 
   const [compostMarkers, setCompostMarkers] = useState<CompostMarker[]>([]);
   const [toiletMarkers, setToiletMarkers] = useState<ToiletMarker[]>([]);
-  const [citizenReports, setCitizenReports] = useState<Awaited<
-    ReturnType<typeof reportService.getReports>
-  >>([]);
+  const [citizenReports, setCitizenReports] = useState<
+    Awaited<ReturnType<typeof reportService.getReports>>
+  >([]);
   const [transportMarkers, setTransportMarkers] = useState<TransportStopMarker[]>([]);
   const [transportZoneCenter, setTransportZoneCenter] = useState<MapCenter | null>(null);
 
@@ -145,13 +142,7 @@ export function useMapMarkerData({ showReports, showTransports, mapLat, mapLon }
   useEffect(() => {
     if (cityLoading) return;
 
-    if (
-      !showTransports ||
-      !transportEnabled ||
-      !tenantId ||
-      mapLat == null ||
-      mapLon == null
-    ) {
+    if (!showTransports || !transportEnabled || !tenantId || mapLat == null || mapLon == null) {
       abortTransportFetch();
       lastTransportFetchCenterRef.current = null;
       setTransportMarkers([]);
@@ -190,10 +181,7 @@ export function useMapMarkerData({ showReports, showTransports, mapLat, mapLon }
     [loadTransportMarkers, showTransports, transportEnabled]
   );
 
-  const reportGroups = useMemo(
-    () => groupReportsByLocation(citizenReports),
-    [citizenReports]
-  );
+  const reportGroups = useMemo(() => groupReportsByLocation(citizenReports), [citizenReports]);
 
   const transportZoneHasDisruption = transportMarkers.some((m) => m.status === 'disrupted');
 

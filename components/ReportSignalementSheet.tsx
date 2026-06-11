@@ -1,11 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { isAxiosError } from 'axios';
-import {
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react';
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
