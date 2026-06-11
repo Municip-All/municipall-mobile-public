@@ -1,5 +1,4 @@
-import React from 'react';
-import { View, Image, Text, StyleSheet, type ImageSourcePropType } from 'react-native';
+import { Image, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
 import { Marker, type MapMarkerProps } from 'react-native-maps';
 import type { ReportStatusDot } from '../lib/reportMapTypes';
 
@@ -22,14 +21,11 @@ const STATUS_DOT_COLORS: Record<ReportStatusDot, string> = {
 
 type MapPinMarkerProps = Omit<MapMarkerProps, 'image'> & {
   kind: MapPinKind;
-  /** Pastille de statut (signalements uniquement) */
   statusDot?: ReportStatusDot;
-  /** Nombre de signalements au même point (> 1) */
   badgeCount?: number;
   size?: number;
 };
 
-/** Marqueur carte avec les PNG Municipall (`ping_composte`, `ping_toilet`, `ping_reports`, `ping_transports`). */
 export default function MapPinMarker({
   kind,
   statusDot,
