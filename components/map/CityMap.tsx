@@ -3,15 +3,55 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import * as Location from 'expo-location';
 import { DEFAULT_MAP_CENTER } from '../../lib/map/constants';
 import type { CityMapMethods } from '../../lib/map/types';
+import type { ReportLocationGroup } from '../../lib/groupReportsByLocation';
+import type { TransportStopMarker } from '../../services/transportService';
 import NativeMapView from './NativeMapView';
+import MapMarkerLayer from './MapMarkerLayer';
+import { useMapMarkerData } from './useMapMarkerData';
 
 type Coordinates = {
   latitude: number;
   longitude: number;
 };
 
-const CityMap = forwardRef<CityMapMethods>(function CityMap(_props, ref) {
+export type CityMapProps = {
+  showComposts?: boolean;
+  showToilets?: boolean;
+  showReports?: boolean;
+  showTransports?: boolean;
+  onReportGroupPress?: (group: ReportLocationGroup) => void;
+  onTransportStopPress?: (stop: TransportStopMarker) => void;
+};
+
+const CityMap = forwardRef<CityMapMethods, CityMapProps>(function CityMap(
+  {
+    showComposts = true,
+    showToilets = true,
+    showReports = true,
+    showTransports = true,
+    onReportGroupPress,
+    onTransportStopPress,
+  },
+  ref
+) {
   const [coords, setCoords] = useState<Coordinates | null>(null);
+
+  const {
+    compostMarkers,
+    toiletMarkers,
+    reportGroups,
+    transportMarkers,
+    transportZoneCenter,
+    transportZoneHasDisruption,
+    transportEnabled,
+    scheduleTransportZoneUpdate,
+    dominantReportStatusDot,
+  } = useMapMarkerData({
+    showReports,
+    showTransports,
+    mapLat: coords?.latitude,
+    mapLon: coords?.longitude,
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -52,7 +92,32 @@ const CityMap = forwardRef<CityMapMethods>(function CityMap(_props, ref) {
     );
   }
 
-  return <NativeMapView ref={ref} latitude={coords.latitude} longitude={coords.longitude} />;
+  return (
+    <NativeMapView
+      ref={ref}
+      latitude={coords.latitude}
+      longitude={coords.longitude}
+      onRegionChangeComplete={(region) => {
+        scheduleTransportZoneUpdate({ lat: region.latitude, lon: region.longitude });
+      }}>
+      <MapMarkerLayer
+        showComposts={showComposts}
+        showToilets={showToilets}
+        showReports={showReports}
+        showTransports={showTransports}
+        transportEnabled={transportEnabled}
+        compostMarkers={compostMarkers}
+        toiletMarkers={toiletMarkers}
+        reportGroups={reportGroups}
+        transportMarkers={transportMarkers}
+        transportZoneCenter={transportZoneCenter}
+        transportZoneHasDisruption={transportZoneHasDisruption}
+        getReportStatusDot={dominantReportStatusDot}
+        onReportGroupPress={onReportGroupPress}
+        onTransportStopPress={onTransportStopPress}
+      />
+    </NativeMapView>
+  );
 });
 
 export default CityMap;

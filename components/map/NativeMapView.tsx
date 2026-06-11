@@ -1,10 +1,5 @@
 import * as Location from 'expo-location';
-import {
-  forwardRef,
-  useCallback,
-  useImperativeHandle,
-  useRef,
-} from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useRef, type ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 import MapView, { type Region } from 'react-native-maps';
 import type { CityMapMethods } from '../../lib/map/types';
@@ -12,6 +7,8 @@ import type { CityMapMethods } from '../../lib/map/types';
 type Props = {
   latitude: number;
   longitude: number;
+  children?: ReactNode;
+  onRegionChangeComplete?: (region: Region) => void;
 };
 
 const REGION_DELTA = 0.05;
@@ -20,7 +17,7 @@ const MIN_DELTA = 0.002;
 const MAX_DELTA = 2;
 
 const NativeMapView = forwardRef<CityMapMethods, Props>(function NativeMapView(
-  { latitude, longitude },
+  { latitude, longitude, children, onRegionChangeComplete },
   ref
 ) {
   const mapRef = useRef<MapView>(null);
@@ -81,8 +78,10 @@ const NativeMapView = forwardRef<CityMapMethods, Props>(function NativeMapView(
       showsUserLocation
       onRegionChangeComplete={(region) => {
         regionRef.current = region;
-      }}
-    />
+        onRegionChangeComplete?.(region);
+      }}>
+      {children}
+    </MapView>
   );
 });
 

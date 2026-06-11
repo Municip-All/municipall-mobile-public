@@ -1,6 +1,6 @@
 import 'react-native-reanimated';
 import React, { useEffect, useState } from 'react';
-import { Slot, Redirect, usePathname } from 'expo-router';
+import { Stack, Redirect, usePathname } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -80,8 +80,13 @@ export default function RootLayout() {
             <BrandingSync />
             <PushNotificationRegistrar />
             {needsOnboarding && pathname !== '/onboarding' ? <Redirect href='/onboarding' /> : null}
-            {/* Slot au lieu de Stack : react-native-screens + New Arch → crash setColor sur RCTView */}
-            <Slot />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                gestureEnabled: true,
+                animation: 'slide_from_right',
+              }}
+            />
           </AuthProvider>
         </CityProvider>
       </ThemeProvider>
