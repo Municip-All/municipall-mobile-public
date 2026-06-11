@@ -12,7 +12,7 @@ type ParisRecord = {
 export async function fetchCompostMarkers(limit = 30): Promise<CompostMarker[]> {
   const response = await axios.get<{ results: ParisRecord[] }>(
     `${PARIS_API}/dechets-menagers-points-dapport-volontaire-composteurs/records`,
-    { params: { limit } },
+    { params: { limit } }
   );
 
   const markers: CompostMarker[] = [];
@@ -36,7 +36,7 @@ export async function fetchCompostMarkers(limit = 30): Promise<CompostMarker[]> 
 export async function fetchPublicToilets(limit = 50): Promise<ToiletMarker[]> {
   const response = await axios.get<{ results: ParisRecord[] }>(
     `${PARIS_API}/sanisettesparis/records`,
-    { params: { limit } },
+    { params: { limit } }
   );
 
   const markers: ToiletMarker[] = [];
