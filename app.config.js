@@ -44,7 +44,7 @@ if (!plugins.some((p) => Array.isArray(p) && p[0] === 'expo-build-properties')) 
     'expo-build-properties',
     {
       ios: {
-        deploymentTarget: '15.1',
+        deploymentTarget: '17.0',
       },
     },
   ]);
@@ -62,6 +62,7 @@ const iosBundleIdentifier =
 /** @type {import('expo/config').ExpoConfig} */
 module.exports = {
   ...appJson.expo,
+  // Reanimated 4 + Expo 54 exigent la New Architecture (pod install échoue sinon).
   newArchEnabled: true,
   ...(iosPersonalTeam
     ? {
