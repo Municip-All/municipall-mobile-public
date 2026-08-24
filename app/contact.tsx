@@ -125,6 +125,7 @@ const ContactScreen: React.FC = () => {
     } catch (e) {
       console.error(e);
       setTickets([]);
+      Alert.alert('Erreur', 'Impossible de charger vos conversations.');
     } finally {
       setLoading(false);
     }

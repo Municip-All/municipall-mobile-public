@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { Ionicons } from '@expo/vector-icons';
 import BottomBar from '@components/bottombar';
@@ -21,6 +21,7 @@ export default function Travaux() {
         setWorks(response.data);
       } catch (err) {
         console.error('Failed to fetch works', err);
+        Alert.alert('Erreur', 'Impossible de charger les travaux.');
       } finally {
         setIsLoading(false);
       }

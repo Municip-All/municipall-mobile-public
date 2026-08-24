@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -59,6 +60,7 @@ export default function ContactChatScreen() {
         });
       } catch (e) {
         console.error(e);
+        if (!silent) Alert.alert('Erreur', 'Impossible de charger la conversation.');
       } finally {
         if (!silent) setLoading(false);
       }
@@ -88,6 +90,7 @@ export default function ContactChatScreen() {
       setReply('');
     } catch (e) {
       console.error(e);
+      Alert.alert('Erreur', "Impossible d'envoyer votre message.");
     } finally {
       setSending(false);
     }
