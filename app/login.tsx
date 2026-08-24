@@ -186,7 +186,14 @@ const LoginScreen: React.FC = () => {
               </View>
             </View>
 
-            <TouchableOpacity className='mt-1 mb-8 self-end pr-1'>
+            <TouchableOpacity
+              className='mt-1 mb-8 self-end pr-1'
+              onPress={() => Alert.alert(
+                'Mot de passe oublié',
+                'Contactez votre mairie pour réinitialiser votre mot de passe.',
+                [{ text: 'OK' }]
+              )}
+            >
               <Text className={`text-sm font-semibold`} style={{ color: primaryColor }}>
                 Mot de passe oublié ?
               </Text>
