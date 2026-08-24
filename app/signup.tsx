@@ -29,6 +29,7 @@ import BottomBar from '@components/bottombar';
 import LegalConsentBlock from '@components/LegalConsentBlock';
 import LegalFooterLinks from '@components/LegalFooterLinks';
 import { recordLegalConsent } from '../services/legalConsent';
+import type { IconName, KeyboardType } from '../lib/types';
 
 const SignupScreen: React.FC = () => {
   const { dark, primaryColor, colors, layoutStyles } = useAppTheme();
@@ -104,7 +105,7 @@ const response = await apiClient.post('/auth/signup', payload);
 
       Alert.alert('Succès', `Bienvenue ${user.name} ! Votre compte est créé.`);
       router.replace('/home');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Signup error', error);
       Alert.alert(
         "Échec de l'inscription",
@@ -236,7 +237,7 @@ const response = await apiClient.post('/auth/signup', payload);
                   <View
                     className={`flex-row items-center rounded-2xl border px-4 py-3 ${dark ? 'border-white/10 bg-black/50' : 'border-blue-50 bg-white'}`}>
                     <Ionicons
-                      name={input.icon as any}
+                      name={input.icon as IconName}
                       size={20}
                       color={dark ? '#9CA3AF' : '#64748B'}
                       className='mr-2'
@@ -245,7 +246,7 @@ const response = await apiClient.post('/auth/signup', payload);
                       value={input.value}
                       onChangeText={input.setter}
                       placeholder={input.placeholder}
-                      keyboardType={input.keyboardType as any}
+                      keyboardType={input.keyboardType as KeyboardType}
                       secureTextEntry={input.secure}
                       autoCapitalize='none'
                       placeholderTextColor={dark ? '#6B7280' : '#94A3B8'}

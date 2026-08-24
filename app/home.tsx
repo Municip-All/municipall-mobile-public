@@ -18,6 +18,7 @@ import BottomBar from '@components/bottombar';
 import BrandedLogo from '@components/BrandedLogo';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { IconName, RouteHref } from '../lib/types';
 
 export default function Home() {
   const { dark, primaryColor, classes, brand, layoutStyles } = useAppTheme();
@@ -148,12 +149,12 @@ export default function Home() {
           ].map((item, i) => (
             <TouchableOpacity
               key={i}
-              onPress={() => router.push(item.path as any)}
+              onPress={() => router.push(item.path as RouteHref)}
               className='w-[18%] min-w-[64px] items-center'>
               <View
                 className='mb-2 h-16 w-16 items-center justify-center rounded-2xl shadow-sm'
                 style={{ backgroundColor: dark ? '#1C1C1E' : '#FFFFFF' }}>
-                <Ionicons name={item.icon as any} size={28} color={item.color} />
+                <Ionicons name={item.icon as IconName} size={28} color={item.color} />
               </View>
               <Text className={classes.caption}>{item.label}</Text>
             </TouchableOpacity>
@@ -177,7 +178,7 @@ export default function Home() {
           highlights.map((item) => (
             <TouchableOpacity
               key={item.id}
-              onPress={() => router.push(item.path as any)}
+              onPress={() => router.push(item.path as RouteHref)}
               className={`mb-4 ${classes.cardRounded}`}>
               <View className='flex-row p-5'>
                 <View

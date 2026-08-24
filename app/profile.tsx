@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { pickProofImage } from '../utils/pickProofImage';
 import apiClient from '../services/apiClient';
+import type { IconName, RouteHref, ThemeId } from '../lib/types';
 import { cityService } from '../services/cityService';
 import { isPartnerCity, partnerCityName } from '../lib/partnerCities';
 import { cityDisplayName } from '../lib/cityDisplay';
@@ -182,7 +183,7 @@ export default function Profile() {
             <View
               key={i}
               className={`flex-1 items-center rounded-[24px] p-4 ${dark ? 'bg-zinc-900' : 'bg-white'} mx-1 border border-zinc-100 shadow-sm dark:border-zinc-800`}>
-              <Ionicons name={stat.icon as any} size={20} color={stat.color} />
+              <Ionicons name={stat.icon as IconName} size={20} color={stat.color} />
               <Text className={`mt-1 text-lg font-black ${dark ? 'text-white' : 'text-black'}`}>
                 {stat.value}
               </Text>
@@ -264,10 +265,10 @@ export default function Profile() {
           ].map((option) => (
             <TouchableOpacity
               key={option.id}
-              onPress={() => setTheme(option.id as any)}
+              onPress={() => setTheme(option.id as ThemeId)}
               className={`flex-1 flex-row items-center justify-center rounded-xl py-3 ${theme === option.id ? (dark ? 'bg-zinc-800' : 'bg-zinc-100') : ''}`}>
               <Ionicons
-                name={option.icon as any}
+                name={option.icon as IconName}
                 size={16}
                 color={theme === option.id ? primaryColor : dark ? '#71717A' : '#A1A1AA'}
               />
@@ -313,13 +314,13 @@ export default function Profile() {
           ].map((item, i, arr) => (
             <TouchableOpacity
               key={i}
-              onPress={() => router.push(item.route as any)}
+              onPress={() => router.push(item.route as RouteHref)}
               className={`flex-row items-center justify-between p-4 ${i !== arr.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
               <View className='flex-row items-center'>
                 <View
                   className='mr-3 h-8 w-8 items-center justify-center rounded-lg'
                   style={{ backgroundColor: `${item.color}15` }}>
-                  <Ionicons name={item.icon as any} size={18} color={item.color} />
+                  <Ionicons name={item.icon as IconName} size={18} color={item.color} />
                 </View>
                 <Text
                   className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
@@ -365,13 +366,13 @@ export default function Profile() {
           ].map((item, i, arr) => (
             <TouchableOpacity
               key={item.route}
-              onPress={() => router.push(item.route as any)}
+              onPress={() => router.push(item.route as RouteHref)}
               className={`flex-row items-center justify-between p-4 ${i !== arr.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
               <View className='flex-row items-center'>
                 <View
                   className='mr-3 h-8 w-8 items-center justify-center rounded-lg'
                   style={{ backgroundColor: `${item.color}15` }}>
-                  <Ionicons name={item.icon as any} size={18} color={item.color} />
+                  <Ionicons name={item.icon as IconName} size={18} color={item.color} />
                 </View>
                 <Text
                   className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>

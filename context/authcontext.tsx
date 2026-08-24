@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           } catch (e) {
             console.warn('Failed to refresh user profile from server', e);
             // If token is expired (401), we should log out
-            if ((e as any)?.response?.status === 401) {
+            if (e && typeof e === 'object' && 'response' in e && (e as { response?: { status?: number } }).response?.status === 401) {
               await logout();
             }
           }
