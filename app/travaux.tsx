@@ -5,20 +5,20 @@ import { Ionicons } from '@expo/vector-icons';
 import BottomBar from '@components/bottombar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import apiClient from '../services/apiClient';
+import { constructionWorksService, ConstructionWork } from '../services/constructionWorksService';
 
 export default function Travaux() {
   const { dark, primaryColor, layoutStyles } = useAppTheme();
   const insets = useSafeAreaInsets();
 
-  const [works, setWorks] = React.useState<any[]>([]);
+  const [works, setWorks] = React.useState<ConstructionWork[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
     const fetchWorks = async () => {
       try {
-        const response = await apiClient.get('construction-works');
-        setWorks(response.data);
+        const data = await constructionWorksService.getWorks();
+        setWorks(data);
       } catch (err) {
         console.error('Failed to fetch works', err);
         Alert.alert('Erreur', 'Impossible de charger les travaux.');
