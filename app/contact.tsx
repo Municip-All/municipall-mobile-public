@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
@@ -111,6 +112,7 @@ const ContactScreen: React.FC = () => {
   const [body, setBody] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showArchives, setShowArchives] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadTickets = useCallback(async () => {
     if (!isAuthenticated) {
@@ -133,6 +135,12 @@ const ContactScreen: React.FC = () => {
 
   useEffect(() => {
     loadTickets();
+  }, [loadTickets]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadTickets();
+    setRefreshing(false);
   }, [loadTickets]);
 
   const contactEmail = config?.contact?.email?.trim();
@@ -217,7 +225,8 @@ const ContactScreen: React.FC = () => {
             paddingHorizontal: 20,
           }}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps='handled'>
+          keyboardShouldPersistTaps='handled'
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
           <View className='mb-8'>
             <Text className={classes.eyebrow}>Assistance</Text>
             <Text className={classes.title}>Contact</Text>

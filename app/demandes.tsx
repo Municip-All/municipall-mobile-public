@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
@@ -166,6 +167,7 @@ export default function SignalementsList() {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('Tous');
   const [showArchives, setShowArchives] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadReports = useCallback(async () => {
     if (!isAuthenticated) {
@@ -190,6 +192,12 @@ export default function SignalementsList() {
     loadReports();
   }, [loadReports]);
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadReports();
+    setRefreshing(false);
+  }, [loadReports]);
+
   const activeReports = reports.filter((r) => !isArchivedReport(r.status));
   const archivedReports = reports.filter((r) => isArchivedReport(r.status));
   const filteredReports = activeReports.filter((r) => matchesFilter(r, activeFilter));
@@ -207,7 +215,8 @@ export default function SignalementsList() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
         <View className='mb-6'>
           <Text
             className={`text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>

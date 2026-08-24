@@ -13,4 +13,5 @@ function apiBaseUrl(): string {
 export const Config = {
   API_BASE_URL: apiBaseUrl(),
   DEFAULT_TENANT_ID: process.env.EXPO_PUBLIC_DEFAULT_TENANT_ID || 'le-kremlin-bicetre',
+  WEBSITE_URL: 'https://municipall.dev',
 };

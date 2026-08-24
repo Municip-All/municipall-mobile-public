@@ -41,6 +41,7 @@ export default function Profile() {
   >([]);
   const [showConvinceModal, setShowConvinceModal] = useState(false);
   const [userStats, setUserStats] = useState({ reports: 0, participations: 0, points: 0 });
+  const [profileLoading, setProfileLoading] = useState(true);
 
   React.useEffect(() => {
     const loadData = async () => {
@@ -53,14 +54,29 @@ export default function Profile() {
       } catch (err) {
         console.error('Failed to load profile data', err);
         Alert.alert('Erreur', 'Impossible de charger les données du profil.');
+      } finally {
+        setProfileLoading(false);
       }
     };
     loadData();
   }, []);
 
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, router]);
+
   if (!isAuthenticated || !user) {
-    router.replace('/login');
     return null;
+  }
+
+  if (profileLoading) {
+    return (
+      <View style={layoutStyles.page} className="items-center justify-center">
+        <ActivityIndicator size="large" color={primaryColor} />
+      </View>
+    );
   }
 
   const handleUpdateCity = async (cityId: string) => {

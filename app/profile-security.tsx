@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -30,8 +30,13 @@ export default function ProfileSecurityScreen() {
   const [showNew, setShowNew] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, router]);
+
   if (!isAuthenticated) {
-    router.replace('/login');
     return null;
   }
 
