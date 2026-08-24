@@ -16,7 +16,6 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor to inject Auth token if available
 apiClient.interceptors.request.use(
   async (config) => {
     config.headers['x-tenant-id'] = activeTenantId;
@@ -31,6 +30,17 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error?.response?.status === 401) {
+      await AsyncStorage.removeItem('user_token');
+      await AsyncStorage.removeItem('user_data');
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default apiClient;
