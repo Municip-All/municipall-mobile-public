@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -56,6 +57,7 @@ export default function ReportChatScreen() {
         });
       } catch (e) {
         console.error(e);
+        if (!silent) Alert.alert('Erreur', 'Impossible de charger le signalement.');
       } finally {
         if (!silent) setLoading(false);
       }
@@ -85,6 +87,7 @@ export default function ReportChatScreen() {
       setReply('');
     } catch (e) {
       console.error(e);
+      Alert.alert('Erreur', "Impossible d'envoyer votre message.");
     } finally {
       setSending(false);
     }

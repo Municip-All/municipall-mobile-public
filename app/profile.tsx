@@ -52,6 +52,7 @@ export default function Profile() {
         setAvailableCities(cities);
       } catch (err) {
         console.error('Failed to load profile data', err);
+        Alert.alert('Erreur', 'Impossible de charger les données du profil.');
       }
     };
     loadData();

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
@@ -179,6 +180,7 @@ export default function SignalementsList() {
     } catch (error) {
       console.error(error);
       setReports([]);
+      Alert.alert('Erreur', 'Impossible de charger vos signalements.');
     } finally {
       setLoading(false);
     }
