@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Config } from '../constants/Config';
 import {
   View,
   Text,
@@ -87,14 +88,15 @@ const SignupScreen: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await apiClient.post('auth/signup', {
+      const payload = {
         name: username,
         surname: '',
         email,
         password,
         phone,
-        cityId: selectedCity, // Now passing the resident city
-      });
+        cityId: selectedCity,
+      };
+const response = await apiClient.post('/auth/signup', payload);
 
       const { access_token, user } = response.data;
       await recordLegalConsent();
