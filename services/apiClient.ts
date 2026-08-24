@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Config } from '../constants/Config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
 let activeTenantId = Config.DEFAULT_TENANT_ID;
 
@@ -38,6 +39,9 @@ apiClient.interceptors.response.use(
     if (error?.response?.status === 401) {
       await AsyncStorage.removeItem('user_token');
       await AsyncStorage.removeItem('user_data');
+      try {
+        router.replace('/login');
+      } catch {}
     }
     return Promise.reject(error);
   }
