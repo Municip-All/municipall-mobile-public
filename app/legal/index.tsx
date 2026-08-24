@@ -9,6 +9,7 @@ import ProfileScreenHeader from '@components/ProfileScreenHeader';
 import { LEGAL_HUB_ITEMS } from '../../constants/legalContent';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
 import { useCityLegalContext } from '@hooks/useCityLegalContext';
+import type { RouteHref } from '../../lib/types';
 
 export default function LegalHubScreen() {
   const { dark, classes, colors, layoutStyles } = useAppTheme();
@@ -48,7 +49,7 @@ export default function LegalHubScreen() {
           {items.map((item, i) => (
             <TouchableOpacity
               key={item.id}
-              onPress={() => router.push(item.route as any)}
+              onPress={() => router.push(item.route as RouteHref)}
               className={`flex-row items-center p-4 ${i < items.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
               <View
                 className='mr-3 h-10 w-10 items-center justify-center rounded-xl'

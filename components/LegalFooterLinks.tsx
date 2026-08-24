@@ -2,13 +2,14 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
+import type { RouteHref } from '../lib/types';
 
 export default function LegalFooterLinks() {
   const router = useRouter();
   const { dark, primaryColor } = useAppTheme();
 
   const Item = ({ label, href }: { label: string; href: string }) => (
-    <TouchableOpacity onPress={() => router.push(href as any)} className='px-2 py-1'>
+    <TouchableOpacity onPress={() => router.push(href as RouteHref)} className='px-2 py-1'>
       <Text className='text-[11px] font-semibold' style={{ color: primaryColor }}>
         {label}
       </Text>

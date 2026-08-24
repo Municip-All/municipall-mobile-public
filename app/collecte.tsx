@@ -8,6 +8,7 @@ import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { getNextCollection, formatCollectionDay } from '../utils/wasteSchedule';
+import type { IconName } from '../lib/types';
 
 export default function Collecte() {
   const { dark, primaryColor, layoutStyles } = useAppTheme();
@@ -79,7 +80,7 @@ export default function Collecte() {
                 <View
                   className='mt-3 flex-row items-center self-start rounded-full px-3 py-1'
                   style={{ backgroundColor: `${next.service.color}20` }}>
-                  <Ionicons name={next.service.icon as any} size={14} color={next.service.color} />
+                  <Ionicons name={next.service.icon as IconName} size={14} color={next.service.color} />
                   <Text className='ml-2 text-xs font-bold' style={{ color: next.service.color }}>
                     {next.service.type}
                   </Text>
@@ -102,7 +103,7 @@ export default function Collecte() {
               <View
                 className='mr-4 h-12 w-12 items-center justify-center rounded-2xl'
                 style={{ backgroundColor: `${item.color}15` }}>
-                <Ionicons name={item.icon as any} size={24} color={item.color} />
+                <Ionicons name={item.icon as IconName} size={24} color={item.color} />
               </View>
               <View className='flex-1'>
                 <Text className={`text-base font-bold ${dark ? 'text-white' : 'text-black'}`}>

@@ -4,6 +4,7 @@ import ExpoCheckbox from 'expo-checkbox';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { LEGAL_ENTITY } from '../constants/legalEntity';
+import type { RouteHref } from '../lib/types';
 
 type Props = {
   acceptedCgu: boolean;
@@ -41,7 +42,7 @@ export default function LegalConsentBlock({
 
   const link = (text: string, href: string) => (
     <Text
-      onPress={() => router.push(href as any)}
+      onPress={() => router.push(href as RouteHref)}
       className='font-bold underline'
       style={{ color: primaryColor }}>
       {text}
