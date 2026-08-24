@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '@hooks/useAppTheme';
-import { feedbackService, FeedbackResourceType, UserRating } from '../services/feedbackService';
+import { feedbackService, FeedbackResourceType } from '../services/feedbackService';
+import type { UserRating } from '../lib/types';
 
 type SatisfactionPromptProps = {
   resourceType: FeedbackResourceType;

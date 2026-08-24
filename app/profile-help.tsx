@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useAuth } from '@context/authcontext';
 import ProfileScreenHeader from '@components/ProfileScreenHeader';
+import { Config } from '../constants/Config';
 
 const FAQ = [
   {
@@ -28,8 +29,13 @@ export default function ProfileHelpScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, router]);
+
   if (!isAuthenticated) {
-    router.replace('/login');
     return null;
   }
 
@@ -50,7 +56,7 @@ export default function ProfileHelpScreen() {
       label: 'Site Municipall',
       icon: 'globe-outline' as const,
       color: '#FF9500',
-      onPress: () => Linking.openURL('https://municipall.dev'),
+      onPress: () => Linking.openURL(Config.WEBSITE_URL),
     },
   ];
 
