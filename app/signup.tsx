@@ -186,7 +186,7 @@ const SignupScreen: React.FC = () => {
               Rejoignez {appName}.
             </Text>
             <Text
-              className={`text-center text-sm font-medium ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
+              className={`text-center text-sm font-medium ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
               Créez votre compte citoyen
             </Text>
           </View>
@@ -233,7 +233,7 @@ const SignupScreen: React.FC = () => {
               ].map((input, index) => (
                 <View key={index} className='mb-4'>
                   <Text
-                    className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
+                    className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>
                     {input.label}
                   </Text>
                   <View
@@ -260,12 +260,12 @@ const SignupScreen: React.FC = () => {
 
               <View className='mt-2 mb-6'>
                 <Text
-                  className={`mb-3 ml-1 text-xs font-semibold ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
+                  className={`mb-3 ml-1 text-xs font-semibold ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>
                   MA VILLE DE RÉSIDENCE
                 </Text>
                 {citiesError ? (
                   <View className='items-center py-3'>
-                    <Text className={`text-sm ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
+                    <Text className={`text-sm ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
                       Impossible de charger les villes.
                     </Text>
                     <TouchableOpacity

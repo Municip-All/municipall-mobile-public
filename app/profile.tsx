@@ -253,7 +253,7 @@ export default function Profile() {
           className={`mb-8 overflow-hidden rounded-[24px] ${dark ? 'bg-zinc-900' : 'bg-white'} border border-zinc-100 p-5 shadow-sm dark:border-zinc-800`}>
           <View className='mb-4 flex-row items-center justify-between'>
             <View className='flex-row items-center'>
-              <View className='mr-3 h-10 w-10 items-center justify-center rounded-xl bg-green-50'>
+              <View className={`mr-3 h-10 w-10 items-center justify-center rounded-xl ${dark ? 'bg-green-900/30' : 'bg-green-50'}`}>
                 <Ionicons name='business' size={20} color='#34C759' />
               </View>
               <View>
