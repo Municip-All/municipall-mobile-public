@@ -111,7 +111,11 @@ const SignupScreen: React.FC = () => {
     } catch {
       Alert.alert(
         "Échec de l'inscription",
-        'Une erreur est survenue lors de la création du compte.'
+        'Une erreur est survenue lors de la création du compte.',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          { text: 'Réessayer', onPress: handleRegister },
+        ]
       );
     } finally {
       setIsSubmitting(false);
