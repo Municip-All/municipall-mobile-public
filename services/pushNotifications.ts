@@ -121,7 +121,7 @@ export async function syncPushTokenWithBackend(): Promise<boolean> {
 
     await apiClient.post('users/push-token', { expoPushToken: token });
     return true;
-  } catch (e) {
+  } catch (e: unknown) {
     console.warn('Push token sync failed', e);
     return false;
   }
