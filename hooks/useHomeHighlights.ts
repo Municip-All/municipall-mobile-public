@@ -41,10 +41,13 @@ export function useHomeHighlights(config: CityConfig | null) {
           ? eventsService.getEvents().catch(() => [])
           : Promise.resolve([]),
       ]);
-      setHighlights(buildHomeHighlights(cfg, works, events));
-    } catch (e) {
-      console.error('useHomeHighlights:', e);
-      setHighlights(buildHomeHighlights(cfg, [], []));
+      if (inFlightRef.current) {
+        setHighlights(buildHomeHighlights(cfg, works, events));
+      }
+    } catch {
+      if (inFlightRef.current) {
+        setHighlights(buildHomeHighlights(cfg, [], []));
+      }
     } finally {
       inFlightRef.current = false;
       if (!silent) setLoading(false);
