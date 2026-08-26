@@ -67,9 +67,9 @@ export default function ProfileSecurityScreen() {
       await updateUserPassword({ current, new: newPassword, confirm });
       Alert.alert('Succès', 'Votre mot de passe a été mis à jour.');
       router.back();
-    } catch (e) {
+    } catch (e: unknown) {
       const msg =
-        (e as Error)?.message === 'PASSWORD_MISMATCH'
+        (e instanceof Error && e.message === 'PASSWORD_MISMATCH')
           ? 'La confirmation ne correspond pas.'
           : 'Vérifiez votre mot de passe actuel et réessayez.';
       Alert.alert('Erreur', msg);

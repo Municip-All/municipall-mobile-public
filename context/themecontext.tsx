@@ -28,7 +28,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           setPref(saved);
           nativewind.setColorScheme(saved);
         }
-      } catch (e) {
+      } catch (e: unknown) {
         console.warn('Failed to load theme preference:', e);
       }
     })();
@@ -39,7 +39,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     async (t: ThemePreference) => {
       try {
         await AsyncStorage.setItem(STORAGE_KEY, t);
-      } catch (e) {
+      } catch (e: unknown) {
         console.warn('Failed to persist theme preference:', e);
       }
       setPref(t);

@@ -116,7 +116,7 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
         const loc = await getReportLocation();
         setReportCoords({ lat: loc.lat, lon: loc.lon });
         setAddress(loc.addressLabel);
-      } catch (e) {
+      } catch (e: unknown) {
         setReportCoords(null);
         if (e instanceof LocationPermissionError) {
           setAddress('');
@@ -182,7 +182,7 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
         Alert.alert('Merci !', 'Votre signalement a été enregistré.');
         resetForm();
         closeWithoutConfirm();
-      } catch (e) {
+      } catch (e: unknown) {
         if (e instanceof LocationPermissionError) {
           Alert.alert(
             'Localisation requise',
