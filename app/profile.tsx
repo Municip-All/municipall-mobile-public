@@ -17,7 +17,6 @@ import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { pickProofImage } from '../utils/pickProofImage';
-import apiClient from '../services/apiClient';
 import type { IconName, RouteHref, ThemeId } from '../lib/types';
 import { cityService } from '../services/cityService';
 import { isPartnerCity, partnerCityName } from '../lib/partnerCities';
@@ -25,7 +24,7 @@ import { cityDisplayName } from '../lib/cityDisplay';
 import ConvinceMayorModal from '@components/ConvinceMayorModal';
 import CityNotListedChip from '@components/CityNotListedChip';
 import { openReferCityEmail } from '../lib/referCity';
-import { uploadUserAvatar } from '../services/userProfileService';
+import { uploadUserAvatar, getUserStats, updateUserCity } from '../services/userProfileService';
 import { isPersistentAvatarUrl } from '../utils/avatarImage';
 
 export default function Profile() {
@@ -48,13 +47,12 @@ export default function Profile() {
     setProfileLoading(true);
     setProfileError(null);
     try {
-      const statsResp = await apiClient.get('users/stats');
-      if (!signal?.cancelled && statsResp.data) setUserStats(statsResp.data);
+      const stats = await getUserStats();
+      if (!signal?.cancelled) setUserStats(stats);
 
       const cities = await cityService.getAllCities();
       if (!signal?.cancelled) setAvailableCities(cities);
-    } catch (err) {
-      console.error('Failed to load profile data', err);
+    } catch (err: unknown) {
       if (!signal?.cancelled) setProfileError('Impossible de charger les données du profil.');
     } finally {
       if (!signal?.cancelled) setProfileLoading(false);
@@ -108,7 +106,7 @@ export default function Profile() {
 
   const handleUpdateCity = async (cityId: string) => {
     try {
-      await apiClient.post('users/profile', { cityId });
+      await updateUserCity(cityId);
       updateUser({ ...user, cityId });
       await applyBrandingCity(cityId);
       setShowCityPicker(false);
