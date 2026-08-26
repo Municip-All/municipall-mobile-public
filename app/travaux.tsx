@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { Ionicons } from '@expo/vector-icons';
 import BottomBar from '@components/BottomBar';
@@ -22,7 +22,7 @@ export default function Travaux() {
     try {
       const data = await constructionWorksService.getWorks();
       if (!signal?.cancelled) setWorks(data);
-    } catch (err: unknown) {
+    } catch {
       if (!signal?.cancelled) setError('Impossible de charger les travaux.');
     } finally {
       if (!signal?.cancelled) setIsLoading(false);
@@ -99,7 +99,7 @@ export default function Travaux() {
               <Text className={`mt-4 text-center font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
                 {error}
               </Text>
-              <TouchableOpacity onPress={() => loadWorks()} className='mt-4'>
+              <TouchableOpacity onPress={() => loadWorks()} className='mt-4' accessibilityRole='button' accessibilityLabel='Réessayer le chargement'>
                 <Text style={{ color: primaryColor }} className='font-bold'>Réessayer</Text>
               </TouchableOpacity>
             </View>

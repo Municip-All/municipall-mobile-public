@@ -243,7 +243,9 @@ const ContactScreen: React.FC = () => {
             <TouchableOpacity
               onPress={openEmail}
               disabled={!contactEmail}
-              className={`mb-3 flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactEmail ? 'opacity-50' : ''}`}>
+              className={`mb-3 flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactEmail ? 'opacity-50' : ''}`}
+              accessibilityRole='button'
+              accessibilityLabel={contactEmail ? `Envoyer un e-mail à ${contactEmail}` : 'E-mail non renseigné'}>
               <Ionicons name='mail-outline' size={20} color={primaryColor} />
               <Text
                 className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-white' : 'text-black'}`}>

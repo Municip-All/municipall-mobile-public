@@ -67,7 +67,7 @@ const SignupScreen: React.FC = () => {
           if (cities.length > 0) setSelectedCity(cities[0].id);
           setCitiesError(false);
         }
-      } catch (err: unknown) {
+      } catch {
         if (!cancelled) setCitiesError(true);
       }
     };
@@ -108,7 +108,7 @@ const SignupScreen: React.FC = () => {
 
       Alert.alert('Succès', `Bienvenue ${user.name} ! Votre compte est créé.`);
       router.replace('/home');
-    } catch (error: unknown) {
+    } catch {
       Alert.alert(
         "Échec de l'inscription",
         'Une erreur est survenue lors de la création du compte.'

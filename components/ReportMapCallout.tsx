@@ -85,10 +85,11 @@ export default function ReportMapSummarySheet({
   onClose,
   onOpenReport,
 }: ReportMapSummarySheetProps) {
-  if (!visible) return null;
-
   const { colorScheme } = useTheme();
   const dark = colorScheme === 'dark';
+
+  if (!visible) return null;
+
   const multiple = reports.length > 1;
 
   return (
