@@ -179,7 +179,7 @@ export default function SignalementsList() {
     try {
       const data = await reportService.getReports();
       if (!signal?.cancelled) setReports(data);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
       if (!signal?.cancelled) {
         setReports([]);

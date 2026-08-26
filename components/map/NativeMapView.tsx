@@ -61,7 +61,7 @@ const NativeMapView = forwardRef<CityMapMethods, Props>(function NativeMapView(
             };
             regionRef.current = next;
             mapRef.current?.animateToRegion(next, 400);
-          } catch (error) {
+          } catch (error: unknown) {
             console.error('NativeMapView: center on user failed', error);
           }
         })();
