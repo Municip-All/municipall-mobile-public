@@ -19,7 +19,7 @@ import { BlurView } from 'expo-blur';
 import BottomBar from '@components/BottomBar';
 import BrandedLogo from '@components/BrandedLogo';
 import LegalFooterLinks from '@components/LegalFooterLinks';
-import apiClient from '../services/apiClient';
+import { authService } from '../services/authService';
 
 const LoginScreen: React.FC = () => {
   const { dark, primaryColor, classes, colors, brand, layoutStyles } = useAppTheme();
@@ -44,12 +44,7 @@ const LoginScreen: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await apiClient.post('/auth/login', {
-        email,
-        password,
-      });
-
-      const { access_token, user } = response.data;
+      const { access_token, user } = await authService.login(email, password);
       await login(access_token, user); // Update context state and persist
 
       if (redirectTo && typeof redirectTo === 'string') {

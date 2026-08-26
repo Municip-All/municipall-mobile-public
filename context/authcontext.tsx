@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import apiClient from '../services/apiClient';
+import { authService } from '../services/authService';
 import { resolveAvatarForUser } from '../utils/avatarImage';
 import { onSessionExpired } from '../services/sessionEvents';
 
@@ -73,12 +73,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setIsAuthenticated(true);
 
           try {
-            const response = await apiClient.get('auth/me');
-            if (response.data) {
-              const freshUser = await resolveAvatarForUser(response.data as User);
-              setUser(freshUser);
-              await AsyncStorage.setItem('user_data', JSON.stringify(userForStorage(freshUser)));
-            }
+            const freshUser = await authService.me();
+            const resolved = await resolveAvatarForUser(freshUser);
+            setUser(resolved);
+            await AsyncStorage.setItem('user_data', JSON.stringify(userForStorage(resolved)));
           } catch (e) {
             console.warn('Failed to refresh user profile from server', e);
             if (e && typeof e === 'object' && 'response' in e && (e as { response?: { status?: number } }).response?.status === 401) {

@@ -18,7 +18,7 @@ import { useCity } from '@context/citycontext';
 import { useAuth } from '@context/authcontext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import apiClient from '../services/apiClient';
+import { authService } from '../services/authService';
 import { cityService } from '../services/cityService';
 import { cityDisplayName } from '../lib/cityDisplay';
 import ConvinceMayorModal from '@components/ConvinceMayorModal';
@@ -103,9 +103,7 @@ const SignupScreen: React.FC = () => {
         phone,
         cityId: selectedCity,
       };
-const response = await apiClient.post('/auth/signup', payload);
-
-      const { access_token, user } = response.data;
+      const { access_token, user } = await authService.signup(payload);
       await recordLegalConsent();
       await authLogin(access_token, user);
 
