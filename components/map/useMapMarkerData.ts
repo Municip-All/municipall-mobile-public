@@ -59,6 +59,10 @@ export function useMapMarkerData({ showReports, showTransports, mapLat, mapLon }
           setToiletMarkers(toilets);
         }
       } catch {
+        if (!cancelled) {
+          setCompostMarkers([]);
+          setToiletMarkers([]);
+        }
       }
     };
 
@@ -80,6 +84,7 @@ export function useMapMarkerData({ showReports, showTransports, mapLat, mapLon }
         const reports = await reportService.getReports();
         if (!cancelled) setCitizenReports(reports);
       } catch {
+        if (!cancelled) setCitizenReports([]);
       }
     };
 
