@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking, Alert } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Linking, Alert, RefreshControl } from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
@@ -118,8 +118,15 @@ function AssociationCard({
 
 export default function SocialScreen() {
   const { dark, primaryColor, classes, layoutStyles, brand } = useAppTheme();
-  const { config } = useCity();
+  const { config, refreshConfig } = useCity();
   const insets = useSafeAreaInsets();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refreshConfig();
+    setRefreshing(false);
+  }, [refreshConfig]);
 
   const associations = useMemo(() => config?.associations ?? [], [config?.associations]);
   const grouped = useMemo(() => {
@@ -144,7 +151,8 @@ export default function SocialScreen() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
         <View className='mb-6'>
           <Text className={classes.eyebrow}>Vie locale</Text>
           <Text className={classes.title}>Social</Text>
