@@ -50,7 +50,7 @@ function SuggestionCard({
         dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
       }`}>
       {lastFromAgent ? (
-        <View className='h-1 w-full' style={{ backgroundColor: '#007AFF' }} />
+        <View className='h-1 w-full' style={{ backgroundColor: dark ? '#3B82F6' : '#007AFF' }} />
       ) : null}
       <View className='p-5'>
         <View className='flex-row items-start justify-between gap-3'>
