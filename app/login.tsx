@@ -54,7 +54,10 @@ const LoginScreen: React.FC = () => {
       }
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Identifiants incorrects ou serveur indisponible.';
-      Alert.alert('Échec de la connexion', msg);
+      Alert.alert('Échec de la connexion', msg, [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Réessayer', onPress: handleLogin },
+      ]);
     } finally {
       setIsSubmitting(false);
     }
