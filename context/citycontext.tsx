@@ -106,19 +106,23 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
   }, [config?.features]);
 
   useEffect(() => {
+    let cancelled = false;
     if (config?.features?.includes('weather')) {
       fetchWeather();
     } else {
-      setWeatherData(null);
-      setWeatherError(null);
+      if (!cancelled) {
+        setWeatherData(null);
+        setWeatherError(null);
+      }
     }
+    return () => { cancelled = true; };
   }, [config?.features, fetchWeather]);
 
   useEffect(() => {
+    let cancelled = false;
     const initializeCity = async () => {
       setLoading(true);
       try {
-        // 1. Get GPS Location
         const { status } = await Location.requestForegroundPermissionsAsync();
 
         if (status === 'granted') {
@@ -126,35 +130,42 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
             accuracy: Location.Accuracy.Balanced,
           });
 
-          // 2. Try to detect city via Backend PostGIS
           const detectedCity = await cityService.detectCity(
             location.coords.latitude,
             location.coords.longitude
           );
 
           if (detectedCity && detectedCity.id) {
-            setTenantId(detectedCity.id);
-            setConfig(detectedCity);
-            setLoading(false);
+            if (!cancelled) {
+              setTenantId(detectedCity.id);
+              setConfig(detectedCity);
+              setLoading(false);
+            }
             return;
           }
         }
       } catch {
       }
 
-      // 3. Fallback to default city if detection fails or permission denied
       try {
         const fallbackConfig = await cityService.getCityConfig(Config.DEFAULT_TENANT_ID);
-        setTenantId(Config.DEFAULT_TENANT_ID);
-        setConfig(fallbackConfig);
+        if (!cancelled) {
+          setTenantId(Config.DEFAULT_TENANT_ID);
+          setConfig(fallbackConfig);
+        }
       } catch (error: unknown) {
-        console.error('CityContext: Failed to fetch fallback config', error);
+        if (!cancelled) {
+          console.error('CityContext: Failed to fetch fallback config', error);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     initializeCity();
+    return () => { cancelled = true; };
   }, [setTenantId]);
 
   const value = useMemo(

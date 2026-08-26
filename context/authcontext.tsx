@@ -63,35 +63,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     const initializeAuth = async () => {
       try {
         const token = await AsyncStorage.getItem('user_token');
         const storedUser = await AsyncStorage.getItem('user_data');
 
         if (token && storedUser) {
-          setUser(JSON.parse(storedUser));
-          setIsAuthenticated(true);
+          if (!cancelled) {
+            setUser(JSON.parse(storedUser));
+            setIsAuthenticated(true);
+          }
 
           try {
             const freshUser = await authService.me();
             const resolved = await resolveAvatarForUser(freshUser);
-            setUser(resolved);
-            await AsyncStorage.setItem('user_data', JSON.stringify(userForStorage(resolved)));
+            if (!cancelled) {
+              setUser(resolved);
+              await AsyncStorage.setItem('user_data', JSON.stringify(userForStorage(resolved)));
+            }
           } catch (e) {
-            console.warn('Failed to refresh user profile from server', e);
-            if (e && typeof e === 'object' && 'response' in e && (e as { response?: { status?: number } }).response?.status === 401) {
-              await logout();
+            if (!cancelled) {
+              console.warn('Failed to refresh user profile from server', e);
+              if (e && typeof e === 'object' && 'response' in e && (e as { response?: { status?: number } }).response?.status === 401) {
+                await logout();
+              }
             }
           }
         }
       } catch (error: unknown) {
-        console.error('Auth initialization error', error);
+        if (!cancelled) {
+          console.error('Auth initialization error', error);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     initializeAuth();
+    return () => { cancelled = true; };
   }, [logout]);
 
   useEffect(() => {
