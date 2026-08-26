@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               setUser(resolved);
               await AsyncStorage.setItem('user_data', JSON.stringify(userForStorage(resolved)));
             }
-          } catch (e) {
+          } catch (e: unknown) {
             if (!cancelled) {
               console.warn('Failed to refresh user profile from server', e);
               if (e && typeof e === 'object' && 'response' in e && (e as { response?: { status?: number } }).response?.status === 401) {
