@@ -169,7 +169,7 @@ export default function SignalementsList() {
   const [showArchives, setShowArchives] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadReports = useCallback(async () => {
+  const loadReports = useCallback(async (signal?: { cancelled: boolean }) => {
     if (!isAuthenticated) {
       setReports([]);
       setLoading(false);
@@ -178,18 +178,22 @@ export default function SignalementsList() {
     setLoading(true);
     try {
       const data = await reportService.getReports();
-      setReports(data);
+      if (!signal?.cancelled) setReports(data);
     } catch (error) {
       console.error(error);
-      setReports([]);
-      Alert.alert('Erreur', 'Impossible de charger vos signalements.');
+      if (!signal?.cancelled) {
+        setReports([]);
+        Alert.alert('Erreur', 'Impossible de charger vos signalements.');
+      }
     } finally {
-      setLoading(false);
+      if (!signal?.cancelled) setLoading(false);
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
-    loadReports();
+    const signal = { cancelled: false };
+    loadReports(signal);
+    return () => { signal.cancelled = true; };
   }, [loadReports]);
 
   const onRefresh = useCallback(async () => {

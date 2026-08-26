@@ -31,7 +31,7 @@ import { isPersistentAvatarUrl } from '../utils/avatarImage';
 export default function Profile() {
   const { theme, dark, primaryColor, classes, colors, setTheme, layoutStyles } = useAppTheme();
   const { applyBrandingCity } = useCity();
-  const { user, logout, updateUser, isAuthenticated } = useAuth();
+  const { user, logout, updateUser, isAuthenticated, isLoading: authLoading } = useAuth();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
@@ -42,32 +42,45 @@ export default function Profile() {
   const [showConvinceModal, setShowConvinceModal] = useState(false);
   const [userStats, setUserStats] = useState({ reports: 0, participations: 0, points: 0 });
   const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
-  React.useEffect(() => {
-    const loadData = async () => {
-      try {
-        const statsResp = await apiClient.get('users/stats');
-        if (statsResp.data) setUserStats(statsResp.data);
+  const loadProfileData = React.useCallback(async (signal?: { cancelled: boolean }) => {
+    setProfileLoading(true);
+    setProfileError(null);
+    try {
+      const statsResp = await apiClient.get('users/stats');
+      if (!signal?.cancelled && statsResp.data) setUserStats(statsResp.data);
 
-        const cities = await cityService.getAllCities();
-        setAvailableCities(cities);
-      } catch (err) {
-        console.error('Failed to load profile data', err);
-        Alert.alert('Erreur', 'Impossible de charger les données du profil.');
-      } finally {
-        setProfileLoading(false);
-      }
-    };
-    loadData();
+      const cities = await cityService.getAllCities();
+      if (!signal?.cancelled) setAvailableCities(cities);
+    } catch (err) {
+      console.error('Failed to load profile data', err);
+      if (!signal?.cancelled) setProfileError('Impossible de charger les données du profil.');
+    } finally {
+      if (!signal?.cancelled) setProfileLoading(false);
+    }
   }, []);
 
   React.useEffect(() => {
-    if (!isAuthenticated) {
+    const signal = { cancelled: false };
+    loadProfileData(signal);
+    return () => { signal.cancelled = true; };
+  }, [loadProfileData]);
+
+  React.useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
       router.replace('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, authLoading, router]);
 
   if (!isAuthenticated || !user) {
+    if (authLoading) {
+      return (
+        <View style={layoutStyles.page} className="items-center justify-center">
+          <ActivityIndicator size="large" color={primaryColor} />
+        </View>
+      );
+    }
     return null;
   }
 
@@ -75,6 +88,20 @@ export default function Profile() {
     return (
       <View style={layoutStyles.page} className="items-center justify-center">
         <ActivityIndicator size="large" color={primaryColor} />
+      </View>
+    );
+  }
+
+  if (profileError) {
+    return (
+      <View style={layoutStyles.page} className="items-center justify-center">
+        <Ionicons name='alert-circle-outline' size={48} color={dark ? '#3F3F46' : '#D4D4D8'} />
+        <Text className={`mt-4 text-center font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+          {profileError}
+        </Text>
+        <TouchableOpacity onPress={() => loadProfileData()} className='mt-4'>
+          <Text style={{ color: primaryColor }} className='font-bold'>Réessayer</Text>
+        </TouchableOpacity>
       </View>
     );
   }

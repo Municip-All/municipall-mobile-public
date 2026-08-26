@@ -20,7 +20,7 @@ import { updateUserPassword } from '../services/userProfileService';
 
 export default function ProfileSecurityScreen() {
   const { classes, primaryColor, colors, layoutStyles } = useAppTheme();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [current, setCurrent] = useState('');
@@ -31,12 +31,19 @@ export default function ProfileSecurityScreen() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !authLoading) {
       router.replace('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, authLoading, router]);
 
   if (!isAuthenticated) {
+    if (authLoading) {
+      return (
+        <View style={layoutStyles.page} className='items-center justify-center'>
+          <ActivityIndicator color={primaryColor} />
+        </View>
+      );
+    }
     return null;
   }
 

@@ -44,6 +44,7 @@ const SignupScreen: React.FC = () => {
   const [availableCities, setAvailableCities] = useState<
     { id: string; name: string; officialName?: string }[]
   >([]);
+  const [citiesError, setCitiesError] = useState(false);
   const [showConvinceModal, setShowConvinceModal] = useState(false);
 
   const secondaryColor = config?.theme.secondaryColor || '#3B82F6';
@@ -57,16 +58,22 @@ const SignupScreen: React.FC = () => {
   const [acceptedAge, setAcceptedAge] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     const loadCities = async () => {
       try {
         const cities = await cityService.getAllCities();
-        setAvailableCities(cities);
-        if (cities.length > 0) setSelectedCity(cities[0].id);
+        if (!cancelled) {
+          setAvailableCities(cities);
+          if (cities.length > 0) setSelectedCity(cities[0].id);
+          setCitiesError(false);
+        }
       } catch (err) {
         console.error('Failed to load cities', err);
+        if (!cancelled) setCitiesError(true);
       }
     };
     loadCities();
+    return () => { cancelled = true; };
   }, []);
 
   const handleRegister = async () => {
@@ -260,6 +267,27 @@ const response = await apiClient.post('/auth/signup', payload);
                   className={`mb-3 ml-1 text-xs font-semibold ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
                   MA VILLE DE RÉSIDENCE
                 </Text>
+                {citiesError ? (
+                  <View className='items-center py-3'>
+                    <Text className={`text-sm ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
+                      Impossible de charger les villes.
+                    </Text>
+                    <TouchableOpacity
+                      onPress={async () => {
+                        try {
+                          const cities = await cityService.getAllCities();
+                          setAvailableCities(cities);
+                          if (cities.length > 0) setSelectedCity(cities[0].id);
+                          setCitiesError(false);
+                        } catch {
+                          setCitiesError(true);
+                        }
+                      }}
+                      className='mt-2'>
+                      <Text className='font-bold' style={{ color: primaryColor }}>Réessayer</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
                 <View className='flex-row flex-wrap gap-2'>
                   {availableCities.map((city) => (
                     <TouchableOpacity
@@ -289,6 +317,7 @@ const response = await apiClient.post('/auth/signup', payload);
                   ))}
                   <CityNotListedChip dark={dark} onPress={() => setShowConvinceModal(true)} />
                 </View>
+                )}
               </View>
 
               <LegalConsentBlock

@@ -114,7 +114,7 @@ const ContactScreen: React.FC = () => {
   const [showArchives, setShowArchives] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadTickets = useCallback(async () => {
+  const loadTickets = useCallback(async (signal?: { cancelled: boolean }) => {
     if (!isAuthenticated) {
       setTickets([]);
       setLoading(false);
@@ -123,18 +123,22 @@ const ContactScreen: React.FC = () => {
     setLoading(true);
     try {
       const data = await contactService.getMyTickets();
-      setTickets(data);
+      if (!signal?.cancelled) setTickets(data);
     } catch (e) {
       console.error(e);
-      setTickets([]);
-      Alert.alert('Erreur', 'Impossible de charger vos conversations.');
+      if (!signal?.cancelled) {
+        setTickets([]);
+        Alert.alert('Erreur', 'Impossible de charger vos conversations.');
+      }
     } finally {
-      setLoading(false);
+      if (!signal?.cancelled) setLoading(false);
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
-    loadTickets();
+    const signal = { cancelled: false };
+    loadTickets(signal);
+    return () => { signal.cancelled = true; };
   }, [loadTickets]);
 
   const onRefresh = useCallback(async () => {
