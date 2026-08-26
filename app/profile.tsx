@@ -193,7 +193,7 @@ export default function Profile() {
           <TouchableOpacity onPress={pickImage} disabled={isUploading} className='relative mb-4' accessibilityRole='button' accessibilityLabel='Changer la photo de profil'>
             <View className='h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-800'>
               {displayAvatarUrl ? (
-                <Image source={{ uri: displayAvatarUrl }} className='h-full w-full' />
+                <Image source={{ uri: displayAvatarUrl }} className='h-full w-full' accessible={false} accessibilityElementsHidden />
               ) : (
                 <View className='flex-1 items-center justify-center'>
                   <Ionicons name='person' size={40} color={dark ? '#3F3F46' : '#D4D4D8'} />
