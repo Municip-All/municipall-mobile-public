@@ -203,7 +203,7 @@ export default function TransportScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
         }>
-        <TouchableOpacity onPress={() => router.back()} className='mb-4 flex-row items-center'>
+        <TouchableOpacity onPress={() => router.back()} className='mb-4 flex-row items-center' accessibilityRole='button' accessibilityLabel='Retour'>
           <Ionicons name='chevron-back' size={22} color={primaryColor} />
           <Text style={{ color: primaryColor, fontWeight: '700', marginLeft: 4 }}>Retour</Text>
         </TouchableOpacity>

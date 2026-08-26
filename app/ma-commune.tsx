@@ -41,7 +41,9 @@ export default function MaCommuneScreen() {
         <TouchableOpacity
           onPress={() => router.back()}
           className='mb-4 flex-row items-center gap-1 self-start'
-          hitSlop={12}>
+          hitSlop={12}
+          accessibilityRole='button'
+          accessibilityLabel='Retour'>
           <Ionicons name='chevron-back' size={22} color={primaryColor} />
           <Text style={{ color: primaryColor }} className='text-sm font-semibold'>
             Retour
@@ -154,7 +156,9 @@ export default function MaCommuneScreen() {
           <TouchableOpacity
             onPress={() => router.push('/contact')}
             className='flex-1 items-center rounded-2xl py-4'
-            style={{ backgroundColor: primaryColor, minWidth: '45%' }}>
+            style={{ backgroundColor: primaryColor, minWidth: '45%' }}
+            accessibilityRole='button'
+            accessibilityLabel='Contacter la mairie'>
             <Text className='text-sm font-bold text-white'>Contacter la mairie</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -162,7 +166,9 @@ export default function MaCommuneScreen() {
             className={`flex-1 items-center rounded-2xl border py-4 ${
               dark ? 'border-zinc-700 bg-zinc-900' : 'border-zinc-200 bg-white'
             }`}
-            style={{ minWidth: '45%' }}>
+            style={{ minWidth: '45%' }}
+            accessibilityRole='button'
+            accessibilityLabel='Vie associative'>
             <Text className={`text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
               Vie associative
             </Text>

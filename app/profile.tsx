@@ -190,7 +190,7 @@ export default function Profile() {
 
         {/* Profile Card */}
         <View className={`mb-8 items-center p-6 ${classes.cardRoundedLg}`}>
-          <TouchableOpacity onPress={pickImage} disabled={isUploading} className='relative mb-4'>
+          <TouchableOpacity onPress={pickImage} disabled={isUploading} className='relative mb-4' accessibilityRole='button' accessibilityLabel='Changer la photo de profil'>
             <View className='h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-800'>
               {displayAvatarUrl ? (
                 <Image source={{ uri: displayAvatarUrl }} className='h-full w-full' />
@@ -436,7 +436,7 @@ export default function Profile() {
           ))}
         </View>
 
-        <TouchableOpacity onPress={handleLogout} className='items-center py-4'>
+        <TouchableOpacity onPress={handleLogout} className='items-center py-4' accessibilityRole='button' accessibilityLabel='Se déconnecter'>
           <Text className='text-base font-bold text-red-500'>Se déconnecter</Text>
         </TouchableOpacity>
       </ScrollView>

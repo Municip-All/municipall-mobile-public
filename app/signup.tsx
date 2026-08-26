@@ -329,6 +329,8 @@ const SignupScreen: React.FC = () => {
                 onPress={handleRegister}
                 disabled={isSubmitting || !acceptedCgu || !acceptedPrivacy || !acceptedAge}
                 activeOpacity={0.8}
+                accessibilityRole='button'
+                accessibilityLabel='Créer mon compte'
                 className='mt-4 w-full flex-row items-center justify-center rounded-[20px] py-4 shadow-xl'
                 style={{
                   backgroundColor: primaryColor,
@@ -353,7 +355,9 @@ const SignupScreen: React.FC = () => {
 
         <TouchableOpacity
           onPress={() => router.push('/login')}
-          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}>
+          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}
+          accessibilityRole='button'
+          accessibilityLabel='Se connecter'>
           <Text className={`text-[15px] font-medium ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
             Vous avez déjà un compte ?{' '}
             <Text className='font-bold' style={{ color: primaryColor }}>

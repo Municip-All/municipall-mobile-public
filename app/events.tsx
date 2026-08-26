@@ -234,6 +234,8 @@ export default function Events() {
                   <TouchableOpacity
                     key={filter}
                     onPress={() => setActiveFilter(filter)}
+                    accessibilityRole='button'
+                    accessibilityLabel={`Filtrer par ${filter}`}
                     className={`mr-2 mb-2 rounded-full border px-5 py-2.5 ${
                       isActive
                         ? 'border-transparent'
