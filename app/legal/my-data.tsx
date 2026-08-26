@@ -1,4 +1,3 @@
-import { type ComponentProps } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, Linking, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,11 +7,12 @@ import { useAuth } from '@context/authcontext';
 import ProfileScreenHeader from '@components/ProfileScreenHeader';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
 import { useCityLegalContext } from '@hooks/useCityLegalContext';
+import type { IconName } from '../../lib/types';
 
 type Action = {
   title: string;
   description: string;
-  icon: ComponentProps<typeof Ionicons>['name'];
+  icon: IconName;
   color: string;
   onPress: () => void;
 };
