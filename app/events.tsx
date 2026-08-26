@@ -76,7 +76,7 @@ function EventCard({
         dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
       }`}>
       {event.imageUrl ? (
-        <Image source={{ uri: event.imageUrl }} className='h-40 w-full' resizeMode='cover' />
+        <Image source={{ uri: event.imageUrl }} className='h-40 w-full' resizeMode='cover' accessible={false} accessibilityElementsHidden />
       ) : null}
       <View className='p-6'>
         <View className='mb-4 flex-row items-center'>
