@@ -16,7 +16,7 @@ import { useAppTheme } from '@hooks/useAppTheme';
 import { useAuth } from '@context/authcontext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import BrandedLogo from '@components/BrandedLogo';
 import LegalFooterLinks from '@components/LegalFooterLinks';
 import apiClient from '../services/apiClient';

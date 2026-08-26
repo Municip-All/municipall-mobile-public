@@ -24,7 +24,7 @@ import { cityDisplayName } from '../lib/cityDisplay';
 import ConvinceMayorModal from '@components/ConvinceMayorModal';
 import CityNotListedChip from '@components/CityNotListedChip';
 import { openReferCityEmail } from '../lib/referCity';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import LegalConsentBlock from '@components/LegalConsentBlock';
 import LegalFooterLinks from '@components/LegalFooterLinks';
 import { recordLegalConsent } from '../services/legalConsent';

@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CityMap, MapHeaderOverlay, type CityMapMethods } from '@components/map';
 import type { MapLayerItem } from '@components/map/MapHeaderOverlay';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import ReportSignalementSheet, {
   type ReportSignalementSheetRef,
 } from '@components/ReportSignalementSheet';

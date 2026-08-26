@@ -14,7 +14,7 @@ import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { useHomeHighlights } from '@hooks/useHomeHighlights';
 import type { HomeHighlight } from '../services/homeHighlights';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import BrandedLogo from '@components/BrandedLogo';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -84,7 +84,7 @@ export default function Home() {
             </Text>
             <Text className={classes.title}>{appDisplayName}</Text>
           </View>
-          <TouchableOpacity onPress={() => router.push('/ma-commune')} activeOpacity={0.85}>
+          <TouchableOpacity onPress={() => router.push('/ma-commune')} activeOpacity={0.85} accessibilityRole='button' accessibilityLabel='Ma commune'>
             <BrandedLogo size={48} radius={24} mode='contain' />
           </TouchableOpacity>
         </View>
@@ -150,7 +150,9 @@ export default function Home() {
             <TouchableOpacity
               key={i}
               onPress={() => router.push(item.path as RouteHref)}
-              className='w-[18%] min-w-[64px] items-center'>
+              className='w-[18%] min-w-[64px] items-center'
+              accessibilityRole='button'
+              accessibilityLabel={item.label}>
               <View
                 className='mb-2 h-16 w-16 items-center justify-center rounded-2xl shadow-sm'
                 style={{ backgroundColor: dark ? '#1C1C1E' : '#FFFFFF' }}>

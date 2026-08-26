@@ -111,7 +111,8 @@ const BottomBar: React.FC = () => {
               key={tab.id}
               onPress={() => handlePress(tab)}
               style={styles.tab}
-              accessibilityRole='button'>
+              accessibilityRole='button'
+              accessibilityLabel={tab.label}>
               <Ionicons
                 name={(pathname === tab.path ? tab.icon : `${tab.icon}-outline`) as IconName}
                 size={22}
@@ -134,7 +135,9 @@ const BottomBar: React.FC = () => {
             styles.centerButton,
             styles.centerButtonShadow,
             { backgroundColor: primaryColor, borderColor: fabBorderColor },
-          ]}>
+          ]}
+          accessibilityRole='button'
+          accessibilityLabel='Signaler'>
           <Ionicons name='paper-plane' size={24} color={brand.onPrimary} />
         </Pressable>
         <Text style={[styles.centerLabel, { color: dark ? '#FFFFFF' : primaryColor }]}>
