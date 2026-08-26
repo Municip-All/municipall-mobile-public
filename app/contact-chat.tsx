@@ -78,9 +78,9 @@ export default function ContactChatScreen() {
   useLiveChatRefresh(() => loadTicket({ silent: true }), Boolean(ticket) && !isClosed);
 
   useEffect(() => {
-    if (ticket?.messages.length) {
-      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
-    }
+    if (!ticket?.messages.length) return;
+    const id = setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+    return () => clearTimeout(id);
   }, [ticket?.messages.length]);
 
   const handleSend = async () => {
