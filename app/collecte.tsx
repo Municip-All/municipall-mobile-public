@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, ScrollView, RefreshControl } from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,8 +12,15 @@ import type { IconName } from '../lib/types';
 
 export default function Collecte() {
   const { dark, primaryColor, layoutStyles } = useAppTheme();
-  const { config } = useCity();
+  const { config, refreshConfig } = useCity();
   const insets = useSafeAreaInsets();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refreshConfig();
+    setRefreshing(false);
+  }, [refreshConfig]);
 
   const schedule = config?.wasteConfig?.services || [
     { type: 'Ordures ménagères', days: [1, 4], time: '19:00', icon: 'trash', color: '#8E8E93' },
@@ -48,7 +55,8 @@ export default function Collecte() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
         {/* Apple Style Header */}
         <View className='mb-8'>
           <Text

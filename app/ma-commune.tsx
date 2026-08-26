@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Linking, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
@@ -11,9 +11,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function MaCommuneScreen() {
   const { dark, primaryColor, classes, layoutStyles, brand } = useAppTheme();
-  const { config } = useCity();
+  const { config, refreshConfig } = useCity();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refreshConfig();
+    setRefreshing(false);
+  }, [refreshConfig]);
 
   const profile = config?.publicProfile;
   const cityName = config?.officialName || config?.name || brand.appName;
@@ -29,7 +36,8 @@ export default function MaCommuneScreen() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
         <TouchableOpacity
           onPress={() => router.back()}
           className='mb-4 flex-row items-center gap-1 self-start'
