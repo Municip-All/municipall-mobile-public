@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image, RefreshControl } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
@@ -136,18 +136,45 @@ export default function Events() {
   const [activeFilter, setActiveFilter] = useState<(typeof FILTERS)[number]>('Tous');
   const [events, setEvents] = useState<CityEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const agendaEnabled = config?.features?.includes('agenda') ?? false;
 
-  const loadEvents = useCallback(async () => {
-    if (!agendaEnabled) {
-      setEvents([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      refreshConfig();
+      setLoading(true);
+      setError(null);
+      eventsService.getEvents()
+        .then((data) => {
+          const now = Date.now();
+          const upcoming = data
+            .filter((e) => new Date(e.endDate).getTime() >= now)
+            .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+          if (!cancelled) setEvents(upcoming);
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setError('Impossible de charger les événements.');
+            setEvents([]);
+          }
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+      return () => { cancelled = true; };
+    }, [refreshConfig])
+  );
+
+  const filteredEvents = useMemo(() => {
+    if (activeFilter === 'Tous') return events;
+    return events.filter((e) => e.category === activeFilter);
+  }, [events, activeFilter]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
     try {
       const data = await eventsService.getEvents();
       const now = Date.now();
@@ -155,26 +182,13 @@ export default function Events() {
         .filter((e) => new Date(e.endDate).getTime() >= now)
         .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
       setEvents(upcoming);
-    } catch (e) {
-      console.error(e);
+      setError(null);
+    } catch {
       setError('Impossible de charger les événements.');
-      setEvents([]);
     } finally {
-      setLoading(false);
+      setRefreshing(false);
     }
-  }, [agendaEnabled]);
-
-  useFocusEffect(
-    useCallback(() => {
-      refreshConfig();
-      loadEvents();
-    }, [loadEvents, refreshConfig])
-  );
-
-  const filteredEvents = useMemo(() => {
-    if (activeFilter === 'Tous') return events;
-    return events.filter((e) => e.category === activeFilter);
-  }, [events, activeFilter]);
+  }, []);
 
   return (
     <View style={layoutStyles.page}>
@@ -184,7 +198,8 @@ export default function Events() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
         <View className='mb-6'>
           <Text className={classes.eyebrow}>Agenda</Text>
           <Text
@@ -246,7 +261,7 @@ export default function Events() {
               <View
                 className={`rounded-[28px] border p-6 ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-white'}`}>
                 <Text className={classes.body}>{error}</Text>
-                <TouchableOpacity onPress={loadEvents} className='mt-4'>
+                <TouchableOpacity onPress={onRefresh} className='mt-4'>
                   <Text style={{ color: primaryColor }} className='font-bold'>
                     Réessayer
                   </Text>

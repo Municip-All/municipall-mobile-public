@@ -55,8 +55,7 @@ export default function ReportChatScreen() {
           }
           return data;
         });
-      } catch (e) {
-        console.error(e);
+      } catch {
         if (!silent) Alert.alert('Erreur', 'Impossible de charger le signalement.');
       } finally {
         if (!silent) setLoading(false);
@@ -66,7 +65,11 @@ export default function ReportChatScreen() {
   );
 
   useEffect(() => {
-    void loadReport();
+    let cancelled = false;
+    void loadReport().finally(() => {
+      if (cancelled) return;
+    });
+    return () => { cancelled = true; };
   }, [loadReport]);
 
   useLiveChatRefresh(() => loadReport({ silent: true }), Boolean(report) && !isClosed);
@@ -85,8 +88,7 @@ export default function ReportChatScreen() {
       const updated = await reportService.reply(reportId, text);
       setReport(updated);
       setReply('');
-    } catch (e) {
-      console.error(e);
+    } catch {
       Alert.alert('Erreur', "Impossible d'envoyer votre message.");
     } finally {
       setSending(false);

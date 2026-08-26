@@ -5,10 +5,11 @@ import {
   TouchableOpacity,
   Pressable,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { BlurView } from 'expo-blur';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
@@ -29,6 +30,14 @@ export default function Home() {
     loading: highlightsLoading,
     refresh: refreshHighlights,
   } = useHomeHighlights(config);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([refreshHighlights(), refreshConfig(), fetchWeather()]);
+    setRefreshing(false);
+  }, [refreshHighlights, refreshConfig, fetchWeather]);
 
   useFocusEffect(
     useCallback(() => {
@@ -71,7 +80,8 @@ export default function Home() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
         {/* Apple Style Header */}
         <View className='mb-8 flex-row items-end justify-between'>
           <View>

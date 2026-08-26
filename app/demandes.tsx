@@ -180,7 +180,6 @@ export default function SignalementsList() {
       const data = await reportService.getReports();
       if (!signal?.cancelled) setReports(data);
     } catch (error: unknown) {
-      console.error(error);
       if (!signal?.cancelled) {
         setReports([]);
         Alert.alert('Erreur', 'Impossible de charger vos signalements.');
