@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { Ionicons } from '@expo/vector-icons';
 import BottomBar from '@components/BottomBar';
@@ -13,6 +13,7 @@ export default function Travaux() {
 
   const [works, setWorks] = React.useState<ConstructionWork[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [refreshing, setRefreshing] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   const loadWorks = React.useCallback(async (signal?: { cancelled: boolean }) => {
@@ -21,8 +22,7 @@ export default function Travaux() {
     try {
       const data = await constructionWorksService.getWorks();
       if (!signal?.cancelled) setWorks(data);
-    } catch (err) {
-      console.error('Failed to fetch works', err);
+    } catch (err: unknown) {
       if (!signal?.cancelled) setError('Impossible de charger les travaux.');
     } finally {
       if (!signal?.cancelled) setIsLoading(false);
@@ -33,6 +33,12 @@ export default function Travaux() {
     const signal = { cancelled: false };
     loadWorks(signal);
     return () => { signal.cancelled = true; };
+  }, [loadWorks]);
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await loadWorks();
+    setRefreshing(false);
   }, [loadWorks]);
 
   const getStatusColor = (status: string) => {
@@ -69,7 +75,8 @@ export default function Travaux() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
         {/* Apple Style Header */}
         <View className='mb-8'>
           <Text

@@ -7,6 +7,7 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
@@ -63,6 +64,14 @@ export default function Profile() {
     const signal = { cancelled: false };
     loadProfileData(signal);
     return () => { signal.cancelled = true; };
+  }, [loadProfileData]);
+
+  const [profileRefreshing, setProfileRefreshing] = React.useState(false);
+
+  const onProfileRefresh = React.useCallback(async () => {
+    setProfileRefreshing(true);
+    await loadProfileData();
+    setProfileRefreshing(false);
   }, [loadProfileData]);
 
   React.useEffect(() => {
@@ -171,7 +180,8 @@ export default function Profile() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={profileRefreshing} onRefresh={onProfileRefresh} tintColor={primaryColor} />}>
         {/* Apple Style Header */}
         <View className='mb-8'>
           <Text className={classes.eyebrow}>Compte</Text>

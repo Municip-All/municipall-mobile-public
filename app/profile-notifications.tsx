@@ -43,10 +43,12 @@ export default function ProfileNotificationsScreen() {
   const [prefs, setPrefs] = useState<NotificationPreferences | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal?: { cancelled: boolean }) => {
     const data = await loadNotificationPreferences();
-    setPrefs(data);
-    setLoading(false);
+    if (!signal?.cancelled) {
+      setPrefs(data);
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -54,7 +56,9 @@ export default function ProfileNotificationsScreen() {
       router.replace('/login');
       return;
     }
-    load();
+    const signal = { cancelled: false };
+    load(signal);
+    return () => { signal.cancelled = true; };
   }, [isAuthenticated, authLoading, load, router]);
 
   const toggle = async (key: keyof NotificationPreferences, value: boolean) => {

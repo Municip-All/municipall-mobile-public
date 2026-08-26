@@ -58,8 +58,7 @@ export default function ContactChatScreen() {
           }
           return data;
         });
-      } catch (e) {
-        console.error(e);
+      } catch {
         if (!silent) Alert.alert('Erreur', 'Impossible de charger la conversation.');
       } finally {
         if (!silent) setLoading(false);
@@ -69,7 +68,11 @@ export default function ContactChatScreen() {
   );
 
   useEffect(() => {
-    void loadTicket();
+    let cancelled = false;
+    void loadTicket().finally(() => {
+      if (cancelled) return;
+    });
+    return () => { cancelled = true; };
   }, [loadTicket]);
 
   useLiveChatRefresh(() => loadTicket({ silent: true }), Boolean(ticket) && !isClosed);
@@ -88,8 +91,7 @@ export default function ContactChatScreen() {
       const updated = await contactService.reply(ticketId, text);
       setTicket(updated);
       setReply('');
-    } catch (e) {
-      console.error(e);
+    } catch {
       Alert.alert('Erreur', "Impossible d'envoyer votre message.");
     } finally {
       setSending(false);

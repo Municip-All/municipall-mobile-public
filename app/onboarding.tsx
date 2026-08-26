@@ -43,8 +43,7 @@ export default function Onboarding() {
   const complete = async () => {
     try {
       await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
-    } catch (e) {
-      console.warn('Failed to save onboarding state:', e);
+    } catch {
     }
     router.replace('/home');
   };

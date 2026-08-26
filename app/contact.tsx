@@ -124,8 +124,7 @@ const ContactScreen: React.FC = () => {
     try {
       const data = await contactService.getMyTickets();
       if (!signal?.cancelled) setTickets(data);
-    } catch (e) {
-      console.error(e);
+    } catch {
       if (!signal?.cancelled) {
         setTickets([]);
         Alert.alert('Erreur', 'Impossible de charger vos conversations.');
