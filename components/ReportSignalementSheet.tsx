@@ -260,6 +260,8 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
                     key={cat}
                     onPress={() => setCategory(cat)}
                     activeOpacity={0.85}
+                    accessibilityLabel={cat}
+                    accessibilityRole='button'
                     className={isSelected ? undefined : classes.chipUnselected}
                     style={[
                       styles.categoryChip,
@@ -301,6 +303,7 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
                 onPress={() => void refreshReportLocation()}
                 disabled={isLocating}
                 accessibilityLabel='Actualiser la position'
+                accessibilityRole='button'
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 {isLocating ? (
                   <ActivityIndicator size='small' color={primaryColor} />
@@ -313,6 +316,8 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
             <Text className={classes.formLabel}>Photo</Text>
             <TouchableOpacity
               onPress={pickImage}
+              accessibilityLabel='Ajouter une photo'
+              accessibilityRole='button'
               className={`mb-6 h-44 overflow-hidden ${classes.photoDropzone} items-center justify-center`}
               style={{ padding: 16 }}>
               {selectedImage ? (
@@ -345,6 +350,8 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
               onPress={handleSubmit}
               disabled={isSubmitting}
               activeOpacity={0.85}
+              accessibilityLabel='Envoyer le signalement'
+              accessibilityRole='button'
               className='items-center justify-center rounded-full shadow-lg'
               style={{
                 backgroundColor: primaryColor,

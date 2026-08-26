@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { TransportStopMarker } from '../services/transportService';

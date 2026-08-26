@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,7 +21,8 @@ export default function ProfileScreenHeader({ title }: Props) {
         <TouchableOpacity
           onPress={() => router.back()}
           className='mr-3 p-2'
-          accessibilityLabel='Retour'>
+          accessibilityLabel='Retour'
+          accessibilityRole='button'>
           <Ionicons name='chevron-back' size={24} color={dark ? '#FFF' : '#000'} />
         </TouchableOpacity>
         <Text className={`flex-1 text-lg font-bold ${dark ? 'text-white' : 'text-black'}`}>

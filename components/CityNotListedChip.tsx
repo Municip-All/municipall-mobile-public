@@ -1,4 +1,3 @@
-import React from 'react';
 import { TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -12,6 +11,8 @@ export default function CityNotListedChip({ onPress, dark }: CityNotListedChipPr
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.75}
+      accessibilityLabel='Pas dans les choix'
+      accessibilityRole='button'
       className={`flex-row items-center gap-1.5 rounded-xl border border-dashed px-3 py-2 ${
         dark ? 'border-zinc-600 bg-zinc-800/50' : 'border-zinc-300 bg-zinc-50'
       }`}>

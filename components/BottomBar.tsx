@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Pressable, Text, Platform, Dimensions, StyleSheet } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { useTheme } from '@context/themecontext';
@@ -101,7 +100,7 @@ const BottomBar: React.FC = () => {
       <Background />
 
       <View style={[styles.tabsContainer, { height: tabHeight }]}>
-        {tabs.map((tab, index) => {
+        {tabs.map((tab, _index) => {
           if (tab.isCenter) {
             return <View key={tab.id} style={styles.centerSpace} pointerEvents='none' />;
           }
