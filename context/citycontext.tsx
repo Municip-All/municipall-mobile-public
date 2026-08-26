@@ -133,15 +133,13 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
           );
 
           if (detectedCity && detectedCity.id) {
-            console.log(`CityContext: Detected city ${detectedCity.name} (${detectedCity.id})`);
             setTenantId(detectedCity.id);
             setConfig(detectedCity);
             setLoading(false);
             return;
           }
         }
-      } catch (error) {
-        console.log('CityContext: Automatic detection failed, using fallback.', error);
+      } catch {
       }
 
       // 3. Fallback to default city if detection fails or permission denied
