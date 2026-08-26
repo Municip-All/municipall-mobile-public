@@ -198,6 +198,8 @@ const LoginScreen: React.FC = () => {
               onPress={handleLogin}
               disabled={isSubmitting}
               activeOpacity={0.8}
+              accessibilityRole='button'
+              accessibilityLabel='Se connecter'
               className='w-full flex-row items-center justify-center rounded-[20px] py-4 shadow-xl'
               style={{
                 backgroundColor: primaryColor,
@@ -223,7 +225,9 @@ const LoginScreen: React.FC = () => {
 
         <TouchableOpacity
           onPress={() => router.push('/signup')}
-          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}>
+          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}
+          accessibilityRole='button'
+          accessibilityLabel='Créer un compte'>
           <Text className={`text-[15px] font-medium ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
             Nouveau citoyen ?{' '}
             <Text className='font-bold' style={{ color: primaryColor }}>

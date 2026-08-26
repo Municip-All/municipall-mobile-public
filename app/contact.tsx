@@ -255,7 +255,9 @@ const ContactScreen: React.FC = () => {
             <TouchableOpacity
               onPress={openPhone}
               disabled={!contactPhone}
-              className={`flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactPhone ? 'opacity-50' : ''}`}>
+              className={`flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactPhone ? 'opacity-50' : ''}`}
+              accessibilityRole='button'
+              accessibilityLabel={contactPhone ? `Appeler le ${contactPhone}` : 'Téléphone non renseigné'}>
               <Ionicons name='call-outline' size={20} color={primaryColor} />
               <Text
                 className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-white' : 'text-black'}`}>
@@ -270,7 +272,9 @@ const ContactScreen: React.FC = () => {
               <TouchableOpacity
                 onPress={() => setShowNew((v) => !v)}
                 className='rounded-full px-4 py-2'
-                style={{ backgroundColor: primaryColor }}>
+                style={{ backgroundColor: primaryColor }}
+                accessibilityRole='button'
+                accessibilityLabel={showNew ? 'Annuler' : 'Nouveau message'}>
                 <Text className='text-xs font-bold text-white'>
                   {showNew ? 'Annuler' : 'Nouveau'}
                 </Text>
