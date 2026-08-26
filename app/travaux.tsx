@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,12 +11,12 @@ export default function Travaux() {
   const { dark, primaryColor, layoutStyles } = useAppTheme();
   const insets = useSafeAreaInsets();
 
-  const [works, setWorks] = React.useState<ConstructionWork[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [refreshing, setRefreshing] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [works, setWorks] = useState<ConstructionWork[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadWorks = React.useCallback(async (signal?: { cancelled: boolean }) => {
+  const loadWorks = useCallback(async (signal?: { cancelled: boolean }) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -29,13 +29,13 @@ export default function Travaux() {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const signal = { cancelled: false };
     loadWorks(signal);
     return () => { signal.cancelled = true; };
   }, [loadWorks]);
 
-  const onRefresh = React.useCallback(async () => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadWorks();
     setRefreshing(false);

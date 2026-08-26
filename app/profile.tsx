@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -44,7 +44,7 @@ export default function Profile() {
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
 
-  const loadProfileData = React.useCallback(async (signal?: { cancelled: boolean }) => {
+  const loadProfileData = useCallback(async (signal?: { cancelled: boolean }) => {
     setProfileLoading(true);
     setProfileError(null);
     try {
@@ -60,21 +60,21 @@ export default function Profile() {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const signal = { cancelled: false };
     loadProfileData(signal);
     return () => { signal.cancelled = true; };
   }, [loadProfileData]);
 
-  const [profileRefreshing, setProfileRefreshing] = React.useState(false);
+  const [profileRefreshing, setProfileRefreshing] = useState(false);
 
-  const onProfileRefresh = React.useCallback(async () => {
+  const onProfileRefresh = useCallback(async () => {
     setProfileRefreshing(true);
     await loadProfileData();
     setProfileRefreshing(false);
   }, [loadProfileData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isAuthenticated && !authLoading) {
       router.replace('/login');
     }

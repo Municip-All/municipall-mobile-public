@@ -1,4 +1,4 @@
-import React from 'react';
+import { type ComponentProps } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, Linking, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,7 +12,7 @@ import { useCityLegalContext } from '@hooks/useCityLegalContext';
 type Action = {
   title: string;
   description: string;
-  icon: React.ComponentProps<typeof Ionicons>['name'];
+  icon: ComponentProps<typeof Ionicons>['name'];
   color: string;
   onPress: () => void;
 };

@@ -43,6 +43,7 @@ function IconButton({
     <TouchableOpacity
       onPress={onPress}
       accessibilityLabel={label}
+      accessibilityRole='button'
       hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
       style={[
         styles.iconBtn,
@@ -134,6 +135,7 @@ export default function MapHeaderOverlay({
                   key={layer.id}
                   onPress={layer.onToggle}
                   accessibilityLabel={layer.label}
+                  accessibilityRole='button'
                   style={[
                     styles.layerChip,
                     {

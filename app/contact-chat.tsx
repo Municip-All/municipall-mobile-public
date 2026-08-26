@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -210,6 +210,8 @@ export default function ContactChatScreen() {
               <TouchableOpacity
                 onPress={handleSend}
                 disabled={sending || !reply.trim()}
+                accessibilityLabel='Envoyer'
+                accessibilityRole='button'
                 style={{
                   backgroundColor: primaryColor,
                   opacity: sending || !reply.trim() ? 0.5 : 1,
