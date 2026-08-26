@@ -149,7 +149,6 @@ export default function TransportScreen() {
       );
       setLines(data.lines);
     } catch (error: unknown) {
-      console.error(error);
       let message = 'Impossible de charger les perturbations. Réessayez dans un instant.';
       if (isAxiosError(error)) {
         const data = error.response?.data as { message?: string | string[] } | undefined;
