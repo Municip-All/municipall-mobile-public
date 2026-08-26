@@ -128,6 +128,7 @@ export default function ProfileSecurityScreen() {
                   onChangeText={field.onChange}
                   secureTextEntry={!field.visible}
                   autoCapitalize='none'
+                  autoCorrect={false}
                   className={`rounded-xl px-4 py-3 pr-12 text-base ${classes.input}`}
                   placeholderTextColor={colors.placeholder}
                 />
