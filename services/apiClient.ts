@@ -26,7 +26,7 @@ apiClient.interceptors.request.use(
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-    } catch (e) {
+    } catch (e: unknown) {
       console.error('Error fetching token from storage', e);
     }
     return config;
