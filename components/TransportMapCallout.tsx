@@ -17,10 +17,11 @@ export default function TransportMapCallout({
   bottomInset = 0,
   onClose,
 }: TransportMapCalloutProps) {
-  if (!visible || !stop) return null;
-
   const { colorScheme } = useTheme();
   const dark = colorScheme === 'dark';
+
+  if (!visible || !stop) return null;
+
   const disrupted = stop.status === 'disrupted';
   const statusColor = disrupted ? '#FF9500' : '#34C759';
 

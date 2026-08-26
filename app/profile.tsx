@@ -53,7 +53,7 @@ export default function Profile() {
 
       const cities = await cityService.getAllCities();
       if (!signal?.cancelled) setAvailableCities(cities);
-    } catch (err: unknown) {
+    } catch {
       if (!signal?.cancelled) setProfileError('Impossible de charger les données du profil.');
     } finally {
       if (!signal?.cancelled) setProfileLoading(false);
