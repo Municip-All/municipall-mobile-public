@@ -75,9 +75,9 @@ export default function ReportChatScreen() {
   useLiveChatRefresh(() => loadReport({ silent: true }), Boolean(report) && !isClosed);
 
   useEffect(() => {
-    if (report?.messages.length) {
-      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
-    }
+    if (!report?.messages.length) return;
+    const id = setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+    return () => clearTimeout(id);
   }, [report?.messages.length]);
 
   const handleSend = async () => {
