@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Linking } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, Linking, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,12 +19,19 @@ type Action = {
 
 export default function LegalMyDataScreen() {
   const { dark, classes, primaryColor, colors, layoutStyles } = useAppTheme();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const cityLegal = useCityLegalContext();
 
   if (!isAuthenticated || !user) {
+    if (authLoading) {
+      return (
+        <View style={layoutStyles.page} className='items-center justify-center'>
+          <ActivityIndicator color={primaryColor} size='large' />
+        </View>
+      );
+    }
     router.replace('/login');
     return null;
   }

@@ -19,7 +19,7 @@ import { updateUserProfile } from '../services/userProfileService';
 
 export default function ProfilePersonalInfoScreen() {
   const { dark, classes, primaryColor, layoutStyles } = useAppTheme();
-  const { user, updateUser, isAuthenticated } = useAuth();
+  const { user, updateUser, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [name, setName] = useState('');
@@ -29,17 +29,28 @@ export default function ProfilePersonalInfoScreen() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated || !user) {
+    if ((!isAuthenticated || !user) && !authLoading) {
       router.replace('/login');
       return;
     }
-    setName(user.name ?? '');
-    setSurname(user.surname ?? '');
-    setEmail(user.email ?? '');
-    setNeighborhood(user.neighborhood ?? '');
-  }, [isAuthenticated, user, router]);
+    if (user) {
+      setName(user.name ?? '');
+      setSurname(user.surname ?? '');
+      setEmail(user.email ?? '');
+      setNeighborhood(user.neighborhood ?? '');
+    }
+  }, [isAuthenticated, user, authLoading, router]);
 
-  if (!user) return null;
+  if (!user) {
+    if (authLoading) {
+      return (
+        <View style={layoutStyles.page} className='items-center justify-center'>
+          <ActivityIndicator color={primaryColor} />
+        </View>
+      );
+    }
+    return null;
+  }
 
   const handleSave = async () => {
     const trimmedEmail = email.trim();

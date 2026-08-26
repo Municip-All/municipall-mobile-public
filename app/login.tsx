@@ -57,9 +57,10 @@ const LoginScreen: React.FC = () => {
       } else {
         router.replace('/home');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error', error);
-      Alert.alert('Échec de la connexion', 'Identifiants incorrects ou serveur indisponible.');
+      const msg = error instanceof Error ? error.message : 'Identifiants incorrects ou serveur indisponible.';
+      Alert.alert('Échec de la connexion', msg);
     } finally {
       setIsSubmitting(false);
     }

@@ -37,7 +37,7 @@ const OPTIONS: { key: keyof NotificationPreferences; label: string; description:
 
 export default function ProfileNotificationsScreen() {
   const { dark, classes, primaryColor, layoutStyles } = useAppTheme();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [prefs, setPrefs] = useState<NotificationPreferences | null>(null);
@@ -50,12 +50,12 @@ export default function ProfileNotificationsScreen() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !authLoading) {
       router.replace('/login');
       return;
     }
     load();
-  }, [isAuthenticated, load, router]);
+  }, [isAuthenticated, authLoading, load, router]);
 
   const toggle = async (key: keyof NotificationPreferences, value: boolean) => {
     if (!prefs) return;

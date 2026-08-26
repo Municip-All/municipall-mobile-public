@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,17 +25,24 @@ const FAQ = [
 
 export default function ProfileHelpScreen() {
   const { dark, classes, primaryColor, colors, layoutStyles } = useAppTheme();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !authLoading) {
       router.replace('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, authLoading, router]);
 
   if (!isAuthenticated) {
+    if (authLoading) {
+      return (
+        <View style={layoutStyles.page} className='items-center justify-center'>
+          <ActivityIndicator color={primaryColor} />
+        </View>
+      );
+    }
     return null;
   }
 

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState, useCall
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiClient from '../services/apiClient';
 import { resolveAvatarForUser } from '../utils/avatarImage';
+import { onSessionExpired } from '../services/sessionEvents';
 
 function userForStorage(user: User): User {
   const { avatar_url: _avatar, ...rest } = user;
@@ -71,7 +72,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(JSON.parse(storedUser));
           setIsAuthenticated(true);
 
-          // Verify token and refresh user data from server in background
           try {
             const response = await apiClient.get('auth/me');
             if (response.data) {
@@ -81,7 +81,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
           } catch (e) {
             console.warn('Failed to refresh user profile from server', e);
-            // If token is expired (401), we should log out
             if (e && typeof e === 'object' && 'response' in e && (e as { response?: { status?: number } }).response?.status === 401) {
               await logout();
             }
@@ -95,6 +94,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     initializeAuth();
+  }, [logout]);
+
+  useEffect(() => {
+    const unsubscribe = onSessionExpired(logout);
+    return unsubscribe;
   }, [logout]);
 
   const value = useMemo<AuthContextType>(
