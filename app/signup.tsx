@@ -255,6 +255,7 @@ const SignupScreen: React.FC = () => {
                       keyboardType={input.keyboardType as KeyboardType}
                       secureTextEntry={input.secure}
                       autoCapitalize='none'
+                      autoCorrect={false}
                       placeholderTextColor={dark ? '#6B7280' : '#94A3B8'}
                       className={`ml-2 flex-1 px-0 text-base ${dark ? 'text-white' : 'text-slate-900'}`}
                     />
