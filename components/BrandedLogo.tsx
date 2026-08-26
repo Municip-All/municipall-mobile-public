@@ -54,6 +54,8 @@ export default function BrandedLogo({
             imageStyle,
           ]}
           resizeMode={mode}
+          accessible={false}
+          accessibilityElementsHidden
         />
       ) : (
         <Ionicons name='business' size={size * 0.45} color={icon} />
