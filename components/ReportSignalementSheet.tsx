@@ -325,6 +325,8 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
                   source={{ uri: selectedImage }}
                   className='h-full w-full'
                   resizeMode='cover'
+                  accessible={false}
+                  accessibilityElementsHidden
                 />
               ) : (
                 <View className='items-center'>
