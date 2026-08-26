@@ -154,6 +154,7 @@ const LoginScreen: React.FC = () => {
                   placeholder='votre@email.fr'
                   keyboardType='email-address'
                   autoCapitalize='none'
+                  autoCorrect={false}
                   placeholderTextColor={dark ? '#6B7280' : '#94A3B8'}
                   className={`ml-2 flex-1 text-base ${dark ? 'text-white' : 'text-slate-900'}`}
                 />
@@ -178,6 +179,7 @@ const LoginScreen: React.FC = () => {
                   placeholder='••••••••'
                   secureTextEntry
                   autoCapitalize='none'
+                  autoCorrect={false}
                   placeholderTextColor={dark ? '#6B7280' : '#94A3B8'}
                   className={`ml-2 flex-1 px-0 text-base ${dark ? 'text-white' : 'text-slate-900'}`}
                 />
