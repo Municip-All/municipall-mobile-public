@@ -114,6 +114,7 @@ export default function ProfilePersonalInfoScreen() {
                 onChangeText={field.onChange}
                 keyboardType={field.keyboard}
                 autoCapitalize={field.keyboard ? 'none' : 'words'}
+                autoCorrect={!field.keyboard}
                 className={`mt-2 rounded-xl px-4 py-3 text-base ${classes.input}`}
                 placeholderTextColor={dark ? '#71717A' : '#A1A1AA'}
               />
