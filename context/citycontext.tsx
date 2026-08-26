@@ -45,7 +45,7 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const cfg = await cityService.getCityConfig(tenantId);
       setConfig(cfg);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('CityContext: Failed to refresh config', error);
     }
   }, [tenantId]);
@@ -57,7 +57,7 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
         const cfg = await cityService.getCityConfig(cityId);
         setTenantId(cityId);
         setConfig(cfg);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('CityContext: Failed to apply branding city', error);
       }
     },
@@ -147,7 +147,7 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
         const fallbackConfig = await cityService.getCityConfig(Config.DEFAULT_TENANT_ID);
         setTenantId(Config.DEFAULT_TENANT_ID);
         setConfig(fallbackConfig);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('CityContext: Failed to fetch fallback config', error);
       } finally {
         setLoading(false);

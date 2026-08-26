@@ -69,7 +69,7 @@ const CityMap = forwardRef<CityMapMethods, CityMapProps>(function CityMap(
           }
           return;
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('CityMap: location error', error);
       }
 

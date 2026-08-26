@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
           }
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Auth initialization error', error);
       } finally {
         setIsLoading(false);
