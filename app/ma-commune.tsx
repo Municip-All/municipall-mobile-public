@@ -5,7 +5,7 @@ import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
 import BrandedLogo from '@components/BrandedLogo';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 

@@ -14,7 +14,7 @@ import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { useHomeHighlights } from '@hooks/useHomeHighlights';
 import type { HomeHighlight } from '../services/homeHighlights';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import BrandedLogo from '@components/BrandedLogo';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
