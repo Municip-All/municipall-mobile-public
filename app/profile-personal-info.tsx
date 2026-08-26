@@ -29,8 +29,9 @@ export default function ProfilePersonalInfoScreen() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     if ((!isAuthenticated || !user) && !authLoading) {
-      router.replace('/login');
+      if (!cancelled) router.replace('/login');
       return;
     }
     if (user) {
@@ -39,6 +40,7 @@ export default function ProfilePersonalInfoScreen() {
       setEmail(user.email ?? '');
       setNeighborhood(user.neighborhood ?? '');
     }
+    return () => { cancelled = true; };
   }, [isAuthenticated, user, authLoading, router]);
 
   if (!user) {
@@ -119,7 +121,7 @@ export default function ProfilePersonalInfoScreen() {
           ))}
         </View>
 
-        <TouchableOpacity onPress={() => router.push('/legal/my-data')} className='mt-4 py-2'>
+        <TouchableOpacity onPress={() => router.push('/legal/my-data')} className='mt-4 py-2' accessibilityLabel='Mes droits RGPD' accessibilityRole='button'>
           <Text className={`text-center text-sm font-semibold`} style={{ color: primaryColor }}>
             Mes droits RGPD (accès, suppression…) →
           </Text>
@@ -128,6 +130,8 @@ export default function ProfilePersonalInfoScreen() {
         <TouchableOpacity
           onPress={handleSave}
           disabled={saving}
+          accessibilityLabel='Enregistrer les informations'
+          accessibilityRole='button'
           className='mt-4 items-center rounded-2xl py-4'
           style={{ backgroundColor: primaryColor }}>
           {saving ? (

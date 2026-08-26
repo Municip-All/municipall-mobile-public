@@ -31,9 +31,11 @@ export default function ProfileSecurityScreen() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     if (!isAuthenticated && !authLoading) {
-      router.replace('/login');
+      if (!cancelled) router.replace('/login');
     }
+    return () => { cancelled = true; };
   }, [isAuthenticated, authLoading, router]);
 
   if (!isAuthenticated) {
@@ -129,7 +131,7 @@ export default function ProfileSecurityScreen() {
                   className={`rounded-xl px-4 py-3 pr-12 text-base ${classes.input}`}
                   placeholderTextColor={colors.placeholder}
                 />
-                <TouchableOpacity onPress={field.toggle} className='absolute top-3 right-3 p-1'>
+                <TouchableOpacity onPress={field.toggle} className='absolute top-3 right-3 p-1' accessibilityLabel={field.visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} accessibilityRole='button'>
                   <Ionicons
                     name={field.visible ? 'eye-off-outline' : 'eye-outline'}
                     size={20}
@@ -144,6 +146,8 @@ export default function ProfileSecurityScreen() {
         <TouchableOpacity
           onPress={handleSave}
           disabled={saving}
+          accessibilityLabel='Mettre à jour le mot de passe'
+          accessibilityRole='button'
           className='mt-6 items-center rounded-2xl py-4'
           style={{ backgroundColor: primaryColor }}>
           {saving ? (
