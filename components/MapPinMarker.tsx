@@ -69,7 +69,7 @@ export default function MapPinMarker({
             ]}
           />
         ) : null}
-        <Image source={MAP_PINS[kind]} style={{ width: size, height: size }} resizeMode='contain' />
+        <Image source={MAP_PINS[kind]} style={{ width: size, height: size }} resizeMode='contain' accessible={false} accessibilityElementsHidden />
       </View>
       {children}
     </Marker>
