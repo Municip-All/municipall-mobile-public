@@ -46,6 +46,9 @@ export default function Onboarding() {
     try {
       await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
     } catch {
+      Alert.alert('Erreur', "Impossible d'enregistrer votre progression. Réessayez.");
+      setCompleting(false);
+      return;
     }
     router.replace('/home');
   };
