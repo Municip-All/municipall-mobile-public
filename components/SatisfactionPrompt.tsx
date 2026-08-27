@@ -28,9 +28,9 @@ export default function SatisfactionPrompt({
 
   if (rating) {
     return (
-      <View className={`border-t px-4 py-5 ${dark ? 'border-zinc-800' : 'border-zinc-200'}`}>
+      <View className={`border-t px-4 py-5 ${dark ? 'border-night-border' : 'border-cream-200'}`}>
         <Text
-          className={`mb-2 text-center text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
+          className={`mb-2 text-center text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
           Merci pour votre avis !
         </Text>
         <View className='flex-row items-center justify-center gap-1'>
@@ -39,7 +39,7 @@ export default function SatisfactionPrompt({
               key={value}
               name={value <= rating.stars ? 'star' : 'star-outline'}
               size={22}
-              color='#FF9500'
+              color={colors.warning}
             />
           ))}
         </View>
@@ -71,8 +71,9 @@ export default function SatisfactionPrompt({
 
   return (
     <View
-      className={`border-t px-4 py-5 ${dark ? 'border-zinc-800 bg-zinc-950' : 'border-zinc-200 bg-zinc-50'}`}>
-      <Text className={`mb-1 text-center text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
+      className={`border-t px-4 py-5 ${dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'}`}>
+      <Text
+        className={`mb-1 text-center text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
         {title}
       </Text>
       <Text className={`mb-4 text-center text-xs ${classes.body}`}>
@@ -90,7 +91,7 @@ export default function SatisfactionPrompt({
             <Ionicons
               name={value <= stars ? 'star' : 'star-outline'}
               size={32}
-              color={value <= stars ? '#FF9500' : colors.placeholder}
+              color={value <= stars ? colors.warning : colors.placeholder}
             />
           </TouchableOpacity>
         ))}
@@ -103,7 +104,7 @@ export default function SatisfactionPrompt({
         placeholderTextColor={colors.placeholder}
         multiline
         maxLength={2000}
-        className={`mb-4 min-h-[72px] rounded-2xl px-4 py-3 text-sm ${classes.formField} ${classes.formFieldText}`}
+        className={`mb-4 min-h-[72px] rounded-xl px-4 py-3 text-sm ${classes.formField} ${classes.formFieldText}`}
       />
 
       <TouchableOpacity
@@ -115,11 +116,13 @@ export default function SatisfactionPrompt({
           backgroundColor: primaryColor,
           opacity: submitting || stars < 1 ? 0.5 : 1,
         }}
-        className='items-center rounded-2xl py-3.5'>
+        className='items-center rounded-xl py-3.5'>
         {submitting ? (
-          <ActivityIndicator color='#FFF' />
+          <ActivityIndicator color={colors.onPrimary} />
         ) : (
-          <Text className='text-sm font-bold text-white'>Envoyer mon avis</Text>
+          <Text className='text-sm font-bold' style={{ color: colors.onPrimary }}>
+            Envoyer mon avis
+          </Text>
         )}
       </TouchableOpacity>
     </View>

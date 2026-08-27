@@ -229,8 +229,8 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
         snapPoint={650}
         modalStyle={{
           backgroundColor: colors.modalSheet,
-          borderTopLeftRadius: 36,
-          borderTopRightRadius: 36,
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
         }}
         handleStyle={{
           backgroundColor: colors.handle,
@@ -241,7 +241,7 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
         HeaderComponent={
           <View style={{ paddingHorizontal: formPaddingX, paddingTop: 40, paddingBottom: 12 }}>
             <Text
-              className={`text-3xl font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
+              className={`text-3xl font-extrabold tracking-tight ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
               Nouveau Signalement
             </Text>
           </View>
@@ -268,17 +268,14 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
                       isSelected
                         ? {
                             backgroundColor: primaryColor,
-                            shadowColor: primaryColor,
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.35,
-                            shadowRadius: 6,
-                            elevation: 4,
+                            ...colors.softShadow,
                           }
                         : undefined,
                     ]}>
                     <Text
                       numberOfLines={2}
-                      className={`text-center text-xs font-bold ${isSelected ? 'text-white' : classes.chipUnselectedText}`}>
+                      className={`text-center text-xs font-bold ${isSelected ? undefined : classes.chipUnselectedText}`}
+                      style={isSelected ? { color: colors.onPrimary } : undefined}>
                       {cat}
                     </Text>
                   </TouchableOpacity>
@@ -354,16 +351,19 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
               activeOpacity={0.85}
               accessibilityLabel='Envoyer le signalement'
               accessibilityRole='button'
-              className='items-center justify-center rounded-full shadow-lg'
+              className='items-center justify-center rounded-xl'
               style={{
                 backgroundColor: primaryColor,
                 paddingVertical: 18,
                 marginTop: 8,
+                ...colors.softShadow,
               }}>
               {isSubmitting ? (
-                <ActivityIndicator color='white' />
+                <ActivityIndicator color={colors.onPrimary} />
               ) : (
-                <Text className='text-lg font-black text-white'>Envoyer</Text>
+                <Text className='text-lg font-extrabold' style={{ color: colors.onPrimary }}>
+                  Envoyer
+                </Text>
               )}
             </TouchableOpacity>
           </ScrollView>
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   categoryChip: {
     width: '48%',
     minHeight: 44,
-    borderRadius: 14,
+    borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 10,
     alignItems: 'center',
