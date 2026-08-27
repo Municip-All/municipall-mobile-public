@@ -4,22 +4,23 @@ import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 
 const FloatingMapButton: React.FC = () => {
-  const { dark, primaryColor, colors } = useAppTheme();
+  const { primaryColor, colors } = useAppTheme();
   const router = useRouter();
 
   return (
     <TouchableOpacity
       onPress={() => router.push('/carte')}
       activeOpacity={0.8}
+      accessibilityLabel='Ouvrir la carte'
+      accessibilityRole='button'
       style={[
         styles.button,
         {
           backgroundColor: colors.elevated,
           borderWidth: 1,
-          borderColor: dark ? '#3F3F46' : '#E4E4E7',
-          shadowColor: '#000',
+          borderColor: colors.border,
         },
-        styles.buttonShadow,
+        colors.softShadow,
       ]}>
       <Ionicons name='map' size={24} color={primaryColor} />
     </TouchableOpacity>
@@ -29,21 +30,14 @@ const FloatingMapButton: React.FC = () => {
 const styles = StyleSheet.create({
   button: {
     position: 'absolute',
-    bottom: 120, // Adjusted to be above the bottom bar
+    bottom: 120,
     right: 20,
     height: 54,
     width: 54,
     borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 10,
     zIndex: 50,
-  },
-  buttonShadow: {
-    shadowOpacity: 0.25,
   },
 });
 
