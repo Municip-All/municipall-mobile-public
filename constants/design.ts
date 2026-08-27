@@ -22,7 +22,7 @@ export const palette = {
   nightMuted: '#9FAA96',
 } as const;
 
-export const DEFAULT_PRIMARY = palette.matcha500;
+export const DEFAULT_PRIMARY = palette.matcha700;
 
 export const softShadow: ViewStyle = {
   shadowColor: palette.matcha700,
@@ -44,7 +44,7 @@ export const semanticColors = {
   success: palette.matcha700,
   successDark: palette.matcha300,
   warning: palette.amber400,
-  accent: { light: palette.matcha500, dark: palette.matcha300 },
+  accent: { light: palette.matcha700, dark: palette.matcha300 },
   points: palette.amber400,
   muted: { light: palette.muted, dark: palette.nightMuted },
   label: { light: '#565E50', dark: '#C9D1C3' },

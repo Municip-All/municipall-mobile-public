@@ -10,7 +10,11 @@ export function useAppTheme() {
   const { config } = useCity();
   const dark = colorScheme === 'dark';
   const brand = useMemo(() => buildBrandTheme(config), [config]);
-  const primaryColor = brand.primaryColor || DEFAULT_PRIMARY;
+  const hasCityColor = Boolean(config?.theme?.primaryColor?.trim());
+  const primaryColor = useMemo(() => {
+    if (hasCityColor) return brand.primaryColor;
+    return dark ? palette.matcha500 : DEFAULT_PRIMARY;
+  }, [hasCityColor, brand.primaryColor, dark]);
 
   const pageBackground = dark
     ? (brand.backgroundColorDark ?? semanticColors.surface.dark)
