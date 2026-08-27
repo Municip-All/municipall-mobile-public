@@ -20,6 +20,8 @@ import BrandedLogo from '@components/BrandedLogo';
 import FloatingMapButton from '@components/FloatingMapButton';
 import ChatBotFloatingButton from '@components/ChatBotFloatingButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuth } from '@context/authcontext';
+import { ensureAuthenticatedForReport } from '../lib/requireAuthForReport';
 import type { IconName, RouteHref } from '../lib/types';
 
 export default function Home() {
@@ -65,10 +67,28 @@ export default function Home() {
   };
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isAuthenticated } = useAuth();
+
+  const handleReport = () => {
+    if (!ensureAuthenticatedForReport(isAuthenticated, router)) return;
+    router.push({ pathname: '/carte', params: { action: 'report' } } as RouteHref);
+  };
 
   const weatherEnabled = config?.features?.includes('weather') ?? false;
   const transportEnabled =
     (config?.isTransportFeatureAllowed && config?.isTransportFeatureEnabled) ?? false;
+
+  const explorerItems = [
+    { label: 'Ma commune', sub: 'Actualités et infos', icon: 'business', path: '/ma-commune' },
+    { label: 'Événements', sub: 'Agenda citoyen', icon: 'calendar', path: '/events' },
+    { label: 'Collecte', sub: 'Jours de ramassage', icon: 'trash', path: '/collecte' },
+    { label: 'Social', sub: 'Associations', icon: 'heart', path: '/social' },
+    ...(transportEnabled
+      ? [{ label: 'Transports', sub: 'Horaires en temps réel', icon: 'bus', path: '/transport' }]
+      : []),
+    { label: 'Contact', sub: 'Écrire à la mairie', icon: 'chatbubble', path: '/contact' },
+  ];
+
   const appDisplayName = brand.appName;
   const weatherLocation = weatherData?.city;
 
@@ -103,6 +123,37 @@ export default function Home() {
             <BrandedLogo size={48} radius={24} mode='contain' />
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          onPress={handleReport}
+          activeOpacity={0.9}
+          className='shadow-soft mb-6'
+          accessibilityRole='button'
+          accessibilityLabel='Signaler un problème'>
+          <View
+            className='overflow-hidden rounded-[20px]'
+            style={{ backgroundColor: primaryColor }}>
+            <View className='flex-row items-center justify-between p-6'>
+              <View className='flex-1 pr-4'>
+                <Text
+                  className='text-lg font-extrabold tracking-tight'
+                  style={{ color: colors.onPrimary }}>
+                  Un problème dans votre ville ?
+                </Text>
+                <Text
+                  className='mt-1 text-sm leading-5 font-medium'
+                  style={{ color: colors.onPrimary, opacity: 0.85 }}>
+                  Signalez-le en quelques secondes, la mairie est notifiée instantanément.
+                </Text>
+              </View>
+              <View
+                className='h-14 w-14 items-center justify-center rounded-full'
+                style={{ backgroundColor: `${colors.onPrimary}26` }}>
+                <Ionicons name='add-circle' size={30} color={colors.onPrimary} />
+              </View>
+            </View>
+          </View>
+        </TouchableOpacity>
 
         {weatherEnabled && (
           <Pressable
@@ -221,6 +272,41 @@ export default function Home() {
             </TouchableOpacity>
           ))
         )}
+        <Text className={`mb-4 ${classes.sectionTitle}`}>Explorer votre commune</Text>
+        <View className='flex-row flex-wrap justify-between'>
+          {explorerItems.map((item) => (
+            <TouchableOpacity
+              key={item.label}
+              onPress={() => router.push(item.path as RouteHref)}
+              className='mb-4 w-[48.5%] active:opacity-80'
+              accessibilityRole='button'
+              accessibilityLabel={item.label}>
+              <View
+                className={`rounded-[20px] border p-5 ${
+                  dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'
+                }`}>
+                <View
+                  className='h-11 w-11 items-center justify-center rounded-full'
+                  style={{
+                    backgroundColor: dark ? colors.palette.nightElevated : colors.palette.matcha100,
+                  }}>
+                  <Ionicons
+                    name={item.icon as IconName}
+                    size={22}
+                    color={dark ? colors.palette.matcha300 : colors.palette.matcha700}
+                  />
+                </View>
+                <Text
+                  className={`mt-3 text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+                  {item.label}
+                </Text>
+                <Text className={`mt-1 text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
+                  {item.sub}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
       </ScrollView>
 
       <FloatingMapButton />
