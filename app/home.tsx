@@ -18,6 +18,7 @@ import type { HomeHighlight } from '../services/homeHighlights';
 import BottomBar from '@components/BottomBar';
 import BrandedLogo from '@components/BrandedLogo';
 import FloatingMapButton from '@components/FloatingMapButton';
+import ChatBotFloatingButton from '@components/ChatBotFloatingButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { IconName, RouteHref } from '../lib/types';
 
@@ -223,6 +224,7 @@ export default function Home() {
       </ScrollView>
 
       <FloatingMapButton />
+      <ChatBotFloatingButton bottomOffset={182} />
       <BottomBar />
     </View>
   );

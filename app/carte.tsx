@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CityMap, MapHeaderOverlay, type CityMapMethods } from '@components/map';
 import type { MapLayerItem } from '@components/map/MapHeaderOverlay';
 import BottomBar from '@components/BottomBar';
+import ChatBotFloatingButton from '@components/ChatBotFloatingButton';
 import ReportSignalementSheet, {
   type ReportSignalementSheetRef,
 } from '@components/ReportSignalementSheet';
@@ -138,6 +139,7 @@ export default function Carte() {
           />
         </View>
         <BottomBar />
+        <ChatBotFloatingButton bottomOffset={insets.bottom + 84} />
         <ReportSignalementSheet ref={reportSheetRef} />
         <ReportMapSummarySheet
           visible={selectedReportGroup != null}
