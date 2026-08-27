@@ -1,27 +1,57 @@
-/** Couleur primaire par défaut (alignée sur la marque Municip'All) */
-export const DEFAULT_PRIMARY = '#0B0080';
+import type { ViewStyle } from 'react-native';
 
-/** Palette sémantique iOS — contrastes validés clair/sombre */
-export const semanticColors = {
-  surface: { light: '#F2F2F7', dark: '#000000' },
-  surfaceAuth: { light: '#F8FAFC', dark: '#09090B' },
-  card: { light: '#FFFFFF', dark: '#18181B' },
-  elevated: { light: '#FFFFFF', dark: '#1C1C1E' },
-  border: { light: '#E4E4E7', dark: '#3F3F46' },
-  borderSubtle: { light: '#F4F4F5', dark: '#27272A' },
-  destructive: '#FF3B30',
-  info: '#007AFF',
-  success: '#34C759',
-  warning: '#FF9500',
-  accent: '#AF52DE',
-  points: '#FFCC00',
-  muted: { light: '#71717A', dark: '#A1A1AA' },
-  label: { light: '#52525B', dark: '#D4D4D8' },
-  secondary: { light: '#3F3F46', dark: '#A1A1AA' },
-  tertiary: { light: '#71717A', dark: '#71717A' },
+export const palette = {
+  matcha900: '#2E4029',
+  matcha700: '#4A6741',
+  matcha500: '#7A9B6D',
+  matcha300: '#A8C69F',
+  matcha100: '#E3EDDE',
+  cream50: '#FDFCF9',
+  cream100: '#F7F4EC',
+  cream200: '#EFEAE0',
+  charcoal: '#3A4238',
+  muted: '#7C8378',
+  sake400: '#C65D4E',
+  amber400: '#D9A441',
+  info400: '#7A8FA6',
+  nightBg: '#1C241A',
+  nightSurface: '#252E22',
+  nightElevated: '#2A3426',
+  nightBorder: '#39442F',
+  nightText: '#E8EDE4',
+  nightMuted: '#9FAA96',
 } as const;
 
-/** Fond teinté à partir d'une couleur primaire (ex. `#0B008015`) */
+export const DEFAULT_PRIMARY = palette.matcha500;
+
+export const softShadow: ViewStyle = {
+  shadowColor: palette.matcha700,
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.08,
+  shadowRadius: 8,
+  elevation: 1,
+};
+
+export const semanticColors = {
+  surface: { light: palette.cream100, dark: palette.nightBg },
+  surfaceAuth: { light: palette.cream50, dark: palette.nightBg },
+  card: { light: palette.cream50, dark: palette.nightSurface },
+  elevated: { light: palette.cream50, dark: palette.nightElevated },
+  border: { light: palette.cream200, dark: palette.nightBorder },
+  borderSubtle: { light: '#F2EFE5', dark: palette.nightSurface },
+  destructive: palette.sake400,
+  info: palette.info400,
+  success: palette.matcha700,
+  successDark: palette.matcha300,
+  warning: palette.amber400,
+  accent: { light: palette.matcha500, dark: palette.matcha300 },
+  points: palette.amber400,
+  muted: { light: palette.muted, dark: palette.nightMuted },
+  label: { light: '#565E50', dark: '#C9D1C3' },
+  secondary: { light: palette.charcoal, dark: palette.nightText },
+  tertiary: { light: palette.muted, dark: palette.nightMuted },
+} as const;
+
 export function tintColor(hex: string, alphaHex = '15') {
   const normalized = hex.startsWith('#') ? hex : `#${hex}`;
   return `${normalized}${alphaHex}`;
