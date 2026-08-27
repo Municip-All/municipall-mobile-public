@@ -28,7 +28,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           setPref(saved);
           nativewind.setColorScheme(saved);
         }
-      } catch {}
+      } catch (e: unknown) {
+        console.warn('Failed to load theme preference:', e);
+      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -37,7 +39,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     async (t: ThemePreference) => {
       try {
         await AsyncStorage.setItem(STORAGE_KEY, t);
-      } catch {}
+      } catch (e: unknown) {
+        console.warn('Failed to persist theme preference:', e);
+      }
       setPref(t);
       nativewind.setColorScheme(t);
     },

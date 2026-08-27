@@ -1,9 +1,18 @@
-import React, { useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking, Alert } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Linking,
+  Alert,
+  RefreshControl,
+  ActivityIndicator,
+} from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { AssociationCategory, CityAssociation } from '../services/cityService';
@@ -81,6 +90,7 @@ function AssociationCard({
         {contactEmail ? (
           <TouchableOpacity
             onPress={() => Linking.openURL(`mailto:${contactEmail}`)}
+            accessibilityLabel={`Envoyer un e-mail à ${item.name}`}
             className={`flex-row items-center rounded-full px-3 py-2 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'}`}>
             <Ionicons name='mail-outline' size={14} color={primaryColor} />
             <Text
@@ -92,6 +102,7 @@ function AssociationCard({
         {contactPhone ? (
           <TouchableOpacity
             onPress={() => Linking.openURL(`tel:${contactPhone.replace(/\s/g, '')}`)}
+            accessibilityLabel={`Appeler ${item.name}`}
             className={`flex-row items-center rounded-full px-3 py-2 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'}`}>
             <Ionicons name='call-outline' size={14} color={primaryColor} />
             <Text
@@ -103,6 +114,7 @@ function AssociationCard({
         {item.website ? (
           <TouchableOpacity
             onPress={() => openLink(item.website!)}
+            accessibilityLabel={`Site web de ${item.name}`}
             className={`flex-row items-center rounded-full px-3 py-2 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'}`}>
             <Ionicons name='globe-outline' size={14} color={primaryColor} />
             <Text
@@ -118,8 +130,21 @@ function AssociationCard({
 
 export default function SocialScreen() {
   const { dark, primaryColor, classes, layoutStyles, brand } = useAppTheme();
-  const { config } = useCity();
+  const { config, refreshConfig, loading } = useCity();
   const insets = useSafeAreaInsets();
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refreshConfig();
+      setError(null);
+    } catch {
+      setError('Impossible de charger les associations.');
+    }
+    setRefreshing(false);
+  }, [refreshConfig]);
 
   const associations = useMemo(() => config?.associations ?? [], [config?.associations]);
   const grouped = useMemo(() => {
@@ -136,6 +161,31 @@ export default function SocialScreen() {
 
   const cityLabel = config?.officialName || config?.name || brand.appName;
 
+  if (loading) {
+    return (
+      <View style={layoutStyles.page} className='items-center justify-center'>
+        <ActivityIndicator size='large' color={primaryColor} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={layoutStyles.page} className='items-center justify-center px-6'>
+        <Text className={`text-center text-base ${classes.body}`}>{error}</Text>
+        <TouchableOpacity
+          onPress={() => {
+            setError(null);
+            onRefresh();
+          }}
+          className='mt-4 rounded-xl px-6 py-3'
+          style={{ backgroundColor: primaryColor }}>
+          <Text className='font-bold text-white'>Réessayer</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={layoutStyles.page}>
       <ScrollView
@@ -144,7 +194,10 @@ export default function SocialScreen() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
+        }>
         <View className='mb-6'>
           <Text className={classes.eyebrow}>Vie locale</Text>
           <Text className={classes.title}>Social</Text>

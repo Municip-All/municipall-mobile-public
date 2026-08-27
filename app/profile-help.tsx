@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,17 +25,47 @@ const FAQ = [
 
 export default function ProfileHelpScreen() {
   const { dark, classes, primaryColor, colors, layoutStyles } = useAppTheme();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [authError, setAuthError] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace('/login');
+    let cancelled = false;
+    if (!isAuthenticated && !authLoading) {
+      if (!cancelled) {
+        setAuthError(true);
+        router.replace('/login');
+      }
     }
-  }, [isAuthenticated, router]);
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, authLoading, router]);
 
   if (!isAuthenticated) {
+    if (authLoading) {
+      return (
+        <View style={layoutStyles.page} className='items-center justify-center'>
+          <ActivityIndicator color={primaryColor} />
+        </View>
+      );
+    }
+    if (authError) {
+      return (
+        <View style={layoutStyles.page} className='items-center justify-center px-6'>
+          <Text className={`text-center text-base ${classes.body}`}>
+            Vous devez être connecté pour accéder à cette page.
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.replace('/login')}
+            className='mt-4 rounded-xl px-6 py-3'
+            style={{ backgroundColor: primaryColor }}>
+            <Text className='font-bold text-white'>Se connecter</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
     return null;
   }
 
@@ -91,6 +121,8 @@ export default function ProfileHelpScreen() {
             <TouchableOpacity
               key={item.label}
               onPress={item.onPress}
+              accessibilityLabel={item.label}
+              accessibilityRole='button'
               className={`flex-row items-center justify-between p-4 ${i < links.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
               <View className='flex-row items-center'>
                 <View
@@ -112,6 +144,8 @@ export default function ProfileHelpScreen() {
           onPress={() =>
             Linking.openURL('mailto:support@municipall.dev?subject=Aide%20application%20Municipall')
           }
+          accessibilityLabel='Écrire au support par e-mail'
+          accessibilityRole='button'
           className='mt-6 items-center rounded-2xl border border-zinc-200 py-4 dark:border-zinc-700'>
           <Text style={{ color: primaryColor }} className='text-base font-bold'>
             Écrire au support

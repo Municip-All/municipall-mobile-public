@@ -69,12 +69,10 @@ const CityMap = forwardRef<CityMapMethods, CityMapProps>(function CityMap(
           }
           return;
         }
-      } catch (error) {
-        console.error('CityMap: location error', error);
-      }
-
-      if (!cancelled) {
-        setCoords(DEFAULT_MAP_CENTER);
+      } catch {
+        if (!cancelled) {
+          setCoords(DEFAULT_MAP_CENTER);
+        }
       }
     };
 

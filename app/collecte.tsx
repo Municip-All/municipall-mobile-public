@@ -1,9 +1,16 @@
-import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { useCallback, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  RefreshControl,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -12,8 +19,22 @@ import type { IconName } from '../lib/types';
 
 export default function Collecte() {
   const { dark, primaryColor, layoutStyles } = useAppTheme();
-  const { config } = useCity();
+  const { config, refreshConfig, loading, fetchWeather } = useCity();
   const insets = useSafeAreaInsets();
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refreshConfig();
+      await fetchWeather();
+      setError(null);
+    } catch {
+      setError('Impossible de charger les données.');
+    }
+    setRefreshing(false);
+  }, [refreshConfig, fetchWeather]);
 
   const schedule = config?.wasteConfig?.services || [
     { type: 'Ordures ménagères', days: [1, 4], time: '19:00', icon: 'trash', color: '#8E8E93' },
@@ -40,6 +61,33 @@ export default function Collecte() {
     return days.map((d) => dayMap[d]).join(', ');
   };
 
+  if (loading) {
+    return (
+      <View style={layoutStyles.page} className='items-center justify-center'>
+        <ActivityIndicator size='large' color={primaryColor} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={layoutStyles.page} className='items-center justify-center px-6'>
+        <Text className={`text-center text-base ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
+          {error}
+        </Text>
+        <TouchableOpacity
+          onPress={() => {
+            setError(null);
+            onRefresh();
+          }}
+          className='mt-4 rounded-xl px-6 py-3'
+          style={{ backgroundColor: primaryColor }}>
+          <Text className='font-bold text-white'>Réessayer</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={layoutStyles.page}>
       <ScrollView
@@ -48,7 +96,10 @@ export default function Collecte() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
+        }>
         {/* Apple Style Header */}
         <View className='mb-8'>
           <Text
@@ -80,7 +131,11 @@ export default function Collecte() {
                 <View
                   className='mt-3 flex-row items-center self-start rounded-full px-3 py-1'
                   style={{ backgroundColor: `${next.service.color}20` }}>
-                  <Ionicons name={next.service.icon as IconName} size={14} color={next.service.color} />
+                  <Ionicons
+                    name={next.service.icon as IconName}
+                    size={14}
+                    color={next.service.color}
+                  />
                   <Text className='ml-2 text-xs font-bold' style={{ color: next.service.color }}>
                     {next.service.type}
                   </Text>
@@ -99,6 +154,7 @@ export default function Collecte() {
           {schedule.map((item, i) => (
             <View
               key={i}
+              accessibilityLabel={`${item.type}, ${formatDays(item.days)} à ${item.time}`}
               className={`flex-row items-center p-5 ${i !== schedule.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
               <View
                 className='mr-4 h-12 w-12 items-center justify-center rounded-2xl'

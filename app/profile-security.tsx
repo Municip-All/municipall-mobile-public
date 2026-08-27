@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -20,7 +20,7 @@ import { updateUserPassword } from '../services/userProfileService';
 
 export default function ProfileSecurityScreen() {
   const { classes, primaryColor, colors, layoutStyles } = useAppTheme();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [current, setCurrent] = useState('');
@@ -31,12 +31,23 @@ export default function ProfileSecurityScreen() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace('/login');
+    let cancelled = false;
+    if (!isAuthenticated && !authLoading) {
+      if (!cancelled) router.replace('/login');
     }
-  }, [isAuthenticated, router]);
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, authLoading, router]);
 
   if (!isAuthenticated) {
+    if (authLoading) {
+      return (
+        <View style={layoutStyles.page} className='items-center justify-center'>
+          <ActivityIndicator color={primaryColor} />
+        </View>
+      );
+    }
     return null;
   }
 
@@ -58,9 +69,9 @@ export default function ProfileSecurityScreen() {
       await updateUserPassword({ current, new: newPassword, confirm });
       Alert.alert('Succès', 'Votre mot de passe a été mis à jour.');
       router.back();
-    } catch (e) {
+    } catch (e: unknown) {
       const msg =
-        (e as Error)?.message === 'PASSWORD_MISMATCH'
+        e instanceof Error && e.message === 'PASSWORD_MISMATCH'
           ? 'La confirmation ne correspond pas.'
           : 'Vérifiez votre mot de passe actuel et réessayez.';
       Alert.alert('Erreur', msg);
@@ -119,10 +130,17 @@ export default function ProfileSecurityScreen() {
                   onChangeText={field.onChange}
                   secureTextEntry={!field.visible}
                   autoCapitalize='none'
+                  autoCorrect={false}
                   className={`rounded-xl px-4 py-3 pr-12 text-base ${classes.input}`}
                   placeholderTextColor={colors.placeholder}
                 />
-                <TouchableOpacity onPress={field.toggle} className='absolute top-3 right-3 p-1'>
+                <TouchableOpacity
+                  onPress={field.toggle}
+                  className='absolute top-3 right-3 p-1'
+                  accessibilityLabel={
+                    field.visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+                  }
+                  accessibilityRole='button'>
                   <Ionicons
                     name={field.visible ? 'eye-off-outline' : 'eye-outline'}
                     size={20}
@@ -137,6 +155,8 @@ export default function ProfileSecurityScreen() {
         <TouchableOpacity
           onPress={handleSave}
           disabled={saving}
+          accessibilityLabel='Mettre à jour le mot de passe'
+          accessibilityRole='button'
           className='mt-6 items-center rounded-2xl py-4'
           style={{ backgroundColor: primaryColor }}>
           {saving ? (

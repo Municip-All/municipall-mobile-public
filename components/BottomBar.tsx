@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Pressable, Text, Platform, Dimensions, StyleSheet } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { useTheme } from '@context/themecontext';
@@ -101,7 +100,7 @@ const BottomBar: React.FC = () => {
       <Background />
 
       <View style={[styles.tabsContainer, { height: tabHeight }]}>
-        {tabs.map((tab, index) => {
+        {tabs.map((tab, _index) => {
           if (tab.isCenter) {
             return <View key={tab.id} style={styles.centerSpace} pointerEvents='none' />;
           }
@@ -111,7 +110,8 @@ const BottomBar: React.FC = () => {
               key={tab.id}
               onPress={() => handlePress(tab)}
               style={styles.tab}
-              accessibilityRole='button'>
+              accessibilityRole='button'
+              accessibilityLabel={tab.label}>
               <Ionicons
                 name={(pathname === tab.path ? tab.icon : `${tab.icon}-outline`) as IconName}
                 size={22}
@@ -134,7 +134,9 @@ const BottomBar: React.FC = () => {
             styles.centerButton,
             styles.centerButtonShadow,
             { backgroundColor: primaryColor, borderColor: fabBorderColor },
-          ]}>
+          ]}
+          accessibilityRole='button'
+          accessibilityLabel='Signaler'>
           <Ionicons name='paper-plane' size={24} color={brand.onPrimary} />
         </Pressable>
         <Text style={[styles.centerLabel, { color: dark ? '#FFFFFF' : primaryColor }]}>

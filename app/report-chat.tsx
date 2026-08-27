@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -55,8 +55,7 @@ export default function ReportChatScreen() {
           }
           return data;
         });
-      } catch (e) {
-        console.error(e);
+      } catch {
         if (!silent) Alert.alert('Erreur', 'Impossible de charger le signalement.');
       } finally {
         if (!silent) setLoading(false);
@@ -66,15 +65,21 @@ export default function ReportChatScreen() {
   );
 
   useEffect(() => {
-    void loadReport();
+    let cancelled = false;
+    void loadReport().finally(() => {
+      if (cancelled) return;
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [loadReport]);
 
   useLiveChatRefresh(() => loadReport({ silent: true }), Boolean(report) && !isClosed);
 
   useEffect(() => {
-    if (report?.messages.length) {
-      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
-    }
+    if (!report?.messages.length) return;
+    const id = setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+    return () => clearTimeout(id);
   }, [report?.messages.length]);
 
   const handleSend = async () => {
@@ -85,8 +90,7 @@ export default function ReportChatScreen() {
       const updated = await reportService.reply(reportId, text);
       setReport(updated);
       setReply('');
-    } catch (e) {
-      console.error(e);
+    } catch {
       Alert.alert('Erreur', "Impossible d'envoyer votre message.");
     } finally {
       setSending(false);
@@ -105,7 +109,11 @@ export default function ReportChatScreen() {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
         <Text className={classes.body}>Signalement introuvable.</Text>
-        <TouchableOpacity onPress={() => router.back()} className='mt-4'>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className='mt-4'
+          accessibilityRole='button'
+          accessibilityLabel='Retour'>
           <Text style={{ color: primaryColor }}>Retour</Text>
         </TouchableOpacity>
       </View>
@@ -118,7 +126,11 @@ export default function ReportChatScreen() {
         style={{ paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: 12 }}
         className={`border-b ${dark ? 'border-zinc-800' : 'border-zinc-200'}`}>
         <View className='flex-row items-center'>
-          <TouchableOpacity onPress={() => router.back()} className='mr-3 p-2'>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className='mr-3 p-2'
+            accessibilityRole='button'
+            accessibilityLabel='Retour'>
             <Ionicons name='chevron-back' size={24} color={dark ? '#FFF' : '#000'} />
           </TouchableOpacity>
           <View className='flex-1'>
@@ -223,6 +235,8 @@ export default function ReportChatScreen() {
               <TouchableOpacity
                 onPress={handleSend}
                 disabled={sending || !reply.trim()}
+                accessibilityLabel='Envoyer'
+                accessibilityRole='button'
                 style={{
                   backgroundColor: primaryColor,
                   opacity: sending || !reply.trim() ? 0.5 : 1,

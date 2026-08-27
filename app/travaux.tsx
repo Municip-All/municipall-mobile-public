@@ -1,8 +1,15 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { Ionicons } from '@expo/vector-icons';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constructionWorksService, ConstructionWork } from '../services/constructionWorksService';
@@ -11,23 +18,37 @@ export default function Travaux() {
   const { dark, primaryColor, layoutStyles } = useAppTheme();
   const insets = useSafeAreaInsets();
 
-  const [works, setWorks] = React.useState<ConstructionWork[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [works, setWorks] = useState<ConstructionWork[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  React.useEffect(() => {
-    const fetchWorks = async () => {
-      try {
-        const data = await constructionWorksService.getWorks();
-        setWorks(data);
-      } catch (err) {
-        console.error('Failed to fetch works', err);
-        Alert.alert('Erreur', 'Impossible de charger les travaux.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchWorks();
+  const loadWorks = useCallback(async (signal?: { cancelled: boolean }) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await constructionWorksService.getWorks();
+      if (!signal?.cancelled) setWorks(data);
+    } catch {
+      if (!signal?.cancelled) setError('Impossible de charger les travaux.');
+    } finally {
+      if (!signal?.cancelled) setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    const signal = { cancelled: false };
+    loadWorks(signal);
+    return () => {
+      signal.cancelled = true;
+    };
+  }, [loadWorks]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadWorks();
+    setRefreshing(false);
+  }, [loadWorks]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -63,7 +84,10 @@ export default function Travaux() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
+        }>
         {/* Apple Style Header */}
         <View className='mb-8'>
           <Text
@@ -80,6 +104,27 @@ export default function Travaux() {
         <View className='space-y-4'>
           {isLoading ? (
             <ActivityIndicator color={primaryColor} size='large' style={{ marginTop: 40 }} />
+          ) : error ? (
+            <View className='items-center py-20'>
+              <Ionicons
+                name='alert-circle-outline'
+                size={48}
+                color={dark ? '#3F3F46' : '#D4D4D8'}
+              />
+              <Text
+                className={`mt-4 text-center font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                {error}
+              </Text>
+              <TouchableOpacity
+                onPress={() => loadWorks()}
+                className='mt-4'
+                accessibilityRole='button'
+                accessibilityLabel='Réessayer le chargement'>
+                <Text style={{ color: primaryColor }} className='font-bold'>
+                  Réessayer
+                </Text>
+              </TouchableOpacity>
+            </View>
           ) : works.length === 0 ? (
             <View className='items-center py-20'>
               <Ionicons name='hammer-outline' size={48} color={dark ? '#3F3F46' : '#D4D4D8'} />

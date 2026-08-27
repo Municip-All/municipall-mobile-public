@@ -1,25 +1,71 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import { useCallback, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Linking,
+  RefreshControl,
+  ActivityIndicator,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
 import BrandedLogo from '@components/BrandedLogo';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function MaCommuneScreen() {
   const { dark, primaryColor, classes, layoutStyles, brand } = useAppTheme();
-  const { config } = useCity();
+  const { config, refreshConfig, loading } = useCity();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refreshConfig();
+      setError(null);
+    } catch {
+      setError('Impossible de charger les informations de la commune.');
+    }
+    setRefreshing(false);
+  }, [refreshConfig]);
 
   const profile = config?.publicProfile;
   const cityName = config?.officialName || config?.name || brand.appName;
   const appName = config?.name || brand.appName;
   const mayorTitle = profile?.mayorTitle?.trim() || 'Maire';
   const mayorName = profile?.mayorName?.trim();
+
+  if (loading) {
+    return (
+      <View style={layoutStyles.page} className='items-center justify-center'>
+        <ActivityIndicator size='large' color={primaryColor} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={layoutStyles.page} className='items-center justify-center px-6'>
+        <Text className={`text-center text-base ${classes.body}`}>{error}</Text>
+        <TouchableOpacity
+          onPress={() => {
+            setError(null);
+            onRefresh();
+          }}
+          className='mt-4 rounded-xl px-6 py-3'
+          style={{ backgroundColor: primaryColor }}>
+          <Text className='font-bold text-white'>Réessayer</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={layoutStyles.page}>
@@ -29,11 +75,16 @@ export default function MaCommuneScreen() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
+        }>
         <TouchableOpacity
           onPress={() => router.back()}
           className='mb-4 flex-row items-center gap-1 self-start'
-          hitSlop={12}>
+          hitSlop={12}
+          accessibilityRole='button'
+          accessibilityLabel='Retour'>
           <Ionicons name='chevron-back' size={22} color={primaryColor} />
           <Text style={{ color: primaryColor }} className='text-sm font-semibold'>
             Retour
@@ -86,8 +137,9 @@ export default function MaCommuneScreen() {
             <Text className={`text-sm leading-6 ${classes.body}`}>{profile.description}</Text>
           </View>
         ) : null}
-
-        <View className={`mb-4 rounded-[24px] p-5 ${classes.card}`}>
+        <View
+          className={`mb-4 rounded-[24px] p-5 ${classes.card}`}
+          accessibilityLabel='Informations pratiques'>
           <Text className={`mb-3 text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
             Informations pratiques
           </Text>
@@ -146,7 +198,9 @@ export default function MaCommuneScreen() {
           <TouchableOpacity
             onPress={() => router.push('/contact')}
             className='flex-1 items-center rounded-2xl py-4'
-            style={{ backgroundColor: primaryColor, minWidth: '45%' }}>
+            style={{ backgroundColor: primaryColor, minWidth: '45%' }}
+            accessibilityRole='button'
+            accessibilityLabel='Contacter la mairie'>
             <Text className='text-sm font-bold text-white'>Contacter la mairie</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -154,7 +208,9 @@ export default function MaCommuneScreen() {
             className={`flex-1 items-center rounded-2xl border py-4 ${
               dark ? 'border-zinc-700 bg-zinc-900' : 'border-zinc-200 bg-white'
             }`}
-            style={{ minWidth: '45%' }}>
+            style={{ minWidth: '45%' }}
+            accessibilityRole='button'
+            accessibilityLabel='Vie associative'>
             <Text className={`text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
               Vie associative
             </Text>

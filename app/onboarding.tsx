@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { useMemo, useState } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -33,6 +33,7 @@ export default function Onboarding() {
   const router = useRouter();
   const { dark, primaryColor, classes, layoutStyles } = useAppTheme();
   const [index, setIndex] = useState(0);
+  const [completing, setCompleting] = useState(false);
   const total = steps.length;
 
   const nextLabel = useMemo(
@@ -41,9 +42,14 @@ export default function Onboarding() {
   );
 
   const complete = async () => {
+    setCompleting(true);
     try {
       await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
-    } catch {}
+    } catch {
+      Alert.alert('Erreur', "Impossible d'enregistrer votre progression. Réessayez.");
+      setCompleting(false);
+      return;
+    }
     router.replace('/home');
   };
 
@@ -88,11 +94,16 @@ export default function Onboarding() {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={onNext}
+            disabled={completing}
             className='rounded-xl px-8 py-3'
             style={{ backgroundColor: primaryColor }}
             accessibilityRole='button'
             accessibilityLabel={nextLabel}>
-            <Text className='font-semibold text-white'>{nextLabel}</Text>
+            {completing ? (
+              <ActivityIndicator color='#fff' />
+            ) : (
+              <Text className='font-semibold text-white'>{nextLabel}</Text>
+            )}
           </TouchableOpacity>
         </View>
         {index === total - 1 ? (
