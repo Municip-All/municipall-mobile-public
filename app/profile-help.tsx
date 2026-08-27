@@ -59,9 +59,13 @@ export default function ProfileHelpScreen() {
           </Text>
           <TouchableOpacity
             onPress={() => router.replace('/login')}
+            accessibilityRole='button'
+            accessibilityLabel='Se connecter'
             className='mt-4 rounded-xl px-6 py-3'
             style={{ backgroundColor: primaryColor }}>
-            <Text className='font-bold text-white'>Se connecter</Text>
+            <Text className='font-bold' style={{ color: colors.onPrimary }}>
+              Se connecter
+            </Text>
           </TouchableOpacity>
         </View>
       );
@@ -73,19 +77,19 @@ export default function ProfileHelpScreen() {
     {
       label: 'Contacter le support',
       icon: 'chatbubbles-outline' as const,
-      color: '#007AFF',
+      color: colors.info,
       onPress: () => router.push('/contact'),
     },
     {
       label: 'Informations légales & RGPD',
       icon: 'shield-checkmark-outline' as const,
-      color: '#34C759',
+      color: colors.success,
       onPress: () => router.push('/legal'),
     },
     {
       label: 'Site Municipall',
       icon: 'globe-outline' as const,
-      color: '#FF9500',
+      color: colors.warning,
       onPress: () => Linking.openURL(Config.WEBSITE_URL),
     },
   ];
@@ -100,14 +104,16 @@ export default function ProfileHelpScreen() {
           paddingTop: 16,
         }}>
         <Text className={`mb-3 ml-1 ${classes.meta}`}>Questions fréquentes</Text>
-        <View className={`mb-8 rounded-[24px] p-4 ${classes.listGroup}`}>
+        <View className={`mb-8 p-4 ${classes.listGroup}`}>
           {FAQ.map((item, i) => (
             <View
               key={item.q}
               className={
-                i < FAQ.length - 1 ? 'mb-5 border-b border-zinc-50 pb-5 dark:border-zinc-800' : ''
+                i < FAQ.length - 1
+                  ? `mb-5 border-b pb-5 ${dark ? 'border-night-border' : 'border-cream-200'}`
+                  : ''
               }>
-              <Text className={`text-sm font-bold ${dark ? 'text-white' : 'text-zinc-900'}`}>
+              <Text className={`text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
                 {item.q}
               </Text>
               <Text className={`mt-2 ${classes.body}`}>{item.a}</Text>
@@ -116,14 +122,14 @@ export default function ProfileHelpScreen() {
         </View>
 
         <Text className={`mb-3 ml-1 ${classes.meta}`}>Liens utiles</Text>
-        <View className={`overflow-hidden rounded-[24px] ${classes.listGroup}`}>
+        <View className={classes.listGroup}>
           {links.map((item, i) => (
             <TouchableOpacity
               key={item.label}
               onPress={item.onPress}
               accessibilityLabel={item.label}
               accessibilityRole='button'
-              className={`flex-row items-center justify-between p-4 ${i < links.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
+              className={`flex-row items-center justify-between p-4 ${i < links.length - 1 ? `border-b ${dark ? 'border-night-border' : 'border-cream-200'}` : ''}`}>
               <View className='flex-row items-center'>
                 <View
                   className='mr-3 h-8 w-8 items-center justify-center rounded-lg'
@@ -131,7 +137,7 @@ export default function ProfileHelpScreen() {
                   <Ionicons name={item.icon} size={18} color={item.color} />
                 </View>
                 <Text
-                  className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                  className={`text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
                   {item.label}
                 </Text>
               </View>
@@ -146,7 +152,7 @@ export default function ProfileHelpScreen() {
           }
           accessibilityLabel='Écrire au support par e-mail'
           accessibilityRole='button'
-          className='mt-6 items-center rounded-2xl border border-zinc-200 py-4 dark:border-zinc-700'>
+          className='border-cream-200 dark:border-night-border mt-6 items-center rounded-xl border py-4'>
           <Text style={{ color: primaryColor }} className='text-base font-bold'>
             Écrire au support
           </Text>
