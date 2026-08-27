@@ -19,6 +19,14 @@ export default function LegalHubScreen() {
   const cityLegal = useCityLegalContext();
   const items = LEGAL_HUB_ITEMS.filter((item) => !item.requiresAuth || isAuthenticated);
 
+  const hubColors: Record<string, string> = {
+    '#007AFF': colors.info,
+    '#34C759': colors.success,
+    '#FF9500': colors.warning,
+    '#AF52DE': colors.accent,
+    '#5856D6': colors.accent,
+  };
+
   return (
     <View style={layoutStyles.page}>
       <ProfileScreenHeader title='Informations légales' />
@@ -35,7 +43,7 @@ export default function LegalHubScreen() {
         </Text>
         {cityLegal.cityName ? (
           <View
-            className={`mb-6 rounded-2xl border p-4 ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-zinc-50'}`}>
+            className={`mb-6 rounded-2xl border p-4 ${dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'}`}>
             <Text className={classes.meta}>Votre commune — {cityLegal.cityName}</Text>
             <Text className={`mt-2 text-xs leading-5 ${classes.body}`}>
               {cityLegal.dataRetentionPolicy?.trim() ||
@@ -44,33 +52,38 @@ export default function LegalHubScreen() {
           </View>
         ) : null}
 
-        <View className={`overflow-hidden rounded-[24px] ${classes.listGroup}`}>
-          {items.map((item, i) => (
-            <TouchableOpacity
-              key={item.id}
-              onPress={() => router.push(item.route as RouteHref)}
-              className={`flex-row items-center p-4 ${i < items.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
-              <View
-                className='mr-3 h-10 w-10 items-center justify-center rounded-xl'
-                style={{ backgroundColor: `${item.color}15` }}>
-                <Ionicons name={item.icon} size={22} color={item.color} />
-              </View>
-              <View className='flex-1'>
-                <Text
-                  className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
-                  {item.label}
-                </Text>
-                <Text className={`mt-0.5 text-xs ${dark ? 'text-zinc-500' : 'text-zinc-500'}`}>
-                  {item.description}
-                </Text>
-              </View>
-              <Ionicons name='chevron-forward' size={16} color={colors.chevron} />
-            </TouchableOpacity>
-          ))}
+        <View className={classes.listGroup}>
+          {items.map((item, i) => {
+            const color = hubColors[item.color] ?? colors.accent;
+            return (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => router.push(item.route as RouteHref)}
+                accessibilityRole='button'
+                accessibilityLabel={item.label}
+                className={`flex-row items-center p-4 ${i < items.length - 1 ? `border-b ${dark ? 'border-night-border' : 'border-cream-200'}` : ''}`}>
+                <View
+                  className='mr-3 h-10 w-10 items-center justify-center rounded-xl'
+                  style={{ backgroundColor: `${color}15` }}>
+                  <Ionicons name={item.icon} size={22} color={color} />
+                </View>
+                <View className='flex-1'>
+                  <Text
+                    className={`text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+                    {item.label}
+                  </Text>
+                  <Text className={`mt-0.5 text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
+                    {item.description}
+                  </Text>
+                </View>
+                <Ionicons name='chevron-forward' size={16} color={colors.chevron} />
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <Text
-          className={`mt-6 text-center text-[11px] leading-4 ${dark ? 'text-zinc-500' : 'text-zinc-500'}`}>
+          className={`mt-6 text-center text-[11px] leading-4 ${dark ? 'text-night-muted' : 'text-muted'}`}>
           Version {LEGAL_ENTITY.documentVersion} — {LEGAL_ENTITY.lastUpdated}
           {'\n'}
           {LEGAL_ENTITY.privacyEmail}

@@ -56,14 +56,14 @@ export default function LegalMyDataScreen() {
       title: 'Accéder et rectifier mes données',
       description: 'Modifier nom, e-mail, quartier et ville de résidence.',
       icon: 'create-outline',
-      color: '#007AFF',
+      color: colors.info,
       onPress: () => router.push('/profile-personal-info'),
     },
     {
       title: 'Exporter mes données',
       description: 'Demande de copie de vos données (réponse sous 1 mois).',
       icon: 'download-outline',
-      color: '#34C759',
+      color: colors.success,
       onPress: () =>
         mailto(
           "Demande d'accès / portabilité RGPD — Municip'All",
@@ -74,7 +74,7 @@ export default function LegalMyDataScreen() {
       title: 'Supprimer mon compte',
       description: "Demande d'effacement définitif de votre compte et données associées.",
       icon: 'trash-outline',
-      color: '#FF3B30',
+      color: colors.destructive,
       onPress: () => {
         Alert.alert(
           'Suppression du compte',
@@ -111,7 +111,7 @@ export default function LegalMyDataScreen() {
       title: 'Opposition / limitation',
       description: 'Notifications, prospection ou traitement spécifique.',
       icon: 'hand-left-outline',
-      color: '#FF9500',
+      color: colors.warning,
       onPress: () =>
         mailto(
           'Demande RGPD (opposition / limitation)',
@@ -122,7 +122,7 @@ export default function LegalMyDataScreen() {
       title: 'Réclamation CNIL',
       description: 'Autorité de contrôle française des données personnelles.',
       icon: 'flag-outline',
-      color: '#5856D6',
+      color: colors.accent,
       onPress: () => Linking.openURL(LEGAL_ENTITY.cnilComplaintUrl),
     },
   ];
@@ -141,29 +141,31 @@ export default function LegalMyDataScreen() {
           d&apos;exercer vos droits. Contact DPO : {LEGAL_ENTITY.dpoEmail}
         </Text>
 
-        <View className={`mb-6 rounded-2xl p-4 ${classes.listGroup}`}>
+        <View className={`mb-6 p-4 ${classes.listGroup}`}>
           <Text className={classes.meta}>Données associées à votre compte</Text>
-          <Text className={`mt-2 text-sm ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
+          <Text className={`mt-2 text-sm ${dark ? 'text-night-text' : 'text-charcoal'}`}>
             {user.name} {user.surname} — {user.email}
           </Text>
           {cityLegal.cityName ? (
-            <Text className={`mt-1 text-xs ${dark ? 'text-zinc-500' : 'text-zinc-500'}`}>
+            <Text className={`mt-1 text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
               Commune : {cityLegal.cityName}
             </Text>
           ) : null}
           {cityLegal.dataRetentionPolicy ? (
-            <Text className={`mt-3 text-xs leading-5 ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+            <Text className={`mt-3 text-xs leading-5 ${dark ? 'text-night-muted' : 'text-muted'}`}>
               Durées contractuelles : {cityLegal.dataRetentionPolicy}
             </Text>
           ) : null}
         </View>
 
-        <View className={`overflow-hidden rounded-[24px] ${classes.listGroup}`}>
+        <View className={classes.listGroup}>
           {actions.map((action, i) => (
             <TouchableOpacity
               key={action.title}
               onPress={action.onPress}
-              className={`flex-row items-center p-4 ${i < actions.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
+              accessibilityRole='button'
+              accessibilityLabel={action.title}
+              className={`flex-row items-center p-4 ${i < actions.length - 1 ? `border-b ${dark ? 'border-night-border' : 'border-cream-200'}` : ''}`}>
               <View
                 className='mr-3 h-9 w-9 items-center justify-center rounded-lg'
                 style={{ backgroundColor: `${action.color}15` }}>
@@ -171,10 +173,10 @@ export default function LegalMyDataScreen() {
               </View>
               <View className='flex-1'>
                 <Text
-                  className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                  className={`text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
                   {action.title}
                 </Text>
-                <Text className={`mt-0.5 text-xs ${dark ? 'text-zinc-500' : 'text-zinc-500'}`}>
+                <Text className={`mt-0.5 text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
                   {action.description}
                 </Text>
               </View>
