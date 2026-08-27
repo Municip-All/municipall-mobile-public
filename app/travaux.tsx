@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { Ionicons } from '@expo/vector-icons';
 import BottomBar from '@components/BottomBar';
@@ -32,7 +39,9 @@ export default function Travaux() {
   useEffect(() => {
     const signal = { cancelled: false };
     loadWorks(signal);
-    return () => { signal.cancelled = true; };
+    return () => {
+      signal.cancelled = true;
+    };
   }, [loadWorks]);
 
   const onRefresh = useCallback(async () => {
@@ -76,7 +85,9 @@ export default function Travaux() {
           paddingHorizontal: 20,
         }}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
+        }>
         {/* Apple Style Header */}
         <View className='mb-8'>
           <Text
@@ -95,12 +106,23 @@ export default function Travaux() {
             <ActivityIndicator color={primaryColor} size='large' style={{ marginTop: 40 }} />
           ) : error ? (
             <View className='items-center py-20'>
-              <Ionicons name='alert-circle-outline' size={48} color={dark ? '#3F3F46' : '#D4D4D8'} />
-              <Text className={`mt-4 text-center font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+              <Ionicons
+                name='alert-circle-outline'
+                size={48}
+                color={dark ? '#3F3F46' : '#D4D4D8'}
+              />
+              <Text
+                className={`mt-4 text-center font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
                 {error}
               </Text>
-              <TouchableOpacity onPress={() => loadWorks()} className='mt-4' accessibilityRole='button' accessibilityLabel='Réessayer le chargement'>
-                <Text style={{ color: primaryColor }} className='font-bold'>Réessayer</Text>
+              <TouchableOpacity
+                onPress={() => loadWorks()}
+                className='mt-4'
+                accessibilityRole='button'
+                accessibilityLabel='Réessayer le chargement'>
+                <Text style={{ color: primaryColor }} className='font-bold'>
+                  Réessayer
+                </Text>
               </TouchableOpacity>
             </View>
           ) : works.length === 0 ? (

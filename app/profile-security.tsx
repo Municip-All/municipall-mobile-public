@@ -35,7 +35,9 @@ export default function ProfileSecurityScreen() {
     if (!isAuthenticated && !authLoading) {
       if (!cancelled) router.replace('/login');
     }
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [isAuthenticated, authLoading, router]);
 
   if (!isAuthenticated) {
@@ -69,7 +71,7 @@ export default function ProfileSecurityScreen() {
       router.back();
     } catch (e: unknown) {
       const msg =
-        (e instanceof Error && e.message === 'PASSWORD_MISMATCH')
+        e instanceof Error && e.message === 'PASSWORD_MISMATCH'
           ? 'La confirmation ne correspond pas.'
           : 'Vérifiez votre mot de passe actuel et réessayez.';
       Alert.alert('Erreur', msg);
@@ -132,7 +134,13 @@ export default function ProfileSecurityScreen() {
                   className={`rounded-xl px-4 py-3 pr-12 text-base ${classes.input}`}
                   placeholderTextColor={colors.placeholder}
                 />
-                <TouchableOpacity onPress={field.toggle} className='absolute top-3 right-3 p-1' accessibilityLabel={field.visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} accessibilityRole='button'>
+                <TouchableOpacity
+                  onPress={field.toggle}
+                  className='absolute top-3 right-3 p-1'
+                  accessibilityLabel={
+                    field.visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+                  }
+                  accessibilityRole='button'>
                   <Ionicons
                     name={field.visible ? 'eye-off-outline' : 'eye-outline'}
                     size={20}

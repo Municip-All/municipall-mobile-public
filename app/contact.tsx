@@ -114,30 +114,35 @@ const ContactScreen: React.FC = () => {
   const [showArchives, setShowArchives] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadTickets = useCallback(async (signal?: { cancelled: boolean }) => {
-    if (!isAuthenticated) {
-      setTickets([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const data = await contactService.getMyTickets();
-      if (!signal?.cancelled) setTickets(data);
-    } catch {
-      if (!signal?.cancelled) {
+  const loadTickets = useCallback(
+    async (signal?: { cancelled: boolean }) => {
+      if (!isAuthenticated) {
         setTickets([]);
-        Alert.alert('Erreur', 'Impossible de charger vos conversations.');
+        setLoading(false);
+        return;
       }
-    } finally {
-      if (!signal?.cancelled) setLoading(false);
-    }
-  }, [isAuthenticated]);
+      setLoading(true);
+      try {
+        const data = await contactService.getMyTickets();
+        if (!signal?.cancelled) setTickets(data);
+      } catch {
+        if (!signal?.cancelled) {
+          setTickets([]);
+          Alert.alert('Erreur', 'Impossible de charger vos conversations.');
+        }
+      } finally {
+        if (!signal?.cancelled) setLoading(false);
+      }
+    },
+    [isAuthenticated]
+  );
 
   useEffect(() => {
     const signal = { cancelled: false };
     loadTickets(signal);
-    return () => { signal.cancelled = true; };
+    return () => {
+      signal.cancelled = true;
+    };
   }, [loadTickets]);
 
   const onRefresh = useCallback(async () => {
@@ -229,7 +234,13 @@ const ContactScreen: React.FC = () => {
           }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps='handled'
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={primaryColor}
+            />
+          }>
           <View className='mb-8'>
             <Text className={classes.eyebrow}>Assistance</Text>
             <Text className={classes.title}>Contact</Text>
@@ -245,7 +256,9 @@ const ContactScreen: React.FC = () => {
               disabled={!contactEmail}
               className={`mb-3 flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactEmail ? 'opacity-50' : ''}`}
               accessibilityRole='button'
-              accessibilityLabel={contactEmail ? `Envoyer un e-mail à ${contactEmail}` : 'E-mail non renseigné'}>
+              accessibilityLabel={
+                contactEmail ? `Envoyer un e-mail à ${contactEmail}` : 'E-mail non renseigné'
+              }>
               <Ionicons name='mail-outline' size={20} color={primaryColor} />
               <Text
                 className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-white' : 'text-black'}`}>
@@ -257,7 +270,9 @@ const ContactScreen: React.FC = () => {
               disabled={!contactPhone}
               className={`flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactPhone ? 'opacity-50' : ''}`}
               accessibilityRole='button'
-              accessibilityLabel={contactPhone ? `Appeler le ${contactPhone}` : 'Téléphone non renseigné'}>
+              accessibilityLabel={
+                contactPhone ? `Appeler le ${contactPhone}` : 'Téléphone non renseigné'
+              }>
               <Ionicons name='call-outline' size={20} color={primaryColor} />
               <Text
                 className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-white' : 'text-black'}`}>

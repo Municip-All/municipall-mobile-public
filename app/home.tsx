@@ -81,7 +81,9 @@ export default function Home() {
           paddingHorizontal: 20,
         }}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
+        }>
         {/* Apple Style Header */}
         <View className='mb-8 flex-row items-end justify-between'>
           <View>
@@ -94,7 +96,11 @@ export default function Home() {
             </Text>
             <Text className={classes.title}>{appDisplayName}</Text>
           </View>
-          <TouchableOpacity onPress={() => router.push('/ma-commune')} activeOpacity={0.85} accessibilityRole='button' accessibilityLabel='Ma commune'>
+          <TouchableOpacity
+            onPress={() => router.push('/ma-commune')}
+            activeOpacity={0.85}
+            accessibilityRole='button'
+            accessibilityLabel='Ma commune'>
             <BrandedLogo size={48} radius={24} mode='contain' />
           </TouchableOpacity>
         </View>

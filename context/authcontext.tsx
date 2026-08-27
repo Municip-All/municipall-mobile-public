@@ -85,7 +85,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           } catch (e: unknown) {
             if (!cancelled) {
               console.warn('Failed to refresh user profile from server', e);
-              if (e && typeof e === 'object' && 'response' in e && (e as { response?: { status?: number } }).response?.status === 401) {
+              if (
+                e &&
+                typeof e === 'object' &&
+                'response' in e &&
+                (e as { response?: { status?: number } }).response?.status === 401
+              ) {
                 await logout();
               }
             }
@@ -103,7 +108,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     initializeAuth();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [logout]);
 
   useEffect(() => {

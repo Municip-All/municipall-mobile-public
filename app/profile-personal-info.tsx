@@ -40,7 +40,9 @@ export default function ProfilePersonalInfoScreen() {
       setEmail(user.email ?? '');
       setNeighborhood(user.neighborhood ?? '');
     }
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [isAuthenticated, user, authLoading, router]);
 
   if (!user) {
@@ -122,7 +124,11 @@ export default function ProfilePersonalInfoScreen() {
           ))}
         </View>
 
-        <TouchableOpacity onPress={() => router.push('/legal/my-data')} className='mt-4 py-2' accessibilityLabel='Mes droits RGPD' accessibilityRole='button'>
+        <TouchableOpacity
+          onPress={() => router.push('/legal/my-data')}
+          className='mt-4 py-2'
+          accessibilityLabel='Mes droits RGPD'
+          accessibilityRole='button'>
           <Text className={`text-center text-sm font-semibold`} style={{ color: primaryColor }}>
             Mes droits RGPD (accès, suppression…) →
           </Text>

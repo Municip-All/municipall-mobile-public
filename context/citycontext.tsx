@@ -115,7 +115,9 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
         setWeatherError(null);
       }
     }
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [config?.features, fetchWeather]);
 
   useEffect(() => {
@@ -144,8 +146,7 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
             return;
           }
         }
-      } catch {
-      }
+      } catch {}
 
       try {
         const fallbackConfig = await cityService.getCityConfig(Config.DEFAULT_TENANT_ID);
@@ -165,7 +166,9 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     initializeCity();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [setTenantId]);
 
   const value = useMemo(

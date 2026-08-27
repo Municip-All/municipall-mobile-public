@@ -53,7 +53,8 @@ const LoginScreen: React.FC = () => {
         router.replace('/home');
       }
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Identifiants incorrects ou serveur indisponible.';
+      const msg =
+        error instanceof Error ? error.message : 'Identifiants incorrects ou serveur indisponible.';
       Alert.alert('Échec de la connexion', msg, [
         { text: 'Annuler', style: 'cancel' },
         { text: 'Réessayer', onPress: handleLogin },
@@ -188,12 +189,13 @@ const LoginScreen: React.FC = () => {
 
             <TouchableOpacity
               className='mt-1 mb-8 self-end pr-1'
-              onPress={() => Alert.alert(
-                'Mot de passe oublié',
-                'Contactez votre mairie pour réinitialiser votre mot de passe.',
-                [{ text: 'OK' }]
-              )}
-            >
+              onPress={() =>
+                Alert.alert(
+                  'Mot de passe oublié',
+                  'Contactez votre mairie pour réinitialiser votre mot de passe.',
+                  [{ text: 'OK' }]
+                )
+              }>
               <Text className={`text-sm font-semibold`} style={{ color: primaryColor }}>
                 Mot de passe oublié ?
               </Text>

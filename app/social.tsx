@@ -1,5 +1,14 @@
 import { useCallback, useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking, Alert, RefreshControl, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Linking,
+  Alert,
+  RefreshControl,
+  ActivityIndicator,
+} from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
@@ -80,7 +89,7 @@ function AssociationCard({
       <View className='flex-row flex-wrap gap-2'>
         {contactEmail ? (
           <TouchableOpacity
-             onPress={() => Linking.openURL(`mailto:${contactEmail}`)}
+            onPress={() => Linking.openURL(`mailto:${contactEmail}`)}
             accessibilityLabel={`Envoyer un e-mail à ${item.name}`}
             className={`flex-row items-center rounded-full px-3 py-2 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'}`}>
             <Ionicons name='mail-outline' size={14} color={primaryColor} />
@@ -164,7 +173,13 @@ export default function SocialScreen() {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
         <Text className={`text-center text-base ${classes.body}`}>{error}</Text>
-        <TouchableOpacity onPress={() => { setError(null); onRefresh(); }} className='mt-4 rounded-xl px-6 py-3' style={{ backgroundColor: primaryColor }}>
+        <TouchableOpacity
+          onPress={() => {
+            setError(null);
+            onRefresh();
+          }}
+          className='mt-4 rounded-xl px-6 py-3'
+          style={{ backgroundColor: primaryColor }}>
           <Text className='font-bold text-white'>Réessayer</Text>
         </TouchableOpacity>
       </View>
@@ -180,7 +195,9 @@ export default function SocialScreen() {
           paddingHorizontal: 20,
         }}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
+        }>
         <View className='mb-6'>
           <Text className={classes.eyebrow}>Vie locale</Text>
           <Text className={classes.title}>Social</Text>

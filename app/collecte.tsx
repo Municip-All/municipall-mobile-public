@@ -1,5 +1,12 @@
 import { useCallback, useState } from 'react';
-import { View, Text, ScrollView, RefreshControl, ActivityIndicator, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  RefreshControl,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { Ionicons } from '@expo/vector-icons';
@@ -65,8 +72,16 @@ export default function Collecte() {
   if (error) {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
-        <Text className={`text-center text-base ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>{error}</Text>
-        <TouchableOpacity onPress={() => { setError(null); onRefresh(); }} className='mt-4 rounded-xl px-6 py-3' style={{ backgroundColor: primaryColor }}>
+        <Text className={`text-center text-base ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
+          {error}
+        </Text>
+        <TouchableOpacity
+          onPress={() => {
+            setError(null);
+            onRefresh();
+          }}
+          className='mt-4 rounded-xl px-6 py-3'
+          style={{ backgroundColor: primaryColor }}>
           <Text className='font-bold text-white'>Réessayer</Text>
         </TouchableOpacity>
       </View>
@@ -82,7 +97,9 @@ export default function Collecte() {
           paddingHorizontal: 20,
         }}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
+        }>
         {/* Apple Style Header */}
         <View className='mb-8'>
           <Text
@@ -114,7 +131,11 @@ export default function Collecte() {
                 <View
                   className='mt-3 flex-row items-center self-start rounded-full px-3 py-1'
                   style={{ backgroundColor: `${next.service.color}20` }}>
-                  <Ionicons name={next.service.icon as IconName} size={14} color={next.service.color} />
+                  <Ionicons
+                    name={next.service.icon as IconName}
+                    size={14}
+                    color={next.service.color}
+                  />
                   <Text className='ml-2 text-xs font-bold' style={{ color: next.service.color }}>
                     {next.service.type}
                   </Text>

@@ -27,7 +27,14 @@ export default function TransportMapCallout({
   return (
     <View pointerEvents='box-none' style={StyleSheet.absoluteFill}>
       <Pressable style={styles.backdrop} onPress={onClose} />
-      <View style={[styles.sheet, { paddingBottom: Math.max(bottomInset, 16) + 12, backgroundColor: dark ? '#18181b' : '#FFFFFF' }]}>
+      <View
+        style={[
+          styles.sheet,
+          {
+            paddingBottom: Math.max(bottomInset, 16) + 12,
+            backgroundColor: dark ? '#18181b' : '#FFFFFF',
+          },
+        ]}>
         <View style={[styles.handle, { backgroundColor: dark ? '#52525b' : '#D4D4D8' }]} />
         <View style={styles.header}>
           <View style={[styles.iconWrap, { backgroundColor: `${statusColor}22` }]}>
@@ -38,7 +45,9 @@ export default function TransportMapCallout({
               {stop.name}
             </Text>
             {stop.modes.length > 0 ? (
-              <Text style={[styles.subtitle, { color: dark ? '#a1a1aa' : '#71717A' }]}>{stop.modes.join(' · ')}</Text>
+              <Text style={[styles.subtitle, { color: dark ? '#a1a1aa' : '#71717A' }]}>
+                {stop.modes.join(' · ')}
+              </Text>
             ) : null}
           </View>
           <View style={[styles.pill, { backgroundColor: `${statusColor}18` }]}>
@@ -51,7 +60,9 @@ export default function TransportMapCallout({
         <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
           {stop.messages.length > 0 ? (
             stop.messages.map((msg, i) => (
-              <Text key={`${stop.stopId}-msg-${i}`} style={[styles.message, { color: dark ? '#d4d4d8' : '#3F3F46' }]}>
+              <Text
+                key={`${stop.stopId}-msg-${i}`}
+                style={[styles.message, { color: dark ? '#d4d4d8' : '#3F3F46' }]}>
                 {msg}
               </Text>
             ))
