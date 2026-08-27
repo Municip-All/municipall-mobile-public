@@ -20,6 +20,7 @@ import { isTerminalContactStatus } from '../lib/contactTicketStatus';
 import SatisfactionPrompt from '@components/SatisfactionPrompt';
 import { useLiveChatRefresh } from '@hooks/useLiveChatRefresh';
 import { chatBubbleStyles as styles } from '../lib/chatBubbleStyles';
+import { palette } from '@constants/design';
 
 export default function ContactChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -127,22 +128,26 @@ export default function ContactChatScreen() {
     <View style={layoutStyles.page}>
       <View
         style={{ paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: 12 }}
-        className={`border-b ${dark ? 'border-zinc-800' : 'border-zinc-200'}`}>
+        className={`border-b ${dark ? 'border-night-border' : 'border-cream-200'}`}>
         <View className='flex-row items-center'>
           <TouchableOpacity
             onPress={() => router.back()}
             className='mr-3 p-2'
             accessibilityRole='button'
             accessibilityLabel='Retour'>
-            <Ionicons name='chevron-back' size={24} color={dark ? '#FFF' : '#000'} />
+            <Ionicons
+              name='chevron-back'
+              size={24}
+              color={dark ? palette.nightText : palette.matcha900}
+            />
           </TouchableOpacity>
           <View className='flex-1'>
             <Text
               numberOfLines={1}
-              className={`text-base font-bold ${dark ? 'text-white' : 'text-black'}`}>
+              className={`text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
               {ticket.subject}
             </Text>
-            <Text className={`text-xs ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+            <Text className={`text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
               {ticket.ticketType === 'suggestion' ? 'Suggestion · ' : 'Question · '}
               {ticket.status}
               {isClosed ? ' · Archivée' : ''}
@@ -207,7 +212,7 @@ export default function ContactChatScreen() {
         {!isClosed ? (
           <View
             style={{ paddingBottom: insets.bottom + 8, paddingHorizontal: 16, paddingTop: 8 }}
-            className={`border-t ${dark ? 'border-zinc-800 bg-black' : 'border-zinc-200 bg-white'}`}>
+            className={`border-t ${dark ? 'border-night-border bg-night-bg' : 'border-cream-200 bg-cream-50'}`}>
             <View className='flex-row items-end gap-2'>
               <TextInput
                 value={reply}
@@ -215,7 +220,7 @@ export default function ContactChatScreen() {
                 placeholder='Votre message…'
                 placeholderTextColor={colors.placeholder}
                 multiline
-                className={`max-h-28 flex-1 rounded-2xl px-4 py-3 text-base ${classes.formField} ${classes.formFieldText}`}
+                className={`max-h-28 flex-1 px-4 py-3 ${classes.formField} ${classes.formFieldText}`}
               />
               <TouchableOpacity
                 onPress={handleSend}
@@ -228,9 +233,9 @@ export default function ContactChatScreen() {
                 }}
                 className='h-11 w-11 items-center justify-center rounded-full'>
                 {sending ? (
-                  <ActivityIndicator color='white' size='small' />
+                  <ActivityIndicator color={colors.onPrimary} size='small' />
                 ) : (
-                  <Ionicons name='send' size={18} color='#FFF' />
+                  <Ionicons name='send' size={18} color={colors.onPrimary} />
                 )}
               </TouchableOpacity>
             </View>
@@ -252,7 +257,7 @@ export default function ContactChatScreen() {
             />
             <View
               style={{ paddingBottom: insets.bottom + 8 }}
-              className={`px-4 pb-2 ${dark ? 'bg-black' : 'bg-white'}`}>
+              className={`px-4 pb-2 ${dark ? 'bg-night-bg' : 'bg-cream-50'}`}>
               <Text className={`text-center text-xs ${classes.body}`}>
                 Cette conversation est terminée. Vous ne pouvez plus envoyer de messages.
               </Text>

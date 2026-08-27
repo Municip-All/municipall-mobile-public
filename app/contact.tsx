@@ -27,6 +27,7 @@ import {
   ContactTicketType,
 } from '../services/contactService';
 import { getContactStatusColor, isTerminalContactStatus } from '../lib/contactTicketStatus';
+import { semanticColors } from '@constants/design';
 
 function SuggestionCard({
   ticket,
@@ -46,35 +47,37 @@ function SuggestionCard({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.85}
-      className={`mb-3 overflow-hidden rounded-3xl border ${
-        dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
+      className={`mb-3 overflow-hidden rounded-[20px] border ${
+        dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'
       }`}>
       {lastFromAgent ? (
-        <View className='h-1 w-full' style={{ backgroundColor: dark ? '#3B82F6' : '#007AFF' }} />
+        <View className='h-1 w-full' style={{ backgroundColor: semanticColors.info }} />
       ) : null}
       <View className='p-5'>
         <View className='flex-row items-start justify-between gap-3'>
           <View className='min-w-0 flex-1'>
             <Text
-              className={`text-base font-bold ${dark ? 'text-white' : 'text-black'}`}
+              className={`text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}
               numberOfLines={2}>
               {ticket.subject}
             </Text>
-            <Text className={`mt-1 text-[11px] ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+            <Text
+              className={`mt-1 text-[11px] font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`}>
               Suggestion · Réf. {ticket.id}
             </Text>
           </View>
           <View
             className='shrink-0 rounded-full px-2.5 py-1'
             style={{ backgroundColor: `${statusColor}18` }}>
-            <Text className='text-[10px] font-black uppercase' style={{ color: statusColor }}>
+            <Text className='text-[10px] font-extrabold uppercase' style={{ color: statusColor }}>
               {ticket.status}
             </Text>
           </View>
         </View>
-        <View className={`mt-3 rounded-2xl px-3.5 py-3 ${dark ? 'bg-zinc-800/60' : 'bg-zinc-50'}`}>
+        <View
+          className={`mt-3 rounded-2xl px-3.5 py-3 ${dark ? 'bg-night-elevated' : 'bg-cream-100'}`}>
           <Text
-            className={`text-sm leading-5 ${dark ? 'text-zinc-200' : 'text-zinc-700'}`}
+            className={`text-sm leading-5 ${dark ? 'text-night-text' : 'text-charcoal'}`}
             numberOfLines={3}>
             {ticket.lastMessage?.body || 'Votre suggestion a été transmise à la mairie.'}
           </Text>
@@ -83,11 +86,11 @@ function SuggestionCard({
           <Ionicons
             name={lastFromAgent ? 'mail-unread-outline' : 'megaphone-outline'}
             size={16}
-            color={lastFromAgent ? '#007AFF' : primaryColor}
+            color={lastFromAgent ? semanticColors.info : primaryColor}
           />
           <Text
             className={`text-xs font-semibold ${
-              lastFromAgent ? 'text-blue-600' : dark ? 'text-zinc-400' : 'text-zinc-500'
+              lastFromAgent ? 'text-info' : dark ? 'text-night-muted' : 'text-muted'
             }`}>
             {lastFromAgent ? 'Suivi mairie — réponse à lire' : 'Suivi de votre suggestion'}
           </Text>
@@ -246,36 +249,37 @@ const ContactScreen: React.FC = () => {
             <Text className={classes.title}>Contact</Text>
           </View>
 
-          <View className={`mb-8 rounded-[28px] p-6 ${classes.card}`}>
-            <Text className={`mb-2 text-lg font-bold ${dark ? 'text-white' : 'text-black'}`}>
+          <View className={`mb-8 p-6 ${classes.cardRounded}`}>
+            <Text
+              className={`mb-2 text-lg font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
               Besoin d&apos;aide ?
             </Text>
             <Text className={`mb-6 text-sm leading-5 ${classes.body}`}>{helpText}</Text>
             <TouchableOpacity
               onPress={openEmail}
               disabled={!contactEmail}
-              className={`mb-3 flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactEmail ? 'opacity-50' : ''}`}
+              className={`mb-3 flex-row items-center rounded-xl p-4 ${dark ? 'bg-night-elevated' : 'bg-cream-100'} ${!contactEmail ? 'opacity-50' : ''}`}
               accessibilityRole='button'
               accessibilityLabel={
                 contactEmail ? `Envoyer un e-mail à ${contactEmail}` : 'E-mail non renseigné'
               }>
               <Ionicons name='mail-outline' size={20} color={primaryColor} />
               <Text
-                className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-white' : 'text-black'}`}>
+                className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
                 {contactEmail || 'E-mail non renseigné'}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={openPhone}
               disabled={!contactPhone}
-              className={`flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactPhone ? 'opacity-50' : ''}`}
+              className={`flex-row items-center rounded-xl p-4 ${dark ? 'bg-night-elevated' : 'bg-cream-100'} ${!contactPhone ? 'opacity-50' : ''}`}
               accessibilityRole='button'
               accessibilityLabel={
                 contactPhone ? `Appeler le ${contactPhone}` : 'Téléphone non renseigné'
               }>
               <Ionicons name='call-outline' size={20} color={primaryColor} />
               <Text
-                className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-white' : 'text-black'}`}>
+                className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
                 {contactPhone || 'Téléphone non renseigné'}
               </Text>
             </TouchableOpacity>
@@ -290,7 +294,7 @@ const ContactScreen: React.FC = () => {
                 style={{ backgroundColor: primaryColor }}
                 accessibilityRole='button'
                 accessibilityLabel={showNew ? 'Annuler' : 'Nouveau message'}>
-                <Text className='text-xs font-bold text-white'>
+                <Text className='text-cream-50 text-xs font-bold'>
                   {showNew ? 'Annuler' : 'Nouveau'}
                 </Text>
               </TouchableOpacity>
@@ -298,8 +302,9 @@ const ContactScreen: React.FC = () => {
           </View>
 
           {showNew && isAuthenticated && (
-            <View className={`mb-6 rounded-[28px] p-4 ${classes.card}`}>
-              <Text className={`mb-3 text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
+            <View className={`mb-6 p-4 ${classes.cardRounded}`}>
+              <Text
+                className={`mb-3 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
                 Type de demande
               </Text>
               <View style={styles.typeRow}>
@@ -324,26 +329,25 @@ const ContactScreen: React.FC = () => {
                     <TouchableOpacity
                       key={opt.id}
                       onPress={() => setNewType(opt.id)}
+                      accessibilityRole='button'
+                      accessibilityLabel={opt.label}
                       style={[
                         styles.typeChip,
                         active
                           ? { borderColor: primaryColor, backgroundColor: `${primaryColor}12` }
-                          : {
-                              borderColor: dark ? '#3f3f46' : '#e4e4e7',
-                              backgroundColor: dark ? '#18181b' : '#fafafa',
-                            },
+                          : { borderColor: colors.border, backgroundColor: colors.card },
                       ]}>
                       <Ionicons
                         name={opt.icon}
                         size={22}
-                        color={active ? primaryColor : '#8E8E93'}
+                        color={active ? primaryColor : colors.iconMuted}
                       />
                       <Text
-                        className={`mt-2 text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
+                        className={`mt-2 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
                         {opt.label}
                       </Text>
                       <Text
-                        className={`mt-0.5 text-[10px] ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                        className={`mt-0.5 text-[10px] ${dark ? 'text-night-muted' : 'text-muted'}`}>
                         {opt.hint}
                       </Text>
                     </TouchableOpacity>
@@ -374,7 +378,7 @@ const ContactScreen: React.FC = () => {
               />
               {newType === 'suggestion' && (
                 <Text
-                  className={`mb-3 text-xs leading-5 ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  className={`mb-3 text-xs leading-5 ${dark ? 'text-night-muted' : 'text-muted'}`}>
                   Votre suggestion sera suivie comme un dossier : la mairie pourra vous répondre et
                   vous informer des avancées.
                 </Text>
@@ -385,9 +389,9 @@ const ContactScreen: React.FC = () => {
                 className='items-center rounded-full py-4'
                 style={{ backgroundColor: primaryColor, opacity: isSubmitting ? 0.7 : 1 }}>
                 {isSubmitting ? (
-                  <ActivityIndicator color='white' />
+                  <ActivityIndicator color={colors.onPrimary} />
                 ) : (
-                  <Text className='font-bold text-white'>
+                  <Text className='text-cream-50 font-bold'>
                     {newType === 'suggestion' ? 'Envoyer ma suggestion' : 'Poser ma question'}
                   </Text>
                 )}
@@ -396,7 +400,7 @@ const ContactScreen: React.FC = () => {
           )}
 
           {!isAuthenticated ? (
-            <View className={`items-center rounded-[28px] p-8 ${classes.card}`}>
+            <View className={`items-center p-8 ${classes.cardRounded}`}>
               <Text className={`text-center text-sm ${classes.body}`}>
                 Connectez-vous pour échanger avec la mairie.
               </Text>
@@ -404,14 +408,14 @@ const ContactScreen: React.FC = () => {
                 onPress={() => router.push('/login')}
                 className='mt-4 rounded-full px-6 py-3'
                 style={{ backgroundColor: primaryColor }}>
-                <Text className='font-bold text-white'>Se connecter</Text>
+                <Text className='text-cream-50 font-bold'>Se connecter</Text>
               </TouchableOpacity>
             </View>
           ) : loading ? (
             <ActivityIndicator className='my-8' color={primaryColor} />
           ) : tickets.length === 0 ? (
-            <View className={`items-center rounded-[28px] p-8 ${classes.card}`}>
-              <Text className={`text-sm ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+            <View className={`items-center p-8 ${classes.cardRounded}`}>
+              <Text className={`text-sm ${dark ? 'text-night-muted' : 'text-muted'}`}>
                 Aucune conversation. Posez une question ou partagez une suggestion.
               </Text>
             </View>
@@ -419,7 +423,8 @@ const ContactScreen: React.FC = () => {
             <>
               {openSuggestions.length > 0 && (
                 <View className='mb-6'>
-                  <Text className={`mb-3 text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
+                  <Text
+                    className={`mb-3 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
                     Mes suggestions
                   </Text>
                   {openSuggestions.map((ticket) => (
@@ -435,9 +440,11 @@ const ContactScreen: React.FC = () => {
               )}
 
               {openQuestions.length > 0 && (
-                <View className={`mb-6 overflow-hidden rounded-[28px] ${classes.card}`}>
-                  <View className='border-b border-zinc-50 px-4 py-3 dark:border-zinc-800'>
-                    <Text className={`text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
+                <View className={`mb-6 ${classes.cardRounded}`}>
+                  <View
+                    className={`border-b px-4 py-3 ${dark ? 'border-night-border' : 'border-cream-200'}`}>
+                    <Text
+                      className={`text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
                       Questions
                     </Text>
                   </View>
@@ -445,7 +452,7 @@ const ContactScreen: React.FC = () => {
                     <TouchableOpacity
                       key={ticket.id}
                       onPress={() => openChat(ticket.id)}
-                      className={`flex-row items-center p-4 ${i < openQuestions.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
+                      className={`flex-row items-center p-4 ${i < openQuestions.length - 1 ? `border-b ${dark ? 'border-night-border' : 'border-cream-200'}` : ''}`}>
                       <View
                         className='mr-3 h-10 w-10 items-center justify-center rounded-xl'
                         style={{ backgroundColor: `${getContactStatusColor(ticket.status)}15` }}>
@@ -458,16 +465,16 @@ const ContactScreen: React.FC = () => {
                       <View className='mr-2 flex-1'>
                         <Text
                           numberOfLines={1}
-                          className={`text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
+                          className={`text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
                           {ticket.subject}
                         </Text>
                         <Text
                           numberOfLines={1}
-                          className={`mt-0.5 text-[11px] ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                          className={`mt-0.5 text-[11px] ${dark ? 'text-night-muted' : 'text-muted'}`}>
                           {ticket.lastMessage?.body || 'Nouvelle question'}
                         </Text>
                       </View>
-                      <Ionicons name='chevron-forward' size={16} color='#A1A1AA' />
+                      <Ionicons name='chevron-forward' size={16} color={colors.iconMuted} />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -479,46 +486,46 @@ const ContactScreen: React.FC = () => {
                     onPress={() => setShowArchives((v) => !v)}
                     activeOpacity={0.8}
                     className={`mb-3 flex-row items-center justify-between rounded-2xl px-4 py-3 ${
-                      dark ? 'bg-zinc-900' : 'bg-zinc-100'
-                    }`}>
+                      dark ? 'bg-night-surface' : 'bg-cream-100'
+                    }`}
+                    accessibilityRole='button'
+                    accessibilityLabel={
+                      showArchives ? 'Masquer les archives' : 'Afficher les archives'
+                    }>
                     <View className='flex-row items-center gap-2'>
-                      <Ionicons name='archive-outline' size={18} color='#8E8E93' />
-                      <Text
-                        className={`text-xs font-bold tracking-wide uppercase ${
-                          dark ? 'text-zinc-400' : 'text-zinc-500'
-                        }`}>
-                        Archives ({archivedTickets.length})
-                      </Text>
+                      <Ionicons name='archive-outline' size={18} color={colors.iconMuted} />
+                      <Text className={classes.eyebrow}>Archives ({archivedTickets.length})</Text>
                     </View>
                     <Ionicons
                       name={showArchives ? 'chevron-up' : 'chevron-down'}
                       size={18}
-                      color='#8E8E93'
+                      color={colors.iconMuted}
                     />
                   </TouchableOpacity>
                   {showArchives && (
-                    <View className={`overflow-hidden rounded-[28px] opacity-75 ${classes.card}`}>
+                    <View className={`opacity-75 ${classes.cardRounded}`}>
                       {archivedTickets.map((ticket, i) => (
                         <TouchableOpacity
                           key={ticket.id}
                           onPress={() => openChat(ticket.id)}
-                          className={`flex-row items-center p-4 ${i < archivedTickets.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
-                          <View className='mr-3 h-10 w-10 items-center justify-center rounded-xl bg-zinc-200 dark:bg-zinc-800'>
-                            <Ionicons name='checkmark-done' size={20} color='#8E8E93' />
+                          className={`flex-row items-center p-4 ${i < archivedTickets.length - 1 ? `border-b ${dark ? 'border-night-border' : 'border-cream-200'}` : ''}`}>
+                          <View
+                            className={`mr-3 h-10 w-10 items-center justify-center rounded-xl ${dark ? 'bg-night-elevated' : 'bg-cream-200'}`}>
+                            <Ionicons name='checkmark-done' size={20} color={colors.iconMuted} />
                           </View>
                           <View className='flex-1'>
                             <Text
                               numberOfLines={1}
-                              className={`text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
+                              className={`text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
                               {ticket.subject}
                             </Text>
                             <Text
-                              className={`text-[10px] ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                              className={`text-[10px] ${dark ? 'text-night-muted' : 'text-muted'}`}>
                               {ticket.ticketType === 'suggestion' ? 'Suggestion' : 'Question'} ·
                               Clôturé
                             </Text>
                           </View>
-                          <Ionicons name='chevron-forward' size={16} color='#A1A1AA' />
+                          <Ionicons name='chevron-forward' size={16} color={colors.iconMuted} />
                         </TouchableOpacity>
                       ))}
                     </View>
@@ -544,7 +551,7 @@ const styles = StyleSheet.create({
   typeChip: {
     flex: 1,
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 14,
     alignItems: 'center',
   },

@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
+import { palette } from '@constants/design';
 
-/** Marge latérale fiable (évite les bulles collées au bord sur ScrollView). */
 export const CHAT_SCREEN_PADDING_H = 20;
 
 export const chatBubbleStyles = StyleSheet.create({
@@ -34,10 +34,10 @@ export const chatBubbleStyles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   senderLabelLight: {
-    color: '#a1a1aa',
+    color: palette.muted,
   },
   senderLabelDark: {
-    color: '#71717a',
+    color: palette.nightMuted,
   },
   senderLabelMine: {
     textAlign: 'right',
@@ -48,32 +48,32 @@ export const chatBubbleStyles = StyleSheet.create({
     paddingVertical: 11,
   },
   bubbleAgentLight: {
-    backgroundColor: '#e4e4e7',
+    backgroundColor: palette.cream200,
   },
   bubbleAgentDark: {
-    backgroundColor: '#27272a',
+    backgroundColor: palette.nightElevated,
   },
   bubbleOtherLight: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.cream50,
     borderWidth: 1,
-    borderColor: '#e4e4e7',
+    borderColor: palette.cream200,
   },
   bubbleOtherDark: {
-    backgroundColor: '#18181b',
+    backgroundColor: palette.nightSurface,
     borderWidth: 1,
-    borderColor: '#3f3f46',
+    borderColor: palette.nightBorder,
   },
   bubbleText: {
     fontSize: 14,
     lineHeight: 20,
   },
   bubbleTextMine: {
-    color: '#ffffff',
+    color: palette.cream50,
   },
   bubbleTextLight: {
-    color: '#27272a',
+    color: palette.charcoal,
   },
   bubbleTextDark: {
-    color: '#e4e4e7',
+    color: palette.nightText,
   },
 });
