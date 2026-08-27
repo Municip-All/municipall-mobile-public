@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constructionWorksService, ConstructionWork } from '../services/constructionWorksService';
 
 export default function Travaux() {
-  const { dark, primaryColor, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, tintColor, layoutStyles } = useAppTheme();
   const insets = useSafeAreaInsets();
 
   const [works, setWorks] = useState<ConstructionWork[]>([]);
@@ -53,28 +53,17 @@ export default function Travaux() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'En cours':
-        return '#FF9500';
+        return colors.warning;
       case 'Annulé':
-        return '#FF3B30';
+        return colors.destructive;
       case 'Terminé':
-        return '#34C759';
+        return colors.success;
       default:
-        return '#007AFF';
+        return colors.info;
     }
   };
 
-  const getStatusBg = (status: string) => {
-    switch (status) {
-      case 'En cours':
-        return 'bg-orange-100 dark:bg-orange-900/20';
-      case 'Annulé':
-        return 'bg-red-100 dark:bg-red-900/20';
-      case 'Terminé':
-        return 'bg-green-100 dark:bg-green-900/20';
-      default:
-        return 'bg-blue-100 dark:bg-blue-900/20';
-    }
-  };
+  const getStatusBg = (status: string) => tintColor(getStatusColor(status), '18');
 
   return (
     <View style={layoutStyles.page}>
@@ -88,33 +77,18 @@ export default function Travaux() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
         }>
-        {/* Apple Style Header */}
         <View className='mb-8'>
-          <Text
-            className={`text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-            Infrastructure
-          </Text>
-          <Text
-            className={`text-4xl font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
-            Travaux
-          </Text>
+          <Text className={classes.eyebrow}>Infrastructure</Text>
+          <Text className={classes.title}>Travaux</Text>
         </View>
 
-        {/* Works List */}
         <View className='space-y-4'>
           {isLoading ? (
             <ActivityIndicator color={primaryColor} size='large' style={{ marginTop: 40 }} />
           ) : error ? (
             <View className='items-center py-20'>
-              <Ionicons
-                name='alert-circle-outline'
-                size={48}
-                color={dark ? '#3F3F46' : '#D4D4D8'}
-              />
-              <Text
-                className={`mt-4 text-center font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                {error}
-              </Text>
+              <Ionicons name='alert-circle-outline' size={48} color={colors.handle} />
+              <Text className={`mt-4 text-center ${classes.subtitle}`}>{error}</Text>
               <TouchableOpacity
                 onPress={() => loadWorks()}
                 className='mt-4'
@@ -127,52 +101,48 @@ export default function Travaux() {
             </View>
           ) : works.length === 0 ? (
             <View className='items-center py-20'>
-              <Ionicons name='hammer-outline' size={48} color={dark ? '#3F3F46' : '#D4D4D8'} />
-              <Text className={`mt-4 font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                Aucun chantier signalé
-              </Text>
+              <Ionicons name='hammer-outline' size={48} color={colors.handle} />
+              <Text className={`mt-4 ${classes.subtitle}`}>Aucun chantier signalé</Text>
             </View>
           ) : (
             works.map((item, i) => (
-              <TouchableOpacity
-                key={i}
-                className={`mb-4 overflow-hidden rounded-[28px] ${dark ? 'bg-zinc-900' : 'bg-white'} border border-zinc-100 shadow-sm dark:border-zinc-800`}>
+              <TouchableOpacity key={i} className={`shadow-soft mb-4 ${classes.cardRounded}`}>
                 <View className='p-6'>
                   <View className='mb-4 flex-row items-center'>
                     <View
-                      className={`mr-4 h-12 w-12 items-center justify-center rounded-2xl ${getStatusBg(item.status)}`}>
+                      className='mr-4 h-12 w-12 items-center justify-center rounded-2xl'
+                      style={{ backgroundColor: getStatusBg(item.status) }}>
                       <Ionicons name='construct' size={24} color={getStatusColor(item.status)} />
                     </View>
                     <View className='flex-1'>
-                      <Text className={`text-xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
+                      <Text
+                        className={`text-xl font-bold ${
+                          dark ? 'text-night-text' : 'text-matcha-900'
+                        }`}>
                         {item.title}
                       </Text>
-                      <Text
-                        className={`text-sm font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                      <Text className={classes.subtitle}>
                         {item.impactType || 'Travaux de voirie'}
                       </Text>
                     </View>
                   </View>
 
-                  <View className='rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-800/50'>
+                  <View
+                    className={`rounded-2xl p-4 ${dark ? 'bg-night-elevated' : 'bg-cream-100'}`}>
                     <View className='mb-2 flex-row items-center justify-between'>
+                      <Text className={classes.eyebrow}>STATUT</Text>
                       <Text
-                        className={`text-xs font-bold ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                        STATUT
-                      </Text>
-                      <Text
-                        className='text-xs font-black uppercase'
+                        className='text-xs font-extrabold uppercase'
                         style={{ color: getStatusColor(item.status) }}>
                         {item.status}
                       </Text>
                     </View>
                     <View className='flex-row items-center justify-between'>
+                      <Text className={classes.eyebrow}>PÉRIODE</Text>
                       <Text
-                        className={`text-xs font-bold ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                        PÉRIODE
-                      </Text>
-                      <Text
-                        className={`text-xs font-bold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                        className={`text-xs font-bold ${
+                          dark ? 'text-night-text' : 'text-charcoal'
+                        }`}>
                         Du {new Date(item.startDate).toLocaleDateString()} au{' '}
                         {new Date(item.endDate).toLocaleDateString()}
                       </Text>
@@ -184,10 +154,12 @@ export default function Travaux() {
           )}
         </View>
 
-        {/* Notice */}
-        <View className='mt-8 rounded-[28px] border border-dashed border-zinc-200 p-6 dark:border-zinc-800'>
+        <View
+          className={`mt-8 rounded-[20px] border border-dashed p-6 ${
+            dark ? 'border-night-border' : 'border-cream-200'
+          }`}>
           <Text
-            className={`text-center text-xs leading-5 ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+            className={`text-center text-xs leading-5 ${dark ? 'text-night-muted' : 'text-muted'}`}>
             Ces informations sont fournies à titre indicatif par les services techniques de la
             ville. Les dates peuvent varier selon les conditions météorologiques.
           </Text>

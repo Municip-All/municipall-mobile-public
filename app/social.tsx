@@ -29,15 +29,8 @@ const CATEGORY_ICONS: Record<AssociationCategory, keyof typeof Ionicons.glyphMap
   autre: 'heart-outline',
 };
 
-function AssociationCard({
-  item,
-  dark,
-  primaryColor,
-}: {
-  item: CityAssociation;
-  dark: boolean;
-  primaryColor: string;
-}) {
+function AssociationCard({ item }: { item: CityAssociation }) {
+  const { dark, primaryColor, classes, colors } = useAppTheme();
   const contactPhone = item.contactPhone;
   const contactEmail = item.contactEmail;
 
@@ -49,30 +42,23 @@ function AssociationCard({
   };
 
   return (
-    <View
-      className={`mb-3 rounded-[24px] border p-5 ${
-        dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
-      }`}>
+    <View className={`mb-3 p-5 ${classes.cardRounded}`}>
       <View className='mb-2 flex-row items-start gap-3'>
         <View
           className='h-11 w-11 items-center justify-center rounded-2xl'
-          style={{ backgroundColor: `${primaryColor}15` }}>
+          style={{ backgroundColor: colors.primaryTint }}>
           <Ionicons name={CATEGORY_ICONS[item.category]} size={22} color={primaryColor} />
         </View>
         <View className='min-w-0 flex-1'>
-          <Text className={`text-base font-bold ${dark ? 'text-white' : 'text-black'}`}>
+          <Text className={`text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
             {item.name}
           </Text>
-          <Text className={`mt-0.5 text-[10px] font-bold tracking-wide text-zinc-400 uppercase`}>
+          <Text className={`mt-0.5 tracking-wide uppercase ${classes.caption}`}>
             {CATEGORY_LABELS[item.category]}
           </Text>
         </View>
       </View>
-      {item.description ? (
-        <Text className={`mb-3 text-sm leading-5 ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
-          {item.description}
-        </Text>
-      ) : null}
+      {item.description ? <Text className={`mb-3 ${classes.body}`}>{item.description}</Text> : null}
       {item.address ? (
         <View className='mb-3 flex-row gap-2'>
           <Ionicons
@@ -81,9 +67,7 @@ function AssociationCard({
             color={primaryColor}
             style={{ marginTop: 2 }}
           />
-          <Text className={`flex-1 text-sm leading-5 ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
-            {item.address}
-          </Text>
+          <Text className={`flex-1 ${classes.body}`}>{item.address}</Text>
         </View>
       ) : null}
       <View className='flex-row flex-wrap gap-2'>
@@ -91,10 +75,14 @@ function AssociationCard({
           <TouchableOpacity
             onPress={() => Linking.openURL(`mailto:${contactEmail}`)}
             accessibilityLabel={`Envoyer un e-mail à ${item.name}`}
-            className={`flex-row items-center rounded-full px-3 py-2 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'}`}>
+            className={`flex-row items-center rounded-full px-3 py-2 ${
+              dark ? 'bg-night-elevated' : 'bg-cream-100'
+            }`}>
             <Ionicons name='mail-outline' size={14} color={primaryColor} />
             <Text
-              className={`ml-1.5 text-xs font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-700'}`}>
+              className={`ml-1.5 text-xs font-semibold ${
+                dark ? 'text-night-text' : 'text-charcoal'
+              }`}>
               E-mail
             </Text>
           </TouchableOpacity>
@@ -103,10 +91,14 @@ function AssociationCard({
           <TouchableOpacity
             onPress={() => Linking.openURL(`tel:${contactPhone.replace(/\s/g, '')}`)}
             accessibilityLabel={`Appeler ${item.name}`}
-            className={`flex-row items-center rounded-full px-3 py-2 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'}`}>
+            className={`flex-row items-center rounded-full px-3 py-2 ${
+              dark ? 'bg-night-elevated' : 'bg-cream-100'
+            }`}>
             <Ionicons name='call-outline' size={14} color={primaryColor} />
             <Text
-              className={`ml-1.5 text-xs font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-700'}`}>
+              className={`ml-1.5 text-xs font-semibold ${
+                dark ? 'text-night-text' : 'text-charcoal'
+              }`}>
               Appeler
             </Text>
           </TouchableOpacity>
@@ -115,10 +107,14 @@ function AssociationCard({
           <TouchableOpacity
             onPress={() => openLink(item.website!)}
             accessibilityLabel={`Site web de ${item.name}`}
-            className={`flex-row items-center rounded-full px-3 py-2 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'}`}>
+            className={`flex-row items-center rounded-full px-3 py-2 ${
+              dark ? 'bg-night-elevated' : 'bg-cream-100'
+            }`}>
             <Ionicons name='globe-outline' size={14} color={primaryColor} />
             <Text
-              className={`ml-1.5 text-xs font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-700'}`}>
+              className={`ml-1.5 text-xs font-semibold ${
+                dark ? 'text-night-text' : 'text-charcoal'
+              }`}>
               Site web
             </Text>
           </TouchableOpacity>
@@ -129,7 +125,7 @@ function AssociationCard({
 }
 
 export default function SocialScreen() {
-  const { dark, primaryColor, classes, layoutStyles, brand } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles, brand } = useAppTheme();
   const { config, refreshConfig, loading } = useCity();
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
@@ -180,7 +176,9 @@ export default function SocialScreen() {
           }}
           className='mt-4 rounded-xl px-6 py-3'
           style={{ backgroundColor: primaryColor }}>
-          <Text className='font-bold text-white'>Réessayer</Text>
+          <Text className='font-bold' style={{ color: colors.onPrimary }}>
+            Réessayer
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -201,16 +199,16 @@ export default function SocialScreen() {
         <View className='mb-6'>
           <Text className={classes.eyebrow}>Vie locale</Text>
           <Text className={classes.title}>Social</Text>
-          <Text className={`mt-2 text-sm leading-5 ${classes.body}`}>
+          <Text className={`mt-2 ${classes.body}`}>
             Associations, groupes de parole et initiatives citoyennes référencés par la mairie de{' '}
             {cityLabel}.
           </Text>
         </View>
 
         {associations.length === 0 ? (
-          <View className={`items-center rounded-[28px] p-10 ${classes.card}`}>
-            <Ionicons name='heart-outline' size={48} color={dark ? '#3f3f46' : '#d4d4d8'} />
-            <Text className={`mt-4 text-center text-sm ${classes.body}`}>
+          <View className={`items-center p-10 ${classes.cardRounded}`}>
+            <Ionicons name='heart-outline' size={48} color={colors.handle} />
+            <Text className={`mt-4 text-center ${classes.body}`}>
               Aucune association référencée pour le moment. La mairie complètera cette liste
               prochainement.
             </Text>
@@ -221,16 +219,14 @@ export default function SocialScreen() {
             if (items.length === 0) return null;
             return (
               <View key={category} className='mb-6'>
-                <Text className={`mb-3 text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
+                <Text
+                  className={`mb-3 text-sm font-bold ${
+                    dark ? 'text-night-text' : 'text-matcha-900'
+                  }`}>
                   {CATEGORY_LABELS[category]}s
                 </Text>
                 {items.map((item) => (
-                  <AssociationCard
-                    key={item.id}
-                    item={item}
-                    dark={dark}
-                    primaryColor={primaryColor}
-                  />
+                  <AssociationCard key={item.id} item={item} />
                 ))}
               </View>
             );

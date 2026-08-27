@@ -18,7 +18,7 @@ import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function MaCommuneScreen() {
-  const { dark, primaryColor, classes, layoutStyles, brand } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles, brand } = useAppTheme();
   const { config, refreshConfig, loading } = useCity();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -61,7 +61,9 @@ export default function MaCommuneScreen() {
           }}
           className='mt-4 rounded-xl px-6 py-3'
           style={{ backgroundColor: primaryColor }}>
-          <Text className='font-bold text-white'>Réessayer</Text>
+          <Text className='font-bold' style={{ color: colors.onPrimary }}>
+            Réessayer
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -91,17 +93,16 @@ export default function MaCommuneScreen() {
           </Text>
         </TouchableOpacity>
 
-        <View className={`mb-6 items-center rounded-[32px] p-8 ${classes.card}`}>
+        <View className={`mb-6 items-center p-8 ${classes.cardRounded}`}>
           <BrandedLogo size={88} radius={44} mode='contain' />
           <Text
-            className={`mt-4 text-center text-2xl font-black ${dark ? 'text-white' : 'text-black'}`}>
+            className={`mt-4 text-center text-2xl font-extrabold ${
+              dark ? 'text-night-text' : 'text-matcha-900'
+            }`}>
             {cityName}
           </Text>
           {appName !== cityName && (
-            <Text
-              className={`mt-1 text-center text-sm ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-              Application {appName}
-            </Text>
+            <Text className={`mt-1 text-center ${classes.subtitle}`}>Application {appName}</Text>
           )}
           {profile?.welcomeText ? (
             <Text className={`mt-4 text-center text-sm leading-6 ${classes.body}`}>
@@ -116,45 +117,42 @@ export default function MaCommuneScreen() {
         </View>
 
         {mayorName ? (
-          <View className={`mb-4 rounded-[24px] p-5 ${classes.card}`}>
-            <Text className={`text-[10px] font-bold tracking-widest text-zinc-400 uppercase`}>
-              Élu référent
-            </Text>
-            <Text className={`mt-2 text-lg font-bold ${dark ? 'text-white' : 'text-black'}`}>
+          <View className={`mb-4 p-5 ${classes.cardRounded}`}>
+            <Text className={`tracking-widest uppercase ${classes.caption}`}>Élu référent</Text>
+            <Text
+              className={`mt-2 text-lg font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
               {mayorName}
             </Text>
-            <Text className={`mt-0.5 text-sm ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-              {mayorTitle}
-            </Text>
+            <Text className={`mt-0.5 ${classes.subtitle}`}>{mayorTitle}</Text>
           </View>
         ) : null}
 
         {profile?.description ? (
-          <View className={`mb-4 rounded-[24px] p-5 ${classes.card}`}>
-            <Text className={`mb-2 text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
+          <View className={`mb-4 p-5 ${classes.cardRounded}`}>
+            <Text
+              className={`mb-2 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
               À propos
             </Text>
-            <Text className={`text-sm leading-6 ${classes.body}`}>{profile.description}</Text>
+            <Text className={classes.body}>{profile.description}</Text>
           </View>
         ) : null}
         <View
-          className={`mb-4 rounded-[24px] p-5 ${classes.card}`}
+          className={`mb-4 p-5 ${classes.cardRounded}`}
           accessibilityLabel='Informations pratiques'>
-          <Text className={`mb-3 text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
+          <Text
+            className={`mb-3 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
             Informations pratiques
           </Text>
           {profile?.address ? (
             <View className='mb-3 flex-row gap-3'>
               <Ionicons name='location-outline' size={18} color={primaryColor} />
-              <Text className={`flex-1 text-sm leading-5 ${classes.body}`}>{profile.address}</Text>
+              <Text className={`flex-1 ${classes.body}`}>{profile.address}</Text>
             </View>
           ) : null}
           {profile?.openingHours ? (
             <View className='mb-3 flex-row gap-3'>
               <Ionicons name='time-outline' size={18} color={primaryColor} />
-              <Text className={`flex-1 text-sm leading-5 ${classes.body}`}>
-                {profile.openingHours}
-              </Text>
+              <Text className={`flex-1 ${classes.body}`}>{profile.openingHours}</Text>
             </View>
           ) : null}
           {config?.contact?.phone ? (
@@ -197,21 +195,23 @@ export default function MaCommuneScreen() {
         <View className='flex-row flex-wrap gap-2'>
           <TouchableOpacity
             onPress={() => router.push('/contact')}
-            className='flex-1 items-center rounded-2xl py-4'
+            className='flex-1 items-center rounded-xl py-4'
             style={{ backgroundColor: primaryColor, minWidth: '45%' }}
             accessibilityRole='button'
             accessibilityLabel='Contacter la mairie'>
-            <Text className='text-sm font-bold text-white'>Contacter la mairie</Text>
+            <Text className='text-sm font-bold' style={{ color: colors.onPrimary }}>
+              Contacter la mairie
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => router.push('/social')}
-            className={`flex-1 items-center rounded-2xl border py-4 ${
-              dark ? 'border-zinc-700 bg-zinc-900' : 'border-zinc-200 bg-white'
+            className={`flex-1 items-center rounded-xl border py-4 ${
+              dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'
             }`}
             style={{ minWidth: '45%' }}
             accessibilityRole='button'
             accessibilityLabel='Vie associative'>
-            <Text className={`text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
+            <Text className={`text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
               Vie associative
             </Text>
           </TouchableOpacity>
