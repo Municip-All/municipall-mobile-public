@@ -72,7 +72,9 @@ const SignupScreen: React.FC = () => {
       }
     };
     loadCities();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleRegister = async () => {
@@ -285,39 +287,41 @@ const SignupScreen: React.FC = () => {
                         }
                       }}
                       className='mt-2'>
-                      <Text className='font-bold' style={{ color: primaryColor }}>Réessayer</Text>
+                      <Text className='font-bold' style={{ color: primaryColor }}>
+                        Réessayer
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
-                <View className='flex-row flex-wrap gap-2'>
-                  {availableCities.map((city) => (
-                    <TouchableOpacity
-                      key={city.id}
-                      onPress={() => setSelectedCity(city.id)}
-                      activeOpacity={0.7}
-                      style={{
-                        backgroundColor:
-                          selectedCity === city.id ? primaryColor : dark ? '#27272a' : '#f1f5f9',
-                        borderRadius: 16,
-                        paddingHorizontal: 16,
-                        paddingVertical: 10,
-                        borderWidth: 1,
-                        borderColor:
-                          selectedCity === city.id ? primaryColor : dark ? '#3f3f46' : '#e2e8f0',
-                      }}>
-                      <Text
+                  <View className='flex-row flex-wrap gap-2'>
+                    {availableCities.map((city) => (
+                      <TouchableOpacity
+                        key={city.id}
+                        onPress={() => setSelectedCity(city.id)}
+                        activeOpacity={0.7}
                         style={{
-                          color:
-                            selectedCity === city.id ? '#FFFFFF' : dark ? '#9CA3AF' : '#475569',
-                          fontWeight: 'bold',
-                          fontSize: 13,
+                          backgroundColor:
+                            selectedCity === city.id ? primaryColor : dark ? '#27272a' : '#f1f5f9',
+                          borderRadius: 16,
+                          paddingHorizontal: 16,
+                          paddingVertical: 10,
+                          borderWidth: 1,
+                          borderColor:
+                            selectedCity === city.id ? primaryColor : dark ? '#3f3f46' : '#e2e8f0',
                         }}>
-                        {cityDisplayName(city)}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                  <CityNotListedChip dark={dark} onPress={() => setShowConvinceModal(true)} />
-                </View>
+                        <Text
+                          style={{
+                            color:
+                              selectedCity === city.id ? '#FFFFFF' : dark ? '#9CA3AF' : '#475569',
+                            fontWeight: 'bold',
+                            fontSize: 13,
+                          }}>
+                          {cityDisplayName(city)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                    <CityNotListedChip dark={dark} onPress={() => setShowConvinceModal(true)} />
+                  </View>
                 )}
               </View>
 

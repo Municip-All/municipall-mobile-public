@@ -38,7 +38,9 @@ export default function ProfileHelpScreen() {
         router.replace('/login');
       }
     }
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [isAuthenticated, authLoading, router]);
 
   if (!isAuthenticated) {
@@ -52,8 +54,13 @@ export default function ProfileHelpScreen() {
     if (authError) {
       return (
         <View style={layoutStyles.page} className='items-center justify-center px-6'>
-          <Text className={`text-center text-base ${classes.body}`}>Vous devez être connecté pour accéder à cette page.</Text>
-          <TouchableOpacity onPress={() => router.replace('/login')} className='mt-4 rounded-xl px-6 py-3' style={{ backgroundColor: primaryColor }}>
+          <Text className={`text-center text-base ${classes.body}`}>
+            Vous devez être connecté pour accéder à cette page.
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.replace('/login')}
+            className='mt-4 rounded-xl px-6 py-3'
+            style={{ backgroundColor: primaryColor }}>
             <Text className='font-bold text-white'>Se connecter</Text>
           </TouchableOpacity>
         </View>

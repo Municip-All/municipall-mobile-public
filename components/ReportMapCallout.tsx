@@ -25,7 +25,7 @@ function formatDate(value?: string): string {
   });
 }
 
-  function ReportSummaryCard({
+function ReportSummaryCard({
   report,
   onOpen,
   showDivider,
@@ -46,7 +46,11 @@ function formatDate(value?: string): string {
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={onOpen}
-      style={[styles.card, showDivider && styles.cardDivider, showDivider && { borderTopColor: dark ? '#3f3f46' : '#e4e4e7' }]}>
+      style={[
+        styles.card,
+        showDivider && styles.cardDivider,
+        showDivider && { borderTopColor: dark ? '#3f3f46' : '#e4e4e7' },
+      ]}>
       <View style={styles.cardHeader}>
         <Text style={[styles.cardTitle, { color: dark ? '#ffffff' : '#18181b' }]} numberOfLines={1}>
           {report.category}
@@ -63,7 +67,9 @@ function formatDate(value?: string): string {
         {report.lastMessage?.senderRole === 'agent' ? 'Mairie : ' : ''}
         {preview}
       </Text>
-      <Text style={[styles.cardAction, { color: dark ? '#818cf8' : '#0B0080' }]}>Voir le détail →</Text>
+      <Text style={[styles.cardAction, { color: dark ? '#818cf8' : '#0B0080' }]}>
+        Voir le détail →
+      </Text>
     </TouchableOpacity>
   );
 }
@@ -94,7 +100,14 @@ export default function ReportMapSummarySheet({
   return (
     <View style={styles.root} pointerEvents='box-none'>
       <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel='Fermer' />
-      <View style={[styles.sheet, { paddingBottom: Math.max(bottomInset, 16), backgroundColor: dark ? '#18181b' : '#ffffff' }]}>
+      <View
+        style={[
+          styles.sheet,
+          {
+            paddingBottom: Math.max(bottomInset, 16),
+            backgroundColor: dark ? '#18181b' : '#ffffff',
+          },
+        ]}>
         <View style={styles.sheetHeader}>
           <Text style={[styles.heading, { color: dark ? '#ffffff' : '#18181b' }]}>
             {multiple ? `${reports.length} signalements ici` : 'Signalement'}

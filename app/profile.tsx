@@ -63,7 +63,9 @@ export default function Profile() {
   useEffect(() => {
     const signal = { cancelled: false };
     loadProfileData(signal);
-    return () => { signal.cancelled = true; };
+    return () => {
+      signal.cancelled = true;
+    };
   }, [loadProfileData]);
 
   const [profileRefreshing, setProfileRefreshing] = useState(false);
@@ -83,8 +85,8 @@ export default function Profile() {
   if (!isAuthenticated || !user) {
     if (authLoading) {
       return (
-        <View style={layoutStyles.page} className="items-center justify-center">
-          <ActivityIndicator size="large" color={primaryColor} />
+        <View style={layoutStyles.page} className='items-center justify-center'>
+          <ActivityIndicator size='large' color={primaryColor} />
         </View>
       );
     }
@@ -93,21 +95,24 @@ export default function Profile() {
 
   if (profileLoading) {
     return (
-      <View style={layoutStyles.page} className="items-center justify-center">
-        <ActivityIndicator size="large" color={primaryColor} />
+      <View style={layoutStyles.page} className='items-center justify-center'>
+        <ActivityIndicator size='large' color={primaryColor} />
       </View>
     );
   }
 
   if (profileError) {
     return (
-      <View style={layoutStyles.page} className="items-center justify-center">
+      <View style={layoutStyles.page} className='items-center justify-center'>
         <Ionicons name='alert-circle-outline' size={48} color={dark ? '#3F3F46' : '#D4D4D8'} />
-        <Text className={`mt-4 text-center font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+        <Text
+          className={`mt-4 text-center font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
           {profileError}
         </Text>
         <TouchableOpacity onPress={() => loadProfileData()} className='mt-4'>
-          <Text style={{ color: primaryColor }} className='font-bold'>Réessayer</Text>
+          <Text style={{ color: primaryColor }} className='font-bold'>
+            Réessayer
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -181,7 +186,13 @@ export default function Profile() {
           paddingHorizontal: 20,
         }}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={profileRefreshing} onRefresh={onProfileRefresh} tintColor={primaryColor} />}>
+        refreshControl={
+          <RefreshControl
+            refreshing={profileRefreshing}
+            onRefresh={onProfileRefresh}
+            tintColor={primaryColor}
+          />
+        }>
         {/* Apple Style Header */}
         <View className='mb-8'>
           <Text className={classes.eyebrow}>Compte</Text>
@@ -190,10 +201,20 @@ export default function Profile() {
 
         {/* Profile Card */}
         <View className={`mb-8 items-center p-6 ${classes.cardRoundedLg}`}>
-          <TouchableOpacity onPress={pickImage} disabled={isUploading} className='relative mb-4' accessibilityRole='button' accessibilityLabel='Changer la photo de profil'>
+          <TouchableOpacity
+            onPress={pickImage}
+            disabled={isUploading}
+            className='relative mb-4'
+            accessibilityRole='button'
+            accessibilityLabel='Changer la photo de profil'>
             <View className='h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-800'>
               {displayAvatarUrl ? (
-                <Image source={{ uri: displayAvatarUrl }} className='h-full w-full' accessible={false} accessibilityElementsHidden />
+                <Image
+                  source={{ uri: displayAvatarUrl }}
+                  className='h-full w-full'
+                  accessible={false}
+                  accessibilityElementsHidden
+                />
               ) : (
                 <View className='flex-1 items-center justify-center'>
                   <Ionicons name='person' size={40} color={dark ? '#3F3F46' : '#D4D4D8'} />
@@ -253,7 +274,8 @@ export default function Profile() {
           className={`mb-8 overflow-hidden rounded-[24px] ${dark ? 'bg-zinc-900' : 'bg-white'} border border-zinc-100 p-5 shadow-sm dark:border-zinc-800`}>
           <View className='mb-4 flex-row items-center justify-between'>
             <View className='flex-row items-center'>
-              <View className={`mr-3 h-10 w-10 items-center justify-center rounded-xl ${dark ? 'bg-green-900/30' : 'bg-green-50'}`}>
+              <View
+                className={`mr-3 h-10 w-10 items-center justify-center rounded-xl ${dark ? 'bg-green-900/30' : 'bg-green-50'}`}>
                 <Ionicons name='business' size={20} color='#34C759' />
               </View>
               <View>
@@ -436,7 +458,11 @@ export default function Profile() {
           ))}
         </View>
 
-        <TouchableOpacity onPress={handleLogout} className='items-center py-4' accessibilityRole='button' accessibilityLabel='Se déconnecter'>
+        <TouchableOpacity
+          onPress={handleLogout}
+          className='items-center py-4'
+          accessibilityRole='button'
+          accessibilityLabel='Se déconnecter'>
           <Text className='text-base font-bold text-red-500'>Se déconnecter</Text>
         </TouchableOpacity>
       </ScrollView>

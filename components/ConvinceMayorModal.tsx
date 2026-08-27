@@ -28,7 +28,12 @@ export default function ConvinceMayorModal({
 
   return (
     <View style={styles.root} pointerEvents='box-none'>
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel='Fermer' accessibilityRole='button' />
+      <Pressable
+        style={styles.backdrop}
+        onPress={onClose}
+        accessibilityLabel='Fermer'
+        accessibilityRole='button'
+      />
       <Pressable
         style={[
           styles.sheet,
@@ -67,7 +72,12 @@ export default function ConvinceMayorModal({
           <Text style={styles.primaryBtnText}>Envoyer un email à ma mairie</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onClose} style={styles.secondaryBtn} activeOpacity={0.7} accessibilityLabel='Plus tard' accessibilityRole='button'>
+        <TouchableOpacity
+          onPress={onClose}
+          style={styles.secondaryBtn}
+          activeOpacity={0.7}
+          accessibilityLabel='Plus tard'
+          accessibilityRole='button'>
           <Text style={[styles.secondaryBtnText, { color: dark ? '#a1a1aa' : '#71717a' }]}>
             Plus tard
           </Text>

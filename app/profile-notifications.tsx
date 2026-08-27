@@ -67,7 +67,9 @@ export default function ProfileNotificationsScreen() {
     }
     const signal = { cancelled: false };
     load(signal);
-    return () => { signal.cancelled = true; };
+    return () => {
+      signal.cancelled = true;
+    };
   }, [isAuthenticated, authLoading, load, router]);
 
   const toggle = async (key: keyof NotificationPreferences, value: boolean) => {
@@ -89,7 +91,14 @@ export default function ProfileNotificationsScreen() {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
         <Text className={`text-center text-base ${classes.body}`}>{loadError}</Text>
-        <TouchableOpacity onPress={() => { setLoadError(null); setLoading(true); load(); }} className='mt-4 rounded-xl px-6 py-3' style={{ backgroundColor: primaryColor }}>
+        <TouchableOpacity
+          onPress={() => {
+            setLoadError(null);
+            setLoading(true);
+            load();
+          }}
+          className='mt-4 rounded-xl px-6 py-3'
+          style={{ backgroundColor: primaryColor }}>
           <Text className='font-bold text-white'>Réessayer</Text>
         </TouchableOpacity>
       </View>

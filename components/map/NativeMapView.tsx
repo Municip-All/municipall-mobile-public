@@ -61,8 +61,7 @@ const NativeMapView = forwardRef<CityMapMethods, Props>(function NativeMapView(
             };
             regionRef.current = next;
             mapRef.current?.animateToRegion(next, 400);
-          } catch {
-          }
+          } catch {}
         })();
       },
     }),

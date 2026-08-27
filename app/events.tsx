@@ -1,5 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image, RefreshControl } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Image,
+  RefreshControl,
+} from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
@@ -76,7 +84,13 @@ function EventCard({
         dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
       }`}>
       {event.imageUrl ? (
-        <Image source={{ uri: event.imageUrl }} className='h-40 w-full' resizeMode='cover' accessible={false} accessibilityElementsHidden />
+        <Image
+          source={{ uri: event.imageUrl }}
+          className='h-40 w-full'
+          resizeMode='cover'
+          accessible={false}
+          accessibilityElementsHidden
+        />
       ) : null}
       <View className='p-6'>
         <View className='mb-4 flex-row items-center'>
@@ -147,7 +161,8 @@ export default function Events() {
       refreshConfig();
       setLoading(true);
       setError(null);
-      eventsService.getEvents()
+      eventsService
+        .getEvents()
         .then((data) => {
           const now = Date.now();
           const upcoming = data
@@ -164,7 +179,9 @@ export default function Events() {
         .finally(() => {
           if (!cancelled) setLoading(false);
         });
-      return () => { cancelled = true; };
+      return () => {
+        cancelled = true;
+      };
     }, [refreshConfig])
   );
 
@@ -199,7 +216,9 @@ export default function Events() {
           paddingHorizontal: 20,
         }}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
+        }>
         <View className='mb-6'>
           <Text className={classes.eyebrow}>Agenda</Text>
           <Text

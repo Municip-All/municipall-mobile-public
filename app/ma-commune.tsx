@@ -1,5 +1,13 @@
 import { useCallback, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking, RefreshControl, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Linking,
+  RefreshControl,
+  ActivityIndicator,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
@@ -46,7 +54,13 @@ export default function MaCommuneScreen() {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
         <Text className={`text-center text-base ${classes.body}`}>{error}</Text>
-        <TouchableOpacity onPress={() => { setError(null); onRefresh(); }} className='mt-4 rounded-xl px-6 py-3' style={{ backgroundColor: primaryColor }}>
+        <TouchableOpacity
+          onPress={() => {
+            setError(null);
+            onRefresh();
+          }}
+          className='mt-4 rounded-xl px-6 py-3'
+          style={{ backgroundColor: primaryColor }}>
           <Text className='font-bold text-white'>Réessayer</Text>
         </TouchableOpacity>
       </View>
@@ -62,7 +76,9 @@ export default function MaCommuneScreen() {
           paddingHorizontal: 20,
         }}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}>
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
+        }>
         <TouchableOpacity
           onPress={() => router.back()}
           className='mb-4 flex-row items-center gap-1 self-start'
@@ -121,8 +137,9 @@ export default function MaCommuneScreen() {
             <Text className={`text-sm leading-6 ${classes.body}`}>{profile.description}</Text>
           </View>
         ) : null}
-        <View className={`mb-4 rounded-[24px] p-5 ${classes.card}`} accessibilityLabel="Informations pratiques">
-
+        <View
+          className={`mb-4 rounded-[24px] p-5 ${classes.card}`}
+          accessibilityLabel='Informations pratiques'>
           <Text className={`mb-3 text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
             Informations pratiques
           </Text>
