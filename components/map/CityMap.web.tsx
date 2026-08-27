@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { palette } from '@constants/design';
 
 export default function CityMap() {
   return (
@@ -10,5 +11,5 @@ export default function CityMap() {
 
 const styles = StyleSheet.create({
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  text: { color: '#71717a' },
+  text: { color: palette.muted },
 });

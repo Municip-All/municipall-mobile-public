@@ -2,6 +2,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { TransportStopMarker } from '../services/transportService';
 import { useTheme } from '@context/themecontext';
+import { palette, softShadow } from '@constants/design';
 
 type TransportMapCalloutProps = {
   visible: boolean;
@@ -22,30 +23,42 @@ export default function TransportMapCallout({
   if (!visible || !stop) return null;
 
   const disrupted = stop.status === 'disrupted';
-  const statusColor = disrupted ? '#FF9500' : '#34C759';
+  const statusColor = disrupted ? palette.amber400 : palette.matcha700;
 
   return (
     <View pointerEvents='box-none' style={StyleSheet.absoluteFill}>
-      <Pressable style={styles.backdrop} onPress={onClose} />
+      <Pressable
+        style={styles.backdrop}
+        onPress={onClose}
+        accessibilityLabel='Fermer'
+        accessibilityRole='button'
+      />
       <View
         style={[
           styles.sheet,
           {
             paddingBottom: Math.max(bottomInset, 16) + 12,
-            backgroundColor: dark ? '#18181b' : '#FFFFFF',
+            backgroundColor: dark ? palette.nightSurface : palette.cream50,
           },
         ]}>
-        <View style={[styles.handle, { backgroundColor: dark ? '#52525b' : '#D4D4D8' }]} />
+        <View
+          style={[
+            styles.handle,
+            { backgroundColor: dark ? palette.nightBorder : palette.cream200 },
+          ]}
+        />
         <View style={styles.header}>
           <View style={[styles.iconWrap, { backgroundColor: `${statusColor}22` }]}>
             <Ionicons name='bus' size={22} color={statusColor} />
           </View>
           <View style={styles.headerText}>
-            <Text style={[styles.title, { color: dark ? '#ffffff' : '#18181B' }]} numberOfLines={2}>
+            <Text
+              style={[styles.title, { color: dark ? palette.nightText : palette.matcha900 }]}
+              numberOfLines={2}>
               {stop.name}
             </Text>
             {stop.modes.length > 0 ? (
-              <Text style={[styles.subtitle, { color: dark ? '#a1a1aa' : '#71717A' }]}>
+              <Text style={[styles.subtitle, { color: dark ? palette.nightMuted : palette.muted }]}>
                 {stop.modes.join(' · ')}
               </Text>
             ) : null}
@@ -62,19 +75,27 @@ export default function TransportMapCallout({
             stop.messages.map((msg, i) => (
               <Text
                 key={`${stop.stopId}-msg-${i}`}
-                style={[styles.message, { color: dark ? '#d4d4d8' : '#3F3F46' }]}>
+                style={[styles.message, { color: dark ? palette.nightText : palette.charcoal }]}>
                 {msg}
               </Text>
             ))
           ) : (
-            <Text style={[styles.messageMuted, { color: dark ? '#a1a1aa' : '#71717A' }]}>
+            <Text
+              style={[styles.messageMuted, { color: dark ? palette.nightMuted : palette.muted }]}>
               Aucune perturbation signalée sur cet arrêt pour le moment.
             </Text>
           )}
         </ScrollView>
 
-        <Pressable onPress={onClose} style={styles.closeBtn}>
-          <Text style={[styles.closeBtnText, { color: dark ? '#818cf8' : '#0B0080' }]}>Fermer</Text>
+        <Pressable
+          onPress={onClose}
+          style={styles.closeBtn}
+          accessibilityLabel='Fermer'
+          accessibilityRole='button'>
+          <Text
+            style={[styles.closeBtnText, { color: dark ? palette.matcha300 : palette.matcha700 }]}>
+            Fermer
+          </Text>
         </Pressable>
       </View>
     </View>
@@ -95,11 +116,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     paddingHorizontal: 20,
     paddingTop: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: -4 },
-    elevation: 12,
+    ...softShadow,
   },
   handle: {
     alignSelf: 'center',
@@ -117,7 +134,7 @@ const styles = StyleSheet.create({
   iconWrap: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
