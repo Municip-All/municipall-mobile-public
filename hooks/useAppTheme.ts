@@ -2,13 +2,7 @@ import { useMemo } from 'react';
 import { type ViewStyle } from 'react-native';
 import { useTheme } from '@context/themecontext';
 import { useCity } from '@context/citycontext';
-import {
-  DEFAULT_PRIMARY,
-  palette,
-  semanticColors,
-  softShadow,
-  tintColor,
-} from '@constants/design';
+import { DEFAULT_PRIMARY, palette, semanticColors, softShadow, tintColor } from '@constants/design';
 import { buildBrandTheme } from '@constants/brand';
 
 export function useAppTheme() {
