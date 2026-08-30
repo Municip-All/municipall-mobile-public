@@ -14,10 +14,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '@hooks/useAppTheme';
-import {
-  chatbotService,
-  CITIZEN_CHAT_MAX_LENGTH,
-} from '../services/chatbotService';
+import { chatbotService, CITIZEN_CHAT_MAX_LENGTH } from '../services/chatbotService';
 import { palette, tintColor } from '@constants/design';
 
 interface ChatMessage {
@@ -59,24 +56,27 @@ export default function ChatBotScreen() {
     return () => clearTimeout(id);
   }, [messages.length, sending, errorVisible]);
 
-  const send = useCallback(async (text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed || sending) return;
-    lastFailedRef.current = trimmed;
-    setErrorVisible(false);
-    setInput('');
-    setMessages((prev) => [...prev, createMessage('user', trimmed)]);
-    setSending(true);
-    try {
-      const response = await chatbotService.sendCitoyenMessage(trimmed);
-      setMessages((prev) => [...prev, createMessage('bot', response.reply)]);
-      lastFailedRef.current = null;
-    } catch {
-      setErrorVisible(true);
-    } finally {
-      setSending(false);
-    }
-  }, [sending]);
+  const send = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || sending) return;
+      lastFailedRef.current = trimmed;
+      setErrorVisible(false);
+      setInput('');
+      setMessages((prev) => [...prev, createMessage('user', trimmed)]);
+      setSending(true);
+      try {
+        const response = await chatbotService.sendCitoyenMessage(trimmed);
+        setMessages((prev) => [...prev, createMessage('bot', response.reply)]);
+        lastFailedRef.current = null;
+      } catch {
+        setErrorVisible(true);
+      } finally {
+        setSending(false);
+      }
+    },
+    [sending]
+  );
 
   useEffect(() => {
     return () => {
@@ -104,7 +104,15 @@ export default function ChatBotScreen() {
                 ? styles.bubbleBotDark
                 : styles.bubbleBotLight,
           ]}>
-          <Text style={[styles.bubbleText, isUser ? styles.bubbleTextUser : (dark ? styles.bubbleTextBotDark : styles.bubbleTextBotLight)]}>
+          <Text
+            style={[
+              styles.bubbleText,
+              isUser
+                ? styles.bubbleTextUser
+                : dark
+                  ? styles.bubbleTextBotDark
+                  : styles.bubbleTextBotLight,
+            ]}>
             {message.text}
           </Text>
         </View>
@@ -135,8 +143,7 @@ export default function ChatBotScreen() {
             <Ionicons name='leaf' size={20} color={primaryColor} />
           </View>
           <View className='flex-1'>
-            <Text
-              className={`text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+            <Text className={`text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
               Assistant municipal
             </Text>
             <Text className={`text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
@@ -162,8 +169,7 @@ export default function ChatBotScreen() {
               <View style={[styles.bubble, dark ? styles.bubbleBotDark : styles.bubbleBotLight]}>
                 <View className='flex-row items-center gap-2'>
                   <ActivityIndicator size='small' color={primaryColor} />
-                  <Text
-                    className={`text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
+                  <Text className={`text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
                     L’assistant rédige une réponse…
                   </Text>
                 </View>
