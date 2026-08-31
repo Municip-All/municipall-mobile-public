@@ -1,4 +1,5 @@
 import apiClient from './apiClient';
+import type { UserRating } from '../lib/types';
 
 export interface TicketMessage {
   id: number;
@@ -23,12 +24,6 @@ export interface ContactTicketListItem {
     senderRole: 'citizen' | 'agent';
     createdAt: string;
   };
-}
-
-export interface UserRating {
-  stars: number;
-  message?: string;
-  createdAt: string;
 }
 
 export interface ContactTicketDetail {

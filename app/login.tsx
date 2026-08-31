@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -16,10 +16,10 @@ import { useAppTheme } from '@hooks/useAppTheme';
 import { useAuth } from '@context/authcontext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import BrandedLogo from '@components/BrandedLogo';
 import LegalFooterLinks from '@components/LegalFooterLinks';
-import apiClient from '../services/apiClient';
+import { authService } from '../services/authService';
 
 const LoginScreen: React.FC = () => {
   const { dark, primaryColor, classes, colors, brand, layoutStyles } = useAppTheme();
@@ -44,12 +44,7 @@ const LoginScreen: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await apiClient.post('/auth/login', {
-        email,
-        password,
-      });
-
-      const { access_token, user } = response.data;
+      const { access_token, user } = await authService.login(email, password);
       await login(access_token, user); // Update context state and persist
 
       if (redirectTo && typeof redirectTo === 'string') {
@@ -57,9 +52,13 @@ const LoginScreen: React.FC = () => {
       } else {
         router.replace('/home');
       }
-    } catch (error: any) {
-      console.error('Login error', error);
-      Alert.alert('Échec de la connexion', 'Identifiants incorrects ou serveur indisponible.');
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error ? error.message : 'Identifiants incorrects ou serveur indisponible.';
+      Alert.alert('Échec de la connexion', msg, [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Réessayer', onPress: handleLogin },
+      ]);
     } finally {
       setIsSubmitting(false);
     }
@@ -156,6 +155,7 @@ const LoginScreen: React.FC = () => {
                   placeholder='votre@email.fr'
                   keyboardType='email-address'
                   autoCapitalize='none'
+                  autoCorrect={false}
                   placeholderTextColor={dark ? '#6B7280' : '#94A3B8'}
                   className={`ml-2 flex-1 text-base ${dark ? 'text-white' : 'text-slate-900'}`}
                 />
@@ -180,13 +180,22 @@ const LoginScreen: React.FC = () => {
                   placeholder='••••••••'
                   secureTextEntry
                   autoCapitalize='none'
+                  autoCorrect={false}
                   placeholderTextColor={dark ? '#6B7280' : '#94A3B8'}
                   className={`ml-2 flex-1 px-0 text-base ${dark ? 'text-white' : 'text-slate-900'}`}
                 />
               </View>
             </View>
 
-            <TouchableOpacity className='mt-1 mb-8 self-end pr-1'>
+            <TouchableOpacity
+              className='mt-1 mb-8 self-end pr-1'
+              onPress={() =>
+                Alert.alert(
+                  'Mot de passe oublié',
+                  'Contactez votre mairie pour réinitialiser votre mot de passe.',
+                  [{ text: 'OK' }]
+                )
+              }>
               <Text className={`text-sm font-semibold`} style={{ color: primaryColor }}>
                 Mot de passe oublié ?
               </Text>
@@ -196,6 +205,8 @@ const LoginScreen: React.FC = () => {
               onPress={handleLogin}
               disabled={isSubmitting}
               activeOpacity={0.8}
+              accessibilityRole='button'
+              accessibilityLabel='Se connecter'
               className='w-full flex-row items-center justify-center rounded-[20px] py-4 shadow-xl'
               style={{
                 backgroundColor: primaryColor,
@@ -221,7 +232,9 @@ const LoginScreen: React.FC = () => {
 
         <TouchableOpacity
           onPress={() => router.push('/signup')}
-          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}>
+          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}
+          accessibilityRole='button'
+          accessibilityLabel='Créer un compte'>
           <Text className={`text-[15px] font-medium ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
             Nouveau citoyen ?{' '}
             <Text className='font-bold' style={{ color: primaryColor }}>

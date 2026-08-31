@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '@hooks/useAppTheme';
-import { feedbackService, FeedbackResourceType, UserRating } from '../services/feedbackService';
+import { feedbackService, FeedbackResourceType } from '../services/feedbackService';
+import type { UserRating } from '../lib/types';
 
 type SatisfactionPromptProps = {
   resourceType: FeedbackResourceType;
@@ -84,7 +85,8 @@ export default function SatisfactionPrompt({
             key={value}
             onPress={() => setStars(value)}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            accessibilityLabel={`${value} étoile${value > 1 ? 's' : ''}`}>
+            accessibilityLabel={`${value} étoile${value > 1 ? 's' : ''}`}
+            accessibilityRole='button'>
             <Ionicons
               name={value <= stars ? 'star' : 'star-outline'}
               size={32}
@@ -107,6 +109,8 @@ export default function SatisfactionPrompt({
       <TouchableOpacity
         onPress={handleSubmit}
         disabled={submitting || stars < 1}
+        accessibilityLabel='Envoyer mon avis'
+        accessibilityRole='button'
         style={{
           backgroundColor: primaryColor,
           opacity: submitting || stars < 1 ? 0.5 : 1,

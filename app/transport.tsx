@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,10 @@ import {
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import { isAxiosError } from 'axios';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -147,30 +148,28 @@ export default function TransportScreen() {
         position.coords.longitude
       );
       setLines(data.lines);
-    } catch (e) {
-      console.error(e);
-      const apiMessage =
-        e &&
-        typeof e === 'object' &&
-        'response' in e &&
-        e.response &&
-        typeof e.response === 'object' &&
-        'data' in e.response &&
-        e.response.data &&
-        typeof e.response.data === 'object' &&
-        'message' in e.response.data &&
-        typeof e.response.data.message === 'string'
-          ? e.response.data.message
-          : null;
-      setError(apiMessage ?? 'Impossible de charger les perturbations. Réessayez dans un instant.');
+    } catch (error: unknown) {
+      let message = 'Impossible de charger les perturbations. Réessayez dans un instant.';
+      if (isAxiosError(error)) {
+        const data = error.response?.data as { message?: string | string[] } | undefined;
+        if (typeof data?.message === 'string') message = data.message;
+        else if (Array.isArray(data?.message)) message = data.message.join(', ');
+      }
+      setError(message);
       setLines([]);
     }
   }, [tenantId, transportEnabled]);
 
   useFocusEffect(
     useCallback(() => {
+      let cancelled = false;
       setLoading(true);
-      void loadDisruptions().finally(() => setLoading(false));
+      void loadDisruptions().finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+      return () => {
+        cancelled = true;
+      };
     }, [loadDisruptions])
   );
 
@@ -206,7 +205,11 @@ export default function TransportScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
         }>
-        <TouchableOpacity onPress={() => router.back()} className='mb-4 flex-row items-center'>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className='mb-4 flex-row items-center'
+          accessibilityRole='button'
+          accessibilityLabel='Retour'>
           <Ionicons name='chevron-back' size={22} color={primaryColor} />
           <Text style={{ color: primaryColor, fontWeight: '700', marginLeft: 4 }}>Retour</Text>
         </TouchableOpacity>

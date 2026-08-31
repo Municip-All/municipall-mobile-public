@@ -1,5 +1,5 @@
 import * as Location from 'expo-location';
-import { forwardRef, useCallback, useImperativeHandle, useRef, type ReactNode } from 'react';
+import { type ReactNode, forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 import MapView, { type Region } from 'react-native-maps';
 import type { CityMapMethods } from '../../lib/map/types';
@@ -61,9 +61,7 @@ const NativeMapView = forwardRef<CityMapMethods, Props>(function NativeMapView(
             };
             regionRef.current = next;
             mapRef.current?.animateToRegion(next, 400);
-          } catch (error) {
-            console.error('NativeMapView: center on user failed', error);
-          }
+          } catch {}
         })();
       },
     }),

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  Alert,
+  RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useAuth } from '@context/authcontext';
 import { Ionicons } from '@expo/vector-icons';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { reportService, Report } from '../services/reportService';
@@ -165,27 +167,43 @@ export default function SignalementsList() {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('Tous');
   const [showArchives, setShowArchives] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const loadReports = useCallback(async () => {
-    if (!isAuthenticated) {
-      setReports([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const data = await reportService.getReports();
-      setReports(data);
-    } catch (error) {
-      console.error(error);
-      setReports([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [isAuthenticated]);
+  const loadReports = useCallback(
+    async (signal?: { cancelled: boolean }) => {
+      if (!isAuthenticated) {
+        setReports([]);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        const data = await reportService.getReports();
+        if (!signal?.cancelled) setReports(data);
+      } catch {
+        if (!signal?.cancelled) {
+          setReports([]);
+          Alert.alert('Erreur', 'Impossible de charger vos signalements.');
+        }
+      } finally {
+        if (!signal?.cancelled) setLoading(false);
+      }
+    },
+    [isAuthenticated]
+  );
 
   useEffect(() => {
-    loadReports();
+    const signal = { cancelled: false };
+    loadReports(signal);
+    return () => {
+      signal.cancelled = true;
+    };
+  }, [loadReports]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadReports();
+    setRefreshing(false);
   }, [loadReports]);
 
   const activeReports = reports.filter((r) => !isArchivedReport(r.status));
@@ -205,7 +223,10 @@ export default function SignalementsList() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
+        }>
         <View className='mb-6'>
           <Text
             className={`text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
@@ -226,7 +247,9 @@ export default function SignalementsList() {
             <TouchableOpacity
               onPress={() => router.push('/login')}
               className='mt-6 rounded-full px-8 py-3'
-              style={{ backgroundColor: primaryColor }}>
+              style={{ backgroundColor: primaryColor }}
+              accessibilityRole='button'
+              accessibilityLabel='Se connecter'>
               <Text className='text-sm font-bold text-white'>Se connecter</Text>
             </TouchableOpacity>
           </View>
@@ -240,6 +263,8 @@ export default function SignalementsList() {
                     key={filter}
                     onPress={() => setActiveFilter(filter)}
                     activeOpacity={0.8}
+                    accessibilityRole='button'
+                    accessibilityLabel={`Filtrer par ${filter}`}
                     style={[
                       styles.filterChip,
                       isActive
@@ -276,7 +301,11 @@ export default function SignalementsList() {
                   className={`mt-4 text-sm font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
                   Aucun signalement en cours
                 </Text>
-                <TouchableOpacity onPress={openNewReport} className='mt-6'>
+                <TouchableOpacity
+                  onPress={openNewReport}
+                  className='mt-6'
+                  accessibilityRole='button'
+                  accessibilityLabel='Faire un signalement'>
                   <Text style={{ color: primaryColor }} className='text-sm font-bold'>
                     Faire un signalement
                   </Text>

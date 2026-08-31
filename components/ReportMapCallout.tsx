@@ -1,7 +1,7 @@
-import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Report } from '../services/reportService';
+import { useTheme } from '@context/themecontext';
 
 function statusColor(status: string): string {
   switch (status) {
@@ -29,10 +29,12 @@ function ReportSummaryCard({
   report,
   onOpen,
   showDivider,
+  dark,
 }: {
   report: Report;
   onOpen: () => void;
   showDivider: boolean;
+  dark: boolean;
 }) {
   const color = statusColor(report.status);
   const preview =
@@ -44,24 +46,30 @@ function ReportSummaryCard({
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={onOpen}
-      style={[styles.card, showDivider && styles.cardDivider]}>
+      style={[
+        styles.card,
+        showDivider && styles.cardDivider,
+        showDivider && { borderTopColor: dark ? '#3f3f46' : '#e4e4e7' },
+      ]}>
       <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle} numberOfLines={1}>
+        <Text style={[styles.cardTitle, { color: dark ? '#ffffff' : '#18181b' }]} numberOfLines={1}>
           {report.category}
         </Text>
         <View style={[styles.statusPill, { backgroundColor: `${color}18` }]}>
           <Text style={[styles.statusText, { color }]}>{report.status}</Text>
         </View>
       </View>
-      <Text style={styles.cardMeta}>
+      <Text style={[styles.cardMeta, { color: dark ? '#a1a1aa' : '#71717a' }]}>
         Réf. {report.id ?? '—'}
         {report.createdAt ? ` · ${formatDate(report.createdAt)}` : ''}
       </Text>
-      <Text style={styles.cardBody} numberOfLines={3}>
+      <Text style={[styles.cardBody, { color: dark ? '#d4d4d8' : '#3f3f46' }]} numberOfLines={3}>
         {report.lastMessage?.senderRole === 'agent' ? 'Mairie : ' : ''}
         {preview}
       </Text>
-      <Text style={styles.cardAction}>Voir le détail →</Text>
+      <Text style={[styles.cardAction, { color: dark ? '#818cf8' : '#0B0080' }]}>
+        Voir le détail →
+      </Text>
     </TouchableOpacity>
   );
 }
@@ -82,6 +90,9 @@ export default function ReportMapSummarySheet({
   onClose,
   onOpenReport,
 }: ReportMapSummarySheetProps) {
+  const { colorScheme } = useTheme();
+  const dark = colorScheme === 'dark';
+
   if (!visible) return null;
 
   const multiple = reports.length > 1;
@@ -89,13 +100,20 @@ export default function ReportMapSummarySheet({
   return (
     <View style={styles.root} pointerEvents='box-none'>
       <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel='Fermer' />
-      <View style={[styles.sheet, { paddingBottom: Math.max(bottomInset, 16) }]}>
+      <View
+        style={[
+          styles.sheet,
+          {
+            paddingBottom: Math.max(bottomInset, 16),
+            backgroundColor: dark ? '#18181b' : '#ffffff',
+          },
+        ]}>
         <View style={styles.sheetHeader}>
-          <Text style={styles.heading}>
+          <Text style={[styles.heading, { color: dark ? '#ffffff' : '#18181b' }]}>
             {multiple ? `${reports.length} signalements ici` : 'Signalement'}
           </Text>
           <TouchableOpacity onPress={onClose} hitSlop={12} accessibilityLabel='Fermer'>
-            <Ionicons name='close' size={22} color='#71717a' />
+            <Ionicons name='close' size={22} color={dark ? '#a1a1aa' : '#71717a'} />
           </TouchableOpacity>
         </View>
 
@@ -114,6 +132,7 @@ export default function ReportMapSummarySheet({
                 }
               }}
               showDivider={index > 0}
+              dark={dark}
             />
           ))}
         </ScrollView>
@@ -133,7 +152,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
   sheet: {
-    backgroundColor: '#ffffff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '70%',
@@ -149,7 +167,6 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 17,
     fontWeight: '800',
-    color: '#18181b',
   },
   scroll: {
     maxHeight: 420,
@@ -163,7 +180,6 @@ const styles = StyleSheet.create({
   },
   cardDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#e4e4e7',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -175,7 +191,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '700',
-    color: '#18181b',
   },
   statusPill: {
     borderRadius: 999,
@@ -190,19 +205,16 @@ const styles = StyleSheet.create({
   cardMeta: {
     marginTop: 4,
     fontSize: 11,
-    color: '#71717a',
     fontWeight: '600',
   },
   cardBody: {
     marginTop: 6,
     fontSize: 14,
     lineHeight: 20,
-    color: '#3f3f46',
   },
   cardAction: {
     marginTop: 8,
     fontSize: 13,
     fontWeight: '700',
-    color: '#0B0080',
   },
 });

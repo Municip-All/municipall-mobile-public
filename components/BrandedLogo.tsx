@@ -1,4 +1,3 @@
-import React from 'react';
 import { Image, View, type ImageStyle, type StyleProp, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '@hooks/useAppTheme';
@@ -55,6 +54,8 @@ export default function BrandedLogo({
             imageStyle,
           ]}
           resizeMode={mode}
+          accessible={false}
+          accessibilityElementsHidden
         />
       ) : (
         <Ionicons name='business' size={size * 0.45} color={icon} />

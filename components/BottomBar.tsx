@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Pressable, Text, Platform, Dimensions, StyleSheet } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { useTheme } from '@context/themecontext';
@@ -9,6 +8,7 @@ import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { ensureAuthenticatedForReport } from '../lib/requireAuthForReport';
+import type { IconName, RouteHref } from '../lib/types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -67,10 +67,10 @@ const BottomBar: React.FC = () => {
 
   const handlePress = (tab: (typeof tabs)[0]) => {
     if (tab.id === 'profile' && !isAuthenticated) {
-      router.replace({ pathname: '/login', params: { redirectTo: '/profile' } as any });
+      router.replace({ pathname: '/login', params: { redirectTo: '/profile' } } as RouteHref);
       return;
     }
-    router.replace(tab.path as any);
+    router.replace(tab.path as RouteHref);
   };
 
   const Background = () => (
@@ -100,7 +100,7 @@ const BottomBar: React.FC = () => {
       <Background />
 
       <View style={[styles.tabsContainer, { height: tabHeight }]}>
-        {tabs.map((tab, index) => {
+        {tabs.map((tab, _index) => {
           if (tab.isCenter) {
             return <View key={tab.id} style={styles.centerSpace} pointerEvents='none' />;
           }
@@ -110,9 +110,10 @@ const BottomBar: React.FC = () => {
               key={tab.id}
               onPress={() => handlePress(tab)}
               style={styles.tab}
-              accessibilityRole='button'>
+              accessibilityRole='button'
+              accessibilityLabel={tab.label}>
               <Ionicons
-                name={(pathname === tab.path ? tab.icon : `${tab.icon}-outline`) as any}
+                name={(pathname === tab.path ? tab.icon : `${tab.icon}-outline`) as IconName}
                 size={22}
                 color={getIconColor(tab.path)}
               />
@@ -127,13 +128,15 @@ const BottomBar: React.FC = () => {
         <Pressable
           onPress={() => {
             if (!ensureAuthenticatedForReport(isAuthenticated, router)) return;
-            router.push({ pathname: '/carte', params: { action: 'report' } as any });
+            router.push({ pathname: '/carte', params: { action: 'report' } } as RouteHref);
           }}
           style={[
             styles.centerButton,
             styles.centerButtonShadow,
             { backgroundColor: primaryColor, borderColor: fabBorderColor },
-          ]}>
+          ]}
+          accessibilityRole='button'
+          accessibilityLabel='Signaler'>
           <Ionicons name='paper-plane' size={24} color={brand.onPrimary} />
         </Pressable>
         <Text style={[styles.centerLabel, { color: dark ? '#FFFFFF' : primaryColor }]}>

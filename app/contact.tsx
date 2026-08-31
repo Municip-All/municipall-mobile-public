@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,13 +11,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { useAuth } from '@context/authcontext';
 import { Ionicons } from '@expo/vector-icons';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -49,7 +50,7 @@ function SuggestionCard({
         dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
       }`}>
       {lastFromAgent ? (
-        <View className='h-1 w-full' style={{ backgroundColor: '#007AFF' }} />
+        <View className='h-1 w-full' style={{ backgroundColor: dark ? '#3B82F6' : '#007AFF' }} />
       ) : null}
       <View className='p-5'>
         <View className='flex-row items-start justify-between gap-3'>
@@ -111,27 +112,43 @@ const ContactScreen: React.FC = () => {
   const [body, setBody] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showArchives, setShowArchives] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const loadTickets = useCallback(async () => {
-    if (!isAuthenticated) {
-      setTickets([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const data = await contactService.getMyTickets();
-      setTickets(data);
-    } catch (e) {
-      console.error(e);
-      setTickets([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [isAuthenticated]);
+  const loadTickets = useCallback(
+    async (signal?: { cancelled: boolean }) => {
+      if (!isAuthenticated) {
+        setTickets([]);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        const data = await contactService.getMyTickets();
+        if (!signal?.cancelled) setTickets(data);
+      } catch {
+        if (!signal?.cancelled) {
+          setTickets([]);
+          Alert.alert('Erreur', 'Impossible de charger vos conversations.');
+        }
+      } finally {
+        if (!signal?.cancelled) setLoading(false);
+      }
+    },
+    [isAuthenticated]
+  );
 
   useEffect(() => {
-    loadTickets();
+    const signal = { cancelled: false };
+    loadTickets(signal);
+    return () => {
+      signal.cancelled = true;
+    };
+  }, [loadTickets]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadTickets();
+    setRefreshing(false);
   }, [loadTickets]);
 
   const contactEmail = config?.contact?.email?.trim();
@@ -216,7 +233,14 @@ const ContactScreen: React.FC = () => {
             paddingHorizontal: 20,
           }}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps='handled'>
+          keyboardShouldPersistTaps='handled'
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={primaryColor}
+            />
+          }>
           <View className='mb-8'>
             <Text className={classes.eyebrow}>Assistance</Text>
             <Text className={classes.title}>Contact</Text>
@@ -230,7 +254,11 @@ const ContactScreen: React.FC = () => {
             <TouchableOpacity
               onPress={openEmail}
               disabled={!contactEmail}
-              className={`mb-3 flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactEmail ? 'opacity-50' : ''}`}>
+              className={`mb-3 flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactEmail ? 'opacity-50' : ''}`}
+              accessibilityRole='button'
+              accessibilityLabel={
+                contactEmail ? `Envoyer un e-mail à ${contactEmail}` : 'E-mail non renseigné'
+              }>
               <Ionicons name='mail-outline' size={20} color={primaryColor} />
               <Text
                 className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-white' : 'text-black'}`}>
@@ -240,7 +268,11 @@ const ContactScreen: React.FC = () => {
             <TouchableOpacity
               onPress={openPhone}
               disabled={!contactPhone}
-              className={`flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactPhone ? 'opacity-50' : ''}`}>
+              className={`flex-row items-center rounded-2xl p-4 ${dark ? 'bg-zinc-800' : 'bg-zinc-50'} ${!contactPhone ? 'opacity-50' : ''}`}
+              accessibilityRole='button'
+              accessibilityLabel={
+                contactPhone ? `Appeler le ${contactPhone}` : 'Téléphone non renseigné'
+              }>
               <Ionicons name='call-outline' size={20} color={primaryColor} />
               <Text
                 className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-white' : 'text-black'}`}>
@@ -255,7 +287,9 @@ const ContactScreen: React.FC = () => {
               <TouchableOpacity
                 onPress={() => setShowNew((v) => !v)}
                 className='rounded-full px-4 py-2'
-                style={{ backgroundColor: primaryColor }}>
+                style={{ backgroundColor: primaryColor }}
+                accessibilityRole='button'
+                accessibilityLabel={showNew ? 'Annuler' : 'Nouveau message'}>
                 <Text className='text-xs font-bold text-white'>
                   {showNew ? 'Annuler' : 'Nouveau'}
                 </Text>

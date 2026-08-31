@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import apiClient from '../services/apiClient';
+import { authService } from '../services/authService';
 import { resolveAvatarForUser } from '../utils/avatarImage';
+import { onSessionExpired } from '../services/sessionEvents';
 
 function userForStorage(user: User): User {
   const { avatar_url: _avatar, ...rest } = user;
@@ -62,39 +63,59 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     const initializeAuth = async () => {
       try {
         const token = await AsyncStorage.getItem('user_token');
         const storedUser = await AsyncStorage.getItem('user_data');
 
         if (token && storedUser) {
-          setUser(JSON.parse(storedUser));
-          setIsAuthenticated(true);
+          if (!cancelled) {
+            setUser(JSON.parse(storedUser));
+            setIsAuthenticated(true);
+          }
 
-          // Verify token and refresh user data from server in background
           try {
-            const response = await apiClient.get('auth/me');
-            if (response.data) {
-              const freshUser = await resolveAvatarForUser(response.data as User);
-              setUser(freshUser);
-              await AsyncStorage.setItem('user_data', JSON.stringify(userForStorage(freshUser)));
+            const freshUser = await authService.me();
+            const resolved = await resolveAvatarForUser(freshUser);
+            if (!cancelled) {
+              setUser(resolved);
+              await AsyncStorage.setItem('user_data', JSON.stringify(userForStorage(resolved)));
             }
-          } catch (e) {
-            console.warn('Failed to refresh user profile from server', e);
-            // If token is expired (401), we should log out
-            if ((e as any)?.response?.status === 401) {
-              await logout();
+          } catch (e: unknown) {
+            if (!cancelled) {
+              console.warn('Failed to refresh user profile from server', e);
+              if (
+                e &&
+                typeof e === 'object' &&
+                'response' in e &&
+                (e as { response?: { status?: number } }).response?.status === 401
+              ) {
+                await logout();
+              }
             }
           }
         }
-      } catch (error) {
-        console.error('Auth initialization error', error);
+      } catch (error: unknown) {
+        if (!cancelled) {
+          console.error('Auth initialization error', error);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     initializeAuth();
+    return () => {
+      cancelled = true;
+    };
+  }, [logout]);
+
+  useEffect(() => {
+    const unsubscribe = onSessionExpired(logout);
+    return unsubscribe;
   }, [logout]);
 
   const value = useMemo<AuthContextType>(

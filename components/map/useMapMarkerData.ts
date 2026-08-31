@@ -58,8 +58,11 @@ export function useMapMarkerData({ showReports, showTransports, mapLat, mapLon }
           setCompostMarkers(composts);
           setToiletMarkers(toilets);
         }
-      } catch (error) {
-        console.error('useMapMarkerData: open data fetch failed', error);
+      } catch {
+        if (!cancelled) {
+          setCompostMarkers([]);
+          setToiletMarkers([]);
+        }
       }
     };
 
@@ -80,8 +83,8 @@ export function useMapMarkerData({ showReports, showTransports, mapLat, mapLon }
       try {
         const reports = await reportService.getReports();
         if (!cancelled) setCitizenReports(reports);
-      } catch (error) {
-        console.error('useMapMarkerData: reports fetch failed', error);
+      } catch {
+        if (!cancelled) setCitizenReports([]);
       }
     };
 
@@ -126,10 +129,9 @@ export function useMapMarkerData({ showReports, showTransports, mapLat, mapLon }
         lastTransportFetchCenterRef.current = center;
         setTransportZoneCenter(center);
         setTransportMarkers(data.stops ?? []);
-      } catch (error) {
+      } catch (error: unknown) {
         if (controller.signal.aborted) return;
         if (isAxiosError(error) && error.code === 'ERR_CANCELED') return;
-        console.error('useMapMarkerData: transport fetch failed', error);
       } finally {
         if (requestId === transportRequestIdRef.current) {
           transportLoadingRef.current = false;

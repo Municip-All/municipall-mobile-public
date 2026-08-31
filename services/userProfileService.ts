@@ -33,3 +33,18 @@ export async function updateUserPassword(payload: {
   }
   await apiClient.post('users/password', payload);
 }
+
+export interface UserStats {
+  reports: number;
+  participations: number;
+  points: number;
+}
+
+export async function getUserStats(): Promise<UserStats> {
+  const response = await apiClient.get<UserStats>('users/stats');
+  return response.data;
+}
+
+export async function updateUserCity(cityId: string): Promise<void> {
+  await apiClient.post('users/profile', { cityId });
+}

@@ -1,5 +1,5 @@
 import 'react-native-reanimated';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Slot, Redirect, usePathname } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';

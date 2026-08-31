@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, ScrollView, Switch, ActivityIndicator } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { View, Text, ScrollView, Switch, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '@hooks/useAppTheme';
@@ -37,25 +37,40 @@ const OPTIONS: { key: keyof NotificationPreferences; label: string; description:
 
 export default function ProfileNotificationsScreen() {
   const { dark, classes, primaryColor, layoutStyles } = useAppTheme();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [prefs, setPrefs] = useState<NotificationPreferences | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    const data = await loadNotificationPreferences();
-    setPrefs(data);
-    setLoading(false);
+  const load = useCallback(async (signal?: { cancelled: boolean }) => {
+    try {
+      const data = await loadNotificationPreferences();
+      if (!signal?.cancelled) {
+        setPrefs(data);
+        setLoading(false);
+        setLoadError(null);
+      }
+    } catch {
+      if (!signal?.cancelled) {
+        setLoadError('Impossible de charger les préférences.');
+        setLoading(false);
+      }
+    }
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !authLoading) {
       router.replace('/login');
       return;
     }
-    load();
-  }, [isAuthenticated, load, router]);
+    const signal = { cancelled: false };
+    load(signal);
+    return () => {
+      signal.cancelled = true;
+    };
+  }, [isAuthenticated, authLoading, load, router]);
 
   const toggle = async (key: keyof NotificationPreferences, value: boolean) => {
     if (!prefs) return;
@@ -68,6 +83,24 @@ export default function ProfileNotificationsScreen() {
     return (
       <View style={layoutStyles.page} className='items-center justify-center'>
         <ActivityIndicator color={primaryColor} />
+      </View>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <View style={layoutStyles.page} className='items-center justify-center px-6'>
+        <Text className={`text-center text-base ${classes.body}`}>{loadError}</Text>
+        <TouchableOpacity
+          onPress={() => {
+            setLoadError(null);
+            setLoading(true);
+            load();
+          }}
+          className='mt-4 rounded-xl px-6 py-3'
+          style={{ backgroundColor: primaryColor }}>
+          <Text className='font-bold text-white'>Réessayer</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -108,6 +141,7 @@ export default function ProfileNotificationsScreen() {
                 value={prefs[option.key]}
                 onValueChange={(v) => toggle(option.key, v)}
                 trackColor={{ false: '#3F3F46', true: primaryColor }}
+                accessibilityLabel={`${option.label}: ${prefs[option.key] ? 'activé' : 'désactivé'}`}
               />
             </View>
           ))}

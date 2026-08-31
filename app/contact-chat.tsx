@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -57,8 +58,8 @@ export default function ContactChatScreen() {
           }
           return data;
         });
-      } catch (e) {
-        console.error(e);
+      } catch {
+        if (!silent) Alert.alert('Erreur', 'Impossible de charger la conversation.');
       } finally {
         if (!silent) setLoading(false);
       }
@@ -67,15 +68,21 @@ export default function ContactChatScreen() {
   );
 
   useEffect(() => {
-    void loadTicket();
+    let cancelled = false;
+    void loadTicket().finally(() => {
+      if (cancelled) return;
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [loadTicket]);
 
   useLiveChatRefresh(() => loadTicket({ silent: true }), Boolean(ticket) && !isClosed);
 
   useEffect(() => {
-    if (ticket?.messages.length) {
-      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
-    }
+    if (!ticket?.messages.length) return;
+    const id = setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+    return () => clearTimeout(id);
   }, [ticket?.messages.length]);
 
   const handleSend = async () => {
@@ -86,8 +93,8 @@ export default function ContactChatScreen() {
       const updated = await contactService.reply(ticketId, text);
       setTicket(updated);
       setReply('');
-    } catch (e) {
-      console.error(e);
+    } catch {
+      Alert.alert('Erreur', "Impossible d'envoyer votre message.");
     } finally {
       setSending(false);
     }
@@ -105,7 +112,11 @@ export default function ContactChatScreen() {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
         <Text className={classes.body}>Conversation introuvable.</Text>
-        <TouchableOpacity onPress={() => router.back()} className='mt-4'>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className='mt-4'
+          accessibilityRole='button'
+          accessibilityLabel='Retour'>
           <Text style={{ color: primaryColor }}>Retour</Text>
         </TouchableOpacity>
       </View>
@@ -118,7 +129,11 @@ export default function ContactChatScreen() {
         style={{ paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: 12 }}
         className={`border-b ${dark ? 'border-zinc-800' : 'border-zinc-200'}`}>
         <View className='flex-row items-center'>
-          <TouchableOpacity onPress={() => router.back()} className='mr-3 p-2'>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className='mr-3 p-2'
+            accessibilityRole='button'
+            accessibilityLabel='Retour'>
             <Ionicons name='chevron-back' size={24} color={dark ? '#FFF' : '#000'} />
           </TouchableOpacity>
           <View className='flex-1'>
@@ -205,6 +220,8 @@ export default function ContactChatScreen() {
               <TouchableOpacity
                 onPress={handleSend}
                 disabled={sending || !reply.trim()}
+                accessibilityLabel='Envoyer'
+                accessibilityRole='button'
                 style={{
                   backgroundColor: primaryColor,
                   opacity: sending || !reply.trim() ? 0.5 : 1,

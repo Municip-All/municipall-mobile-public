@@ -1,5 +1,6 @@
 import apiClient from './apiClient';
 import { prepareImageForUpload } from '../utils/avatarImage';
+import type { UserRating } from '../lib/types';
 
 export interface ReportMessage {
   id: number;
@@ -25,12 +26,6 @@ export interface Report {
     senderRole: 'citizen' | 'agent';
     createdAt: string;
   };
-}
-
-export interface UserRating {
-  stars: number;
-  message?: string;
-  createdAt: string;
 }
 
 export interface ReportDetail extends Report {

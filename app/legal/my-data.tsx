@@ -1,5 +1,12 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Linking } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Linking,
+  ActivityIndicator,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,23 +15,31 @@ import { useAuth } from '@context/authcontext';
 import ProfileScreenHeader from '@components/ProfileScreenHeader';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
 import { useCityLegalContext } from '@hooks/useCityLegalContext';
+import type { IconName } from '../../lib/types';
 
 type Action = {
   title: string;
   description: string;
-  icon: React.ComponentProps<typeof Ionicons>['name'];
+  icon: IconName;
   color: string;
   onPress: () => void;
 };
 
 export default function LegalMyDataScreen() {
   const { dark, classes, primaryColor, colors, layoutStyles } = useAppTheme();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const cityLegal = useCityLegalContext();
 
   if (!isAuthenticated || !user) {
+    if (authLoading) {
+      return (
+        <View style={layoutStyles.page} className='items-center justify-center'>
+          <ActivityIndicator color={primaryColor} size='large' />
+        </View>
+      );
+    }
     router.replace('/login');
     return null;
   }

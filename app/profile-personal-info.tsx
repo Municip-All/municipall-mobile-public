@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import { updateUserProfile } from '../services/userProfileService';
 
 export default function ProfilePersonalInfoScreen() {
   const { dark, classes, primaryColor, layoutStyles } = useAppTheme();
-  const { user, updateUser, isAuthenticated } = useAuth();
+  const { user, updateUser, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [name, setName] = useState('');
@@ -29,17 +29,32 @@ export default function ProfilePersonalInfoScreen() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated || !user) {
-      router.replace('/login');
+    let cancelled = false;
+    if ((!isAuthenticated || !user) && !authLoading) {
+      if (!cancelled) router.replace('/login');
       return;
     }
-    setName(user.name ?? '');
-    setSurname(user.surname ?? '');
-    setEmail(user.email ?? '');
-    setNeighborhood(user.neighborhood ?? '');
-  }, [isAuthenticated, user, router]);
+    if (user) {
+      setName(user.name ?? '');
+      setSurname(user.surname ?? '');
+      setEmail(user.email ?? '');
+      setNeighborhood(user.neighborhood ?? '');
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, user, authLoading, router]);
 
-  if (!user) return null;
+  if (!user) {
+    if (authLoading) {
+      return (
+        <View style={layoutStyles.page} className='items-center justify-center'>
+          <ActivityIndicator color={primaryColor} />
+        </View>
+      );
+    }
+    return null;
+  }
 
   const handleSave = async () => {
     const trimmedEmail = email.trim();
@@ -101,6 +116,7 @@ export default function ProfilePersonalInfoScreen() {
                 onChangeText={field.onChange}
                 keyboardType={field.keyboard}
                 autoCapitalize={field.keyboard ? 'none' : 'words'}
+                autoCorrect={!field.keyboard}
                 className={`mt-2 rounded-xl px-4 py-3 text-base ${classes.input}`}
                 placeholderTextColor={dark ? '#71717A' : '#A1A1AA'}
               />
@@ -108,7 +124,11 @@ export default function ProfilePersonalInfoScreen() {
           ))}
         </View>
 
-        <TouchableOpacity onPress={() => router.push('/legal/my-data')} className='mt-4 py-2'>
+        <TouchableOpacity
+          onPress={() => router.push('/legal/my-data')}
+          className='mt-4 py-2'
+          accessibilityLabel='Mes droits RGPD'
+          accessibilityRole='button'>
           <Text className={`text-center text-sm font-semibold`} style={{ color: primaryColor }}>
             Mes droits RGPD (accès, suppression…) →
           </Text>
@@ -117,6 +137,8 @@ export default function ProfilePersonalInfoScreen() {
         <TouchableOpacity
           onPress={handleSave}
           disabled={saving}
+          accessibilityLabel='Enregistrer les informations'
+          accessibilityRole='button'
           className='mt-4 items-center rounded-2xl py-4'
           style={{ backgroundColor: primaryColor }}>
           {saving ? (

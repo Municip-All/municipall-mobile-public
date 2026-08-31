@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,16 +18,17 @@ import { useCity } from '@context/citycontext';
 import { useAuth } from '@context/authcontext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import apiClient from '../services/apiClient';
+import { authService } from '../services/authService';
 import { cityService } from '../services/cityService';
 import { cityDisplayName } from '../lib/cityDisplay';
 import ConvinceMayorModal from '@components/ConvinceMayorModal';
 import CityNotListedChip from '@components/CityNotListedChip';
 import { openReferCityEmail } from '../lib/referCity';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import LegalConsentBlock from '@components/LegalConsentBlock';
 import LegalFooterLinks from '@components/LegalFooterLinks';
 import { recordLegalConsent } from '../services/legalConsent';
+import type { IconName, KeyboardType } from '../lib/types';
 
 const SignupScreen: React.FC = () => {
   const { dark, primaryColor, colors, layoutStyles } = useAppTheme();
@@ -43,6 +44,7 @@ const SignupScreen: React.FC = () => {
   const [availableCities, setAvailableCities] = useState<
     { id: string; name: string; officialName?: string }[]
   >([]);
+  const [citiesError, setCitiesError] = useState(false);
   const [showConvinceModal, setShowConvinceModal] = useState(false);
 
   const secondaryColor = config?.theme.secondaryColor || '#3B82F6';
@@ -56,16 +58,23 @@ const SignupScreen: React.FC = () => {
   const [acceptedAge, setAcceptedAge] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     const loadCities = async () => {
       try {
         const cities = await cityService.getAllCities();
-        setAvailableCities(cities);
-        if (cities.length > 0) setSelectedCity(cities[0].id);
-      } catch (err) {
-        console.error('Failed to load cities', err);
+        if (!cancelled) {
+          setAvailableCities(cities);
+          if (cities.length > 0) setSelectedCity(cities[0].id);
+          setCitiesError(false);
+        }
+      } catch {
+        if (!cancelled) setCitiesError(true);
       }
     };
     loadCities();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleRegister = async () => {
@@ -87,26 +96,28 @@ const SignupScreen: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await apiClient.post('auth/signup', {
+      const payload = {
         name: username,
         surname: '',
         email,
         password,
         phone,
-        cityId: selectedCity, // Now passing the resident city
-      });
-
-      const { access_token, user } = response.data;
+        cityId: selectedCity,
+      };
+      const { access_token, user } = await authService.signup(payload);
       await recordLegalConsent();
       await authLogin(access_token, user);
 
       Alert.alert('Succès', `Bienvenue ${user.name} ! Votre compte est créé.`);
       router.replace('/home');
-    } catch (error: any) {
-      console.error('Signup error', error);
+    } catch {
       Alert.alert(
         "Échec de l'inscription",
-        'Une erreur est survenue lors de la création du compte.'
+        'Une erreur est survenue lors de la création du compte.',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          { text: 'Réessayer', onPress: handleRegister },
+        ]
       );
     } finally {
       setIsSubmitting(false);
@@ -181,7 +192,7 @@ const SignupScreen: React.FC = () => {
               Rejoignez {appName}.
             </Text>
             <Text
-              className={`text-center text-sm font-medium ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
+              className={`text-center text-sm font-medium ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
               Créez votre compte citoyen
             </Text>
           </View>
@@ -228,13 +239,13 @@ const SignupScreen: React.FC = () => {
               ].map((input, index) => (
                 <View key={index} className='mb-4'>
                   <Text
-                    className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
+                    className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>
                     {input.label}
                   </Text>
                   <View
                     className={`flex-row items-center rounded-2xl border px-4 py-3 ${dark ? 'border-white/10 bg-black/50' : 'border-blue-50 bg-white'}`}>
                     <Ionicons
-                      name={input.icon as any}
+                      name={input.icon as IconName}
                       size={20}
                       color={dark ? '#9CA3AF' : '#64748B'}
                       className='mr-2'
@@ -243,9 +254,10 @@ const SignupScreen: React.FC = () => {
                       value={input.value}
                       onChangeText={input.setter}
                       placeholder={input.placeholder}
-                      keyboardType={input.keyboardType as any}
+                      keyboardType={input.keyboardType as KeyboardType}
                       secureTextEntry={input.secure}
                       autoCapitalize='none'
+                      autoCorrect={false}
                       placeholderTextColor={dark ? '#6B7280' : '#94A3B8'}
                       className={`ml-2 flex-1 px-0 text-base ${dark ? 'text-white' : 'text-slate-900'}`}
                     />
@@ -255,38 +267,62 @@ const SignupScreen: React.FC = () => {
 
               <View className='mt-2 mb-6'>
                 <Text
-                  className={`mb-3 ml-1 text-xs font-semibold ${dark ? 'text-gray-400' : 'text-slate-600'}`}>
+                  className={`mb-3 ml-1 text-xs font-semibold ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>
                   MA VILLE DE RÉSIDENCE
                 </Text>
-                <View className='flex-row flex-wrap gap-2'>
-                  {availableCities.map((city) => (
+                {citiesError ? (
+                  <View className='items-center py-3'>
+                    <Text className={`text-sm ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
+                      Impossible de charger les villes.
+                    </Text>
                     <TouchableOpacity
-                      key={city.id}
-                      onPress={() => setSelectedCity(city.id)}
-                      activeOpacity={0.7}
-                      style={{
-                        backgroundColor:
-                          selectedCity === city.id ? primaryColor : dark ? '#27272a' : '#f1f5f9',
-                        borderRadius: 16,
-                        paddingHorizontal: 16,
-                        paddingVertical: 10,
-                        borderWidth: 1,
-                        borderColor:
-                          selectedCity === city.id ? primaryColor : dark ? '#3f3f46' : '#e2e8f0',
-                      }}>
-                      <Text
-                        style={{
-                          color:
-                            selectedCity === city.id ? '#FFFFFF' : dark ? '#9CA3AF' : '#475569',
-                          fontWeight: 'bold',
-                          fontSize: 13,
-                        }}>
-                        {cityDisplayName(city)}
+                      onPress={async () => {
+                        try {
+                          const cities = await cityService.getAllCities();
+                          setAvailableCities(cities);
+                          if (cities.length > 0) setSelectedCity(cities[0].id);
+                          setCitiesError(false);
+                        } catch {
+                          setCitiesError(true);
+                        }
+                      }}
+                      className='mt-2'>
+                      <Text className='font-bold' style={{ color: primaryColor }}>
+                        Réessayer
                       </Text>
                     </TouchableOpacity>
-                  ))}
-                  <CityNotListedChip dark={dark} onPress={() => setShowConvinceModal(true)} />
-                </View>
+                  </View>
+                ) : (
+                  <View className='flex-row flex-wrap gap-2'>
+                    {availableCities.map((city) => (
+                      <TouchableOpacity
+                        key={city.id}
+                        onPress={() => setSelectedCity(city.id)}
+                        activeOpacity={0.7}
+                        style={{
+                          backgroundColor:
+                            selectedCity === city.id ? primaryColor : dark ? '#27272a' : '#f1f5f9',
+                          borderRadius: 16,
+                          paddingHorizontal: 16,
+                          paddingVertical: 10,
+                          borderWidth: 1,
+                          borderColor:
+                            selectedCity === city.id ? primaryColor : dark ? '#3f3f46' : '#e2e8f0',
+                        }}>
+                        <Text
+                          style={{
+                            color:
+                              selectedCity === city.id ? '#FFFFFF' : dark ? '#9CA3AF' : '#475569',
+                            fontWeight: 'bold',
+                            fontSize: 13,
+                          }}>
+                          {cityDisplayName(city)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                    <CityNotListedChip dark={dark} onPress={() => setShowConvinceModal(true)} />
+                  </View>
+                )}
               </View>
 
               <LegalConsentBlock
@@ -302,6 +338,8 @@ const SignupScreen: React.FC = () => {
                 onPress={handleRegister}
                 disabled={isSubmitting || !acceptedCgu || !acceptedPrivacy || !acceptedAge}
                 activeOpacity={0.8}
+                accessibilityRole='button'
+                accessibilityLabel='Créer mon compte'
                 className='mt-4 w-full flex-row items-center justify-center rounded-[20px] py-4 shadow-xl'
                 style={{
                   backgroundColor: primaryColor,
@@ -326,7 +364,9 @@ const SignupScreen: React.FC = () => {
 
         <TouchableOpacity
           onPress={() => router.push('/login')}
-          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}>
+          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}
+          accessibilityRole='button'
+          accessibilityLabel='Se connecter'>
           <Text className={`text-[15px] font-medium ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
             Vous avez déjà un compte ?{' '}
             <Text className='font-bold' style={{ color: primaryColor }}>

@@ -1,12 +1,7 @@
 import apiClient from './apiClient';
+import type { UserRating } from '../lib/types';
 
 export type FeedbackResourceType = 'report' | 'contact_ticket';
-
-export interface UserRating {
-  stars: number;
-  message?: string;
-  createdAt: string;
-}
 
 export const feedbackService = {
   submit: async (

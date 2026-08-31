@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,30 +7,31 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { useAuth } from '@context/authcontext';
 import { Ionicons } from '@expo/vector-icons';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { pickProofImage } from '../utils/pickProofImage';
-import apiClient from '../services/apiClient';
+import type { IconName, RouteHref, ThemeId } from '../lib/types';
 import { cityService } from '../services/cityService';
 import { isPartnerCity, partnerCityName } from '../lib/partnerCities';
 import { cityDisplayName } from '../lib/cityDisplay';
 import ConvinceMayorModal from '@components/ConvinceMayorModal';
 import CityNotListedChip from '@components/CityNotListedChip';
 import { openReferCityEmail } from '../lib/referCity';
-import { uploadUserAvatar } from '../services/userProfileService';
+import { uploadUserAvatar, getUserStats, updateUserCity } from '../services/userProfileService';
 import { isPersistentAvatarUrl } from '../utils/avatarImage';
 
 export default function Profile() {
   const { theme, dark, primaryColor, classes, colors, setTheme, layoutStyles } = useAppTheme();
   const { applyBrandingCity } = useCity();
-  const { user, logout, updateUser, isAuthenticated } = useAuth();
+  const { user, logout, updateUser, isAuthenticated, isLoading: authLoading } = useAuth();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
@@ -40,30 +41,86 @@ export default function Profile() {
   >([]);
   const [showConvinceModal, setShowConvinceModal] = useState(false);
   const [userStats, setUserStats] = useState({ reports: 0, participations: 0, points: 0 });
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
-  React.useEffect(() => {
-    const loadData = async () => {
-      try {
-        const statsResp = await apiClient.get('users/stats');
-        if (statsResp.data) setUserStats(statsResp.data);
+  const loadProfileData = useCallback(async (signal?: { cancelled: boolean }) => {
+    setProfileLoading(true);
+    setProfileError(null);
+    try {
+      const stats = await getUserStats();
+      if (!signal?.cancelled) setUserStats(stats);
 
-        const cities = await cityService.getAllCities();
-        setAvailableCities(cities);
-      } catch (err) {
-        console.error('Failed to load profile data', err);
-      }
-    };
-    loadData();
+      const cities = await cityService.getAllCities();
+      if (!signal?.cancelled) setAvailableCities(cities);
+    } catch {
+      if (!signal?.cancelled) setProfileError('Impossible de charger les données du profil.');
+    } finally {
+      if (!signal?.cancelled) setProfileLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    const signal = { cancelled: false };
+    loadProfileData(signal);
+    return () => {
+      signal.cancelled = true;
+    };
+  }, [loadProfileData]);
+
+  const [profileRefreshing, setProfileRefreshing] = useState(false);
+
+  const onProfileRefresh = useCallback(async () => {
+    setProfileRefreshing(true);
+    await loadProfileData();
+    setProfileRefreshing(false);
+  }, [loadProfileData]);
+
+  useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, authLoading, router]);
+
   if (!isAuthenticated || !user) {
-    router.replace('/login');
+    if (authLoading) {
+      return (
+        <View style={layoutStyles.page} className='items-center justify-center'>
+          <ActivityIndicator size='large' color={primaryColor} />
+        </View>
+      );
+    }
     return null;
+  }
+
+  if (profileLoading) {
+    return (
+      <View style={layoutStyles.page} className='items-center justify-center'>
+        <ActivityIndicator size='large' color={primaryColor} />
+      </View>
+    );
+  }
+
+  if (profileError) {
+    return (
+      <View style={layoutStyles.page} className='items-center justify-center'>
+        <Ionicons name='alert-circle-outline' size={48} color={dark ? '#3F3F46' : '#D4D4D8'} />
+        <Text
+          className={`mt-4 text-center font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+          {profileError}
+        </Text>
+        <TouchableOpacity onPress={() => loadProfileData()} className='mt-4'>
+          <Text style={{ color: primaryColor }} className='font-bold'>
+            Réessayer
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
   }
 
   const handleUpdateCity = async (cityId: string) => {
     try {
-      await apiClient.post('users/profile', { cityId });
+      await updateUserCity(cityId);
       updateUser({ ...user, cityId });
       await applyBrandingCity(cityId);
       setShowCityPicker(false);
@@ -128,7 +185,14 @@ export default function Profile() {
           paddingBottom: 120,
           paddingHorizontal: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={profileRefreshing}
+            onRefresh={onProfileRefresh}
+            tintColor={primaryColor}
+          />
+        }>
         {/* Apple Style Header */}
         <View className='mb-8'>
           <Text className={classes.eyebrow}>Compte</Text>
@@ -137,10 +201,20 @@ export default function Profile() {
 
         {/* Profile Card */}
         <View className={`mb-8 items-center p-6 ${classes.cardRoundedLg}`}>
-          <TouchableOpacity onPress={pickImage} disabled={isUploading} className='relative mb-4'>
+          <TouchableOpacity
+            onPress={pickImage}
+            disabled={isUploading}
+            className='relative mb-4'
+            accessibilityRole='button'
+            accessibilityLabel='Changer la photo de profil'>
             <View className='h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-800'>
               {displayAvatarUrl ? (
-                <Image source={{ uri: displayAvatarUrl }} className='h-full w-full' />
+                <Image
+                  source={{ uri: displayAvatarUrl }}
+                  className='h-full w-full'
+                  accessible={false}
+                  accessibilityElementsHidden
+                />
               ) : (
                 <View className='flex-1 items-center justify-center'>
                   <Ionicons name='person' size={40} color={dark ? '#3F3F46' : '#D4D4D8'} />
@@ -182,7 +256,7 @@ export default function Profile() {
             <View
               key={i}
               className={`flex-1 items-center rounded-[24px] p-4 ${dark ? 'bg-zinc-900' : 'bg-white'} mx-1 border border-zinc-100 shadow-sm dark:border-zinc-800`}>
-              <Ionicons name={stat.icon as any} size={20} color={stat.color} />
+              <Ionicons name={stat.icon as IconName} size={20} color={stat.color} />
               <Text className={`mt-1 text-lg font-black ${dark ? 'text-white' : 'text-black'}`}>
                 {stat.value}
               </Text>
@@ -200,7 +274,8 @@ export default function Profile() {
           className={`mb-8 overflow-hidden rounded-[24px] ${dark ? 'bg-zinc-900' : 'bg-white'} border border-zinc-100 p-5 shadow-sm dark:border-zinc-800`}>
           <View className='mb-4 flex-row items-center justify-between'>
             <View className='flex-row items-center'>
-              <View className='mr-3 h-10 w-10 items-center justify-center rounded-xl bg-green-50'>
+              <View
+                className={`mr-3 h-10 w-10 items-center justify-center rounded-xl ${dark ? 'bg-green-900/30' : 'bg-green-50'}`}>
                 <Ionicons name='business' size={20} color='#34C759' />
               </View>
               <View>
@@ -264,10 +339,10 @@ export default function Profile() {
           ].map((option) => (
             <TouchableOpacity
               key={option.id}
-              onPress={() => setTheme(option.id as any)}
+              onPress={() => setTheme(option.id as ThemeId)}
               className={`flex-1 flex-row items-center justify-center rounded-xl py-3 ${theme === option.id ? (dark ? 'bg-zinc-800' : 'bg-zinc-100') : ''}`}>
               <Ionicons
-                name={option.icon as any}
+                name={option.icon as IconName}
                 size={16}
                 color={theme === option.id ? primaryColor : dark ? '#71717A' : '#A1A1AA'}
               />
@@ -313,13 +388,13 @@ export default function Profile() {
           ].map((item, i, arr) => (
             <TouchableOpacity
               key={i}
-              onPress={() => router.push(item.route as any)}
+              onPress={() => router.push(item.route as RouteHref)}
               className={`flex-row items-center justify-between p-4 ${i !== arr.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
               <View className='flex-row items-center'>
                 <View
                   className='mr-3 h-8 w-8 items-center justify-center rounded-lg'
                   style={{ backgroundColor: `${item.color}15` }}>
-                  <Ionicons name={item.icon as any} size={18} color={item.color} />
+                  <Ionicons name={item.icon as IconName} size={18} color={item.color} />
                 </View>
                 <Text
                   className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
@@ -365,13 +440,13 @@ export default function Profile() {
           ].map((item, i, arr) => (
             <TouchableOpacity
               key={item.route}
-              onPress={() => router.push(item.route as any)}
+              onPress={() => router.push(item.route as RouteHref)}
               className={`flex-row items-center justify-between p-4 ${i !== arr.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
               <View className='flex-row items-center'>
                 <View
                   className='mr-3 h-8 w-8 items-center justify-center rounded-lg'
                   style={{ backgroundColor: `${item.color}15` }}>
-                  <Ionicons name={item.icon as any} size={18} color={item.color} />
+                  <Ionicons name={item.icon as IconName} size={18} color={item.color} />
                 </View>
                 <Text
                   className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
@@ -383,7 +458,11 @@ export default function Profile() {
           ))}
         </View>
 
-        <TouchableOpacity onPress={handleLogout} className='items-center py-4'>
+        <TouchableOpacity
+          onPress={handleLogout}
+          className='items-center py-4'
+          accessibilityRole='button'
+          accessibilityLabel='Se déconnecter'>
           <Text className='text-base font-bold text-red-500'>Se déconnecter</Text>
         </TouchableOpacity>
       </ScrollView>

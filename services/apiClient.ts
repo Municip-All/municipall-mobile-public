@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { Config } from '../constants/Config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
+import { emitSessionExpired } from './sessionEvents';
 
 let activeTenantId = Config.DEFAULT_TENANT_ID;
 
@@ -16,7 +18,6 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor to inject Auth token if available
 apiClient.interceptors.request.use(
   async (config) => {
     config.headers['x-tenant-id'] = activeTenantId;
@@ -25,12 +26,27 @@ apiClient.interceptors.request.use(
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-    } catch (e) {
+    } catch (e: unknown) {
       console.error('Error fetching token from storage', e);
     }
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error?.response?.status === 401) {
+      await AsyncStorage.removeItem('user_token');
+      await AsyncStorage.removeItem('user_data');
+      emitSessionExpired();
+      try {
+        router.replace('/login');
+      } catch {}
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default apiClient;

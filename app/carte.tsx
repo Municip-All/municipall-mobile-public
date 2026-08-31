@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CityMap, MapHeaderOverlay, type CityMapMethods } from '@components/map';
 import type { MapLayerItem } from '@components/map/MapHeaderOverlay';
-import BottomBar from '@components/bottombar';
+import BottomBar from '@components/BottomBar';
 import ReportSignalementSheet, {
   type ReportSignalementSheetRef,
 } from '@components/ReportSignalementSheet';
@@ -21,8 +21,8 @@ import type { TransportStopMarker } from '../services/transportService';
 export default function Carte() {
   const mapRef = useRef<CityMapMethods>(null);
   const reportSheetRef = useRef<ReportSignalementSheetRef>(null);
-  const { layoutStyles } = useAppTheme();
-  const { config } = useCity();
+  const { layoutStyles, primaryColor } = useAppTheme();
+  const { config, loading: cityLoading } = useCity();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -104,6 +104,14 @@ export default function Carte() {
     reportSheetRef.current?.open();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ouverture liée au deep link ?action=report
   }, [action, isAuthenticated]);
+
+  if (cityLoading) {
+    return (
+      <View style={layoutStyles.page} className='items-center justify-center'>
+        <ActivityIndicator size='large' color={primaryColor} />
+      </View>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
