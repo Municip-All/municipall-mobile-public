@@ -33,10 +33,11 @@ export function getSessionUserId(): string {
 }
 
 const chatbotClient = axios.create({
-  baseURL: Config.IA_BASE_URL,
+  baseURL: Config.API_BASE_URL,
   timeout: 20000,
   headers: {
     'Content-Type': 'application/json',
+    'X-Tenant-Id': Config.DEFAULT_TENANT_ID,
   },
 });
 
@@ -46,7 +47,7 @@ export const chatbotService = {
     if (!trimmed) {
       throw new Error('Message vide');
     }
-    const response = await chatbotClient.post<CitoyenChatResponse>('/reporting/chat/citoyen', {
+    const response = await chatbotClient.post<CitoyenChatResponse>('/ai/chat/citoyen', {
       user_id: getSessionUserId(),
       message: trimmed.slice(0, CITIZEN_CHAT_MAX_LENGTH),
     });
