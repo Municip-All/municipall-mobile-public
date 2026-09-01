@@ -2,10 +2,14 @@ import { TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
+import { useAuth } from '@context/authcontext';
 
 const ChatBotFloatingButton: React.FC<{ bottomOffset?: number }> = ({ bottomOffset = 120 }) => {
   const { primaryColor, colors } = useAppTheme();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
+
+  if (!isAuthenticated) return null;
 
   return (
     <TouchableOpacity
