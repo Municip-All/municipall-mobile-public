@@ -18,6 +18,7 @@ import { useAuth } from '@context/authcontext';
 import { reportService, ReportDetail } from '../services/reportService';
 import { useLiveChatRefresh } from '@hooks/useLiveChatRefresh';
 import { chatBubbleStyles as styles } from '../lib/chatBubbleStyles';
+import { palette } from '@constants/design';
 import SatisfactionPrompt from '@components/SatisfactionPrompt';
 
 export default function ReportChatScreen() {
@@ -124,22 +125,26 @@ export default function ReportChatScreen() {
     <View style={layoutStyles.page}>
       <View
         style={{ paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: 12 }}
-        className={`border-b ${dark ? 'border-zinc-800' : 'border-zinc-200'}`}>
+        className={`border-b ${dark ? 'border-night-border' : 'border-cream-200'}`}>
         <View className='flex-row items-center'>
           <TouchableOpacity
             onPress={() => router.back()}
             className='mr-3 p-2'
             accessibilityRole='button'
             accessibilityLabel='Retour'>
-            <Ionicons name='chevron-back' size={24} color={dark ? '#FFF' : '#000'} />
+            <Ionicons
+              name='chevron-back'
+              size={24}
+              color={dark ? palette.nightText : palette.matcha900}
+            />
           </TouchableOpacity>
           <View className='flex-1'>
             <Text
               numberOfLines={1}
-              className={`text-base font-bold ${dark ? 'text-white' : 'text-black'}`}>
+              className={`text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
               {report.category}
             </Text>
-            <Text className={`text-xs ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+            <Text className={`text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
               REF-{String(report.id).padStart(4, '0')} · {report.status}
               {isClosed ? ' · Dossier clôturé' : ''}
             </Text>
@@ -149,14 +154,12 @@ export default function ReportChatScreen() {
 
       {report.description ? (
         <View
-          className={`border-b px-4 py-3 ${dark ? 'border-zinc-800 bg-zinc-900/50' : 'border-zinc-100 bg-zinc-50'}`}>
+          className={`border-b px-4 py-3 ${dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-100'}`}>
           <Text
-            className={`text-xs font-bold tracking-wide uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+            className={`text-xs font-bold tracking-wide uppercase ${dark ? 'text-night-muted' : 'text-muted'}`}>
             Votre signalement
           </Text>
-          <Text className={`mt-1 text-sm leading-5 ${dark ? 'text-zinc-300' : 'text-zinc-700'}`}>
-            {report.description}
-          </Text>
+          <Text className={`mt-1 ${classes.body}`}>{report.description}</Text>
         </View>
       ) : null}
 
@@ -222,7 +225,7 @@ export default function ReportChatScreen() {
         {!isClosed ? (
           <View
             style={{ paddingBottom: insets.bottom + 8, paddingHorizontal: 16, paddingTop: 8 }}
-            className={`border-t ${dark ? 'border-zinc-800 bg-black' : 'border-zinc-200 bg-white'}`}>
+            className={`border-t ${dark ? 'border-night-border bg-night-bg' : 'border-cream-200 bg-cream-50'}`}>
             <View className='flex-row items-end gap-2'>
               <TextInput
                 value={reply}
@@ -230,7 +233,7 @@ export default function ReportChatScreen() {
                 placeholder='Votre réponse…'
                 placeholderTextColor={colors.placeholder}
                 multiline
-                className={`max-h-28 flex-1 rounded-2xl px-4 py-3 text-base ${classes.formField} ${classes.formFieldText}`}
+                className={`max-h-28 flex-1 px-4 py-3 ${classes.formField} ${classes.formFieldText}`}
               />
               <TouchableOpacity
                 onPress={handleSend}
@@ -243,9 +246,9 @@ export default function ReportChatScreen() {
                 }}
                 className='h-11 w-11 items-center justify-center rounded-full'>
                 {sending ? (
-                  <ActivityIndicator color='white' size='small' />
+                  <ActivityIndicator color={colors.onPrimary} size='small' />
                 ) : (
-                  <Ionicons name='send' size={18} color='#FFF' />
+                  <Ionicons name='send' size={18} color={colors.onPrimary} />
                 )}
               </TouchableOpacity>
             </View>
@@ -263,7 +266,7 @@ export default function ReportChatScreen() {
             />
             <View
               style={{ paddingBottom: insets.bottom + 8 }}
-              className={`px-4 pb-2 ${dark ? 'bg-black' : 'bg-white'}`}>
+              className={`px-4 pb-2 ${dark ? 'bg-night-bg' : 'bg-cream-50'}`}>
               <Text className={`text-center text-xs ${classes.body}`}>
                 Ce signalement est clôturé. Vous ne pouvez plus envoyer de messages.
               </Text>

@@ -9,13 +9,9 @@ type BrandedLogoProps = {
   iconColor?: string;
   style?: StyleProp<ViewStyle>;
   imageStyle?: StyleProp<ImageStyle>;
-  /** cover = avatar rond ; contain = logo municipal (recommandé) */
   mode?: 'cover' | 'contain';
 };
 
-/**
- * Logo communal avec repli gracieux — object-contain pour préserver les blasons.
- */
 export default function BrandedLogo({
   size = 48,
   radius = 16,

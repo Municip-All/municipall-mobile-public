@@ -45,7 +45,7 @@ const LoginScreen: React.FC = () => {
     setIsSubmitting(true);
     try {
       const { access_token, user } = await authService.login(email, password);
-      await login(access_token, user); // Update context state and persist
+      await login(access_token, user);
 
       if (redirectTo && typeof redirectTo === 'string') {
         router.replace(redirectTo);
@@ -71,14 +71,13 @@ const LoginScreen: React.FC = () => {
           dark
             ? colors.semantic.surfaceAuth.dark
             : useGradient
-              ? '#E0E7FF'
+              ? colors.palette.matcha100
               : colors.semantic.surfaceAuth.light,
           dark ? colors.card : colors.semantic.surfaceAuth.light,
         ]}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
 
-      {/* Decorative Brand Circles representing White Label custom color */}
       {useGradient && (
         <>
           <View
@@ -120,34 +119,26 @@ const LoginScreen: React.FC = () => {
             iconColor={brand.onPrimary}
             style={{
               marginBottom: 24,
-              shadowColor: primaryColor,
-              shadowOffset: { width: 0, height: 10 },
-              shadowOpacity: 0.3,
-              shadowRadius: 20,
-              elevation: 8,
+              ...colors.softShadow,
             }}
           />
-          <Text
-            className={`mb-2 text-4xl font-extrabold tracking-tight ${dark ? 'text-white' : 'text-slate-900'}`}>
-            Bienvenue.
-          </Text>
+          <Text className={`mb-2 ${classes.title}`}>Bienvenue.</Text>
           <Text className={classes.subtitle}>Connectez-vous à {appName}</Text>
         </View>
 
         <View className='w-full items-center'>
-          {/* Glassmorphic Container for the form */}
           <BlurView
             intensity={dark ? 20 : 60}
             tint={dark ? 'dark' : 'light'}
-            className='w-full overflow-hidden rounded-[32px] border border-white/20 p-6 dark:border-white/10'>
-            <View className='pointer-events-none absolute inset-0 bg-white/40 dark:bg-black/20' />
+            className='border-cream-200 dark:border-night-border w-full overflow-hidden rounded-[20px] border p-6'>
+            <View className='bg-cream-50/40 dark:bg-night-bg/20 pointer-events-none absolute inset-0' />
 
             <View className='mb-4'>
               <Text
-                className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`}>
                 IDENTIFIANT / EMAIL
               </Text>
-              <View className={`flex-row items-center rounded-2xl px-4 py-3 ${classes.input}`}>
+              <View className={`flex-row items-center px-4 py-3 ${classes.input}`}>
                 <Ionicons name='mail-outline' size={20} color={colors.iconMuted} className='mr-2' />
                 <TextInput
                   value={email}
@@ -156,18 +147,18 @@ const LoginScreen: React.FC = () => {
                   keyboardType='email-address'
                   autoCapitalize='none'
                   autoCorrect={false}
-                  placeholderTextColor={dark ? '#6B7280' : '#94A3B8'}
-                  className={`ml-2 flex-1 text-base ${dark ? 'text-white' : 'text-slate-900'}`}
+                  placeholderTextColor={colors.placeholder}
+                  className={`ml-2 flex-1 text-base ${dark ? 'text-night-text' : 'text-matcha-900'}`}
                 />
               </View>
             </View>
 
             <View className='mb-4'>
               <Text
-                className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`}>
                 MOT DE PASSE
               </Text>
-              <View className={`flex-row items-center rounded-2xl px-4 py-3 ${classes.input}`}>
+              <View className={`flex-row items-center px-4 py-3 ${classes.input}`}>
                 <Ionicons
                   name='lock-closed-outline'
                   size={20}
@@ -181,8 +172,8 @@ const LoginScreen: React.FC = () => {
                   secureTextEntry
                   autoCapitalize='none'
                   autoCorrect={false}
-                  placeholderTextColor={dark ? '#6B7280' : '#94A3B8'}
-                  className={`ml-2 flex-1 px-0 text-base ${dark ? 'text-white' : 'text-slate-900'}`}
+                  placeholderTextColor={colors.placeholder}
+                  className={`ml-2 flex-1 px-0 text-base ${dark ? 'text-night-text' : 'text-matcha-900'}`}
                 />
               </View>
             </View>
@@ -207,13 +198,10 @@ const LoginScreen: React.FC = () => {
               activeOpacity={0.8}
               accessibilityRole='button'
               accessibilityLabel='Se connecter'
-              className='w-full flex-row items-center justify-center rounded-[20px] py-4 shadow-xl'
+              className='shadow-soft w-full flex-row items-center justify-center rounded-xl py-4'
               style={{
                 backgroundColor: primaryColor,
-                shadowColor: primaryColor,
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.3,
-                shadowRadius: 15,
+                ...colors.softShadow,
               }}>
               {isSubmitting ? (
                 <ActivityIndicator color={brand.onPrimary} />
@@ -232,10 +220,10 @@ const LoginScreen: React.FC = () => {
 
         <TouchableOpacity
           onPress={() => router.push('/signup')}
-          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}
+          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-night-bg/80' : 'bg-cream-50/80'}`}
           accessibilityRole='button'
           accessibilityLabel='Créer un compte'>
-          <Text className={`text-[15px] font-medium ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+          <Text className={`text-[15px] font-medium ${dark ? 'text-night-muted' : 'text-muted'}`}>
             Nouveau citoyen ?{' '}
             <Text className='font-bold' style={{ color: primaryColor }}>
               Créer un compte

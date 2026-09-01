@@ -4,6 +4,7 @@ import { BlurView } from 'expo-blur';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '@hooks/useAppTheme';
+import { palette } from '@constants/design';
 
 export type MapLayerItem = {
   id: string;
@@ -51,8 +52,8 @@ function IconButton({
           backgroundColor: active
             ? `${primaryColor}22`
             : dark
-              ? 'rgba(63,63,70,0.55)'
-              : 'rgba(255,255,255,0.55)',
+              ? 'rgba(42,52,38,0.55)'
+              : 'rgba(253,252,249,0.55)',
           borderColor: active ? primaryColor : 'transparent',
           borderWidth: active ? 1 : 0,
         },
@@ -73,8 +74,8 @@ export default function MapHeaderOverlay({
   onCenterLocation,
 }: Props) {
   const insets = useSafeAreaInsets();
-  const { dark, primaryColor } = useAppTheme();
-  const iconColor = dark ? '#E4E4E7' : '#3F3F46';
+  const { dark, primaryColor, colors } = useAppTheme();
+  const iconColor = dark ? palette.nightText : palette.charcoal;
 
   return (
     <View pointerEvents='box-none' style={[styles.wrapper, { paddingTop: insets.top + 6 }]}>
@@ -84,13 +85,13 @@ export default function MapHeaderOverlay({
         style={[
           styles.panel,
           {
-            borderColor: dark ? 'rgba(63,63,70,0.4)' : 'rgba(255,255,255,0.45)',
+            borderColor: dark ? 'rgba(57,68,47,0.4)' : 'rgba(253,252,249,0.45)',
           },
         ]}>
         <View style={styles.bar}>
           <Text
             numberOfLines={1}
-            className={`flex-1 text-sm font-bold ${dark ? 'text-white' : 'text-zinc-900'}`}
+            className={`flex-1 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}
             style={styles.title}>
             {cityName}
           </Text>
@@ -128,7 +129,11 @@ export default function MapHeaderOverlay({
         </View>
 
         {layersOpen ? (
-          <View style={styles.expanded}>
+          <View
+            style={[
+              styles.expanded,
+              { borderTopColor: dark ? palette.nightBorder : palette.cream200 },
+            ]}>
             <View style={styles.layerRow}>
               {mapLayers.map((layer) => (
                 <TouchableOpacity
@@ -142,8 +147,8 @@ export default function MapHeaderOverlay({
                       backgroundColor: layer.active
                         ? `${primaryColor}18`
                         : dark
-                          ? 'rgba(39,39,42,0.5)'
-                          : 'rgba(255,255,255,0.45)',
+                          ? 'rgba(42,52,38,0.5)'
+                          : 'rgba(253,252,249,0.45)',
                       borderColor: layer.active ? primaryColor : 'transparent',
                     },
                   ]}>
@@ -154,11 +159,11 @@ export default function MapHeaderOverlay({
                         : (`${layer.icon}-outline` as ComponentProps<typeof Ionicons>['name'])
                     }
                     size={15}
-                    color={layer.active ? primaryColor : dark ? '#A1A1AA' : '#71717A'}
+                    color={layer.active ? primaryColor : colors.iconMuted}
                   />
                   <Text
                     numberOfLines={1}
-                    className={`ml-1.5 text-[10px] font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-700'}`}>
+                    className={`ml-1.5 text-[10px] font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
                     {layer.label}
                   </Text>
                 </TouchableOpacity>
@@ -170,7 +175,7 @@ export default function MapHeaderOverlay({
                   <View style={[styles.legendDot, { backgroundColor: item.color }]} />
                   <Text
                     numberOfLines={1}
-                    className={`text-[9px] font-medium ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                    className={`text-[9px] font-medium ${dark ? 'text-night-muted' : 'text-muted'}`}>
                     {item.label}
                   </Text>
                 </View>
@@ -225,7 +230,6 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     gap: 8,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(128,128,128,0.2)',
   },
   layerRow: {
     flexDirection: 'row',

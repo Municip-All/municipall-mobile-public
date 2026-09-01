@@ -4,6 +4,7 @@ import { useTheme } from '@context/themecontext';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@context/authcontext';
 import { useAppTheme } from '@hooks/useAppTheme';
+import { palette } from '@constants/design';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -23,7 +24,6 @@ const BottomBar: React.FC = () => {
   const tabHeight = 64;
   const totalHeight = tabHeight + insets.bottom;
 
-  // Icons and labels based on the user's provided image
   const tabs = [
     { id: 'home', label: 'Accueil', icon: 'home', path: '/home' },
     { id: 'events', label: 'Évènement', icon: 'calendar', path: '/events' },
@@ -32,7 +32,7 @@ const BottomBar: React.FC = () => {
     { id: 'profile', label: 'Profile', icon: 'person', path: '/profile' },
   ];
 
-  const inactiveColor = dark ? '#A1A1AA' : '#52525B';
+  const inactiveColor = dark ? palette.nightMuted : palette.muted;
 
   const getIconColor = (path: string) => {
     if (pathname === path) return primaryColor;
@@ -46,13 +46,10 @@ const BottomBar: React.FC = () => {
 
   const fabBorderColor = colors.fabBorder;
 
-  // SVG Path calculation for the curved tab bar
   const center = SCREEN_WIDTH / 2;
   const cutoutRadius = 42;
   const cornerRadius = 12;
 
-  // Path description:
-  // Starts top-left, goes to center cutout, creates smooth curve, goes to top-right, down and back to start.
   const d = `
     M 0 0
     L ${center - cutoutRadius - cornerRadius} 0
@@ -83,14 +80,11 @@ const BottomBar: React.FC = () => {
         />
       ) : (
         <View
-          style={[
-            StyleSheet.absoluteFill,
-            { backgroundColor: dark ? '#18181B' : '#FFFFFF', opacity: 0.95 },
-          ]}
+          style={[StyleSheet.absoluteFill, { backgroundColor: colors.tabBar, opacity: 0.95 }]}
         />
       )}
       <Svg width={SCREEN_WIDTH} height={totalHeight} style={{ position: 'absolute', top: 0 }}>
-        <Path d={d} fill={dark ? '#18181B' : '#FFFFFF'} />
+        <Path d={d} fill={colors.tabBar} />
       </Svg>
     </View>
   );
@@ -123,7 +117,6 @@ const BottomBar: React.FC = () => {
         })}
       </View>
 
-      {/* Floating Center Button */}
       <View style={styles.centerButtonContainer} pointerEvents='box-none'>
         <Pressable
           onPress={() => {
@@ -132,14 +125,14 @@ const BottomBar: React.FC = () => {
           }}
           style={[
             styles.centerButton,
-            styles.centerButtonShadow,
+            colors.softShadow,
             { backgroundColor: primaryColor, borderColor: fabBorderColor },
           ]}
           accessibilityRole='button'
           accessibilityLabel='Signaler'>
           <Ionicons name='paper-plane' size={24} color={brand.onPrimary} />
         </Pressable>
-        <Text style={[styles.centerLabel, { color: dark ? '#FFFFFF' : primaryColor }]}>
+        <Text style={[styles.centerLabel, { color: dark ? palette.nightText : primaryColor }]}>
           Signaler
         </Text>
       </View>
@@ -176,7 +169,7 @@ const styles = StyleSheet.create({
   },
   centerButtonContainer: {
     position: 'absolute',
-    top: -15, // Lift it up
+    top: -15,
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -188,14 +181,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 4,
-    borderColor: '#F4F4F5',
-  },
-  centerButtonShadow: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
   },
   centerLabel: {
     fontSize: 11,

@@ -33,7 +33,7 @@ export default function LegalConsentBlock({
         color={checked ? primaryColor : undefined}
         style={{ marginTop: 2, marginRight: 10 }}
       />
-      <Text className={`flex-1 text-xs leading-5 ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
+      <Text className={`flex-1 text-xs leading-5 ${dark ? 'text-night-text' : 'text-charcoal'}`}>
         {label}
       </Text>
     </View>
@@ -50,7 +50,7 @@ export default function LegalConsentBlock({
 
   return (
     <View
-      className={`mt-2 rounded-2xl border p-4 ${dark ? 'border-zinc-700 bg-zinc-900/50' : 'border-zinc-200 bg-white/80'}`}>
+      className={`mt-2 rounded-2xl border p-4 ${dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'}`}>
       <Text className={`mb-3 text-xs font-bold tracking-wide uppercase ${classes.meta}`}>
         Consentements obligatoires
       </Text>
@@ -76,7 +76,7 @@ export default function LegalConsentBlock({
         </>
       )}
       <TouchableOpacity onPress={() => router.push('/legal')} className='mt-1'>
-        <Text className={`text-xs ${dark ? 'text-zinc-500' : 'text-zinc-500'}`}>
+        <Text className={`text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
           Voir tous les documents légaux →
         </Text>
       </TouchableOpacity>

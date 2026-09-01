@@ -11,19 +11,16 @@ const ONBOARDING_KEY = 'onboarding_completed_v1';
 const steps = [
   {
     icon: 'leaf-outline' as const,
-    color: '#22c55e',
     title: "Bienvenue sur Municip'All",
     desc: 'Découvrez les composteurs, sanisettes et suivez vos signalements facilement.',
   },
   {
     icon: 'map-outline' as const,
-    color: '#0284c7',
     title: 'Carte et signalements',
     desc: 'Localisez les points utiles et signalez un problème en quelques secondes.',
   },
   {
     icon: 'chatbubble-ellipses-outline' as const,
-    color: '#8b5cf6',
     title: 'Contact & suivi',
     desc: 'Envoyez des suggestions à la mairie et suivez leur traitement.',
   },
@@ -31,10 +28,11 @@ const steps = [
 
 export default function Onboarding() {
   const router = useRouter();
-  const { dark, primaryColor, classes, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, tintColor, layoutStyles } = useAppTheme();
   const [index, setIndex] = useState(0);
   const [completing, setCompleting] = useState(false);
   const total = steps.length;
+  const stepColors = [colors.success, colors.info, colors.primary];
 
   const nextLabel = useMemo(
     () => (index < total - 1 ? 'Suivant' : "C'est parti !"),
@@ -67,12 +65,10 @@ export default function Onboarding() {
       <View className='items-center'>
         <View
           className='mb-5 h-16 w-16 items-center justify-center rounded-full'
-          style={{ backgroundColor: `${steps[index].color}20` }}>
-          <Ionicons name={steps[index].icon} size={28} color={steps[index].color} />
+          style={{ backgroundColor: tintColor(stepColors[index], '20') }}>
+          <Ionicons name={steps[index].icon} size={28} color={stepColors[index]} />
         </View>
-        <Text className={`text-center text-2xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
-          {steps[index].title}
-        </Text>
+        <Text className={`text-center ${classes.sectionTitle}`}>{steps[index].title}</Text>
         <Text className={`mt-3 text-center text-sm leading-6 ${classes.body}`}>
           {steps[index].desc}
         </Text>
@@ -83,14 +79,14 @@ export default function Onboarding() {
           {steps.map((_, i) => (
             <View
               key={i}
-              className={`mx-1 h-2 w-8 rounded-full ${dark ? 'bg-zinc-700' : 'bg-slate-200'}`}
+              className={`mx-1 h-2 w-8 rounded-full ${dark ? 'bg-night-border' : 'bg-cream-200'}`}
               style={i === index ? { backgroundColor: primaryColor, width: 32 } : {}}
             />
           ))}
         </View>
         <View className='w-full flex-row items-center justify-between'>
           <TouchableOpacity onPress={onSkip} accessibilityRole='button' accessibilityLabel='Passer'>
-            <Text className={`text-sm ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>Passer</Text>
+            <Text className={`text-sm ${dark ? 'text-night-muted' : 'text-muted'}`}>Passer</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={onNext}
@@ -100,9 +96,11 @@ export default function Onboarding() {
             accessibilityRole='button'
             accessibilityLabel={nextLabel}>
             {completing ? (
-              <ActivityIndicator color='#fff' />
+              <ActivityIndicator color={colors.onPrimary} />
             ) : (
-              <Text className='font-semibold text-white'>{nextLabel}</Text>
+              <Text className='font-semibold' style={{ color: colors.onPrimary }}>
+                {nextLabel}
+              </Text>
             )}
           </TouchableOpacity>
         </View>

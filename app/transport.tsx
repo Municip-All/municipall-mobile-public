@@ -55,16 +55,14 @@ function modeLabel(mode: TransportMode): string {
   }
 }
 
-function LineCard({ line, dark }: { line: TransportLineDisruption; dark: boolean }) {
+function LineCard({ line }: { line: TransportLineDisruption }) {
+  const { dark, classes, colors } = useAppTheme();
   const disrupted = line.status === 'disrupted';
-  const statusColor = disrupted ? '#FF9500' : '#34C759';
+  const statusColor = disrupted ? colors.warning : colors.success;
   const statusLabel = disrupted ? 'Perturbation' : 'Trafic normal';
 
   return (
-    <View
-      className={`mb-4 overflow-hidden rounded-[28px] border shadow-sm ${
-        dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
-      }`}>
+    <View className={`shadow-soft mb-4 ${classes.cardRounded}`}>
       <View className='flex-row items-start p-5'>
         <View
           className='mr-4 h-12 w-12 items-center justify-center rounded-2xl'
@@ -73,7 +71,10 @@ function LineCard({ line, dark }: { line: TransportLineDisruption; dark: boolean
         </View>
         <View className='flex-1'>
           <View className='flex-row items-center justify-between gap-2'>
-            <Text className={`flex-1 text-base font-bold ${dark ? 'text-white' : 'text-zinc-900'}`}>
+            <Text
+              className={`flex-1 text-base font-bold ${
+                dark ? 'text-night-text' : 'text-matcha-900'
+              }`}>
               {line.lineName}
             </Text>
             <View
@@ -85,7 +86,7 @@ function LineCard({ line, dark }: { line: TransportLineDisruption; dark: boolean
             </View>
           </View>
           <Text
-            className={`mt-1 text-xs font-semibold ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+            className={`mt-1 text-xs font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`}>
             {modeLabel(line.mode)}
           </Text>
           {line.messages.length > 0 ? (
@@ -93,13 +94,13 @@ function LineCard({ line, dark }: { line: TransportLineDisruption; dark: boolean
               {line.messages.map((msg, i) => (
                 <Text
                   key={`${line.lineId}-${i}`}
-                  className={`text-sm leading-5 ${dark ? 'text-zinc-200' : 'text-zinc-700'}`}>
+                  className={`text-sm leading-5 ${dark ? 'text-night-text' : 'text-charcoal'}`}>
                   {msg}
                 </Text>
               ))}
             </View>
           ) : (
-            <Text className={`mt-3 text-sm ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+            <Text className={`mt-3 ${classes.subtitle}`}>
               Circulation normale sur cette ligne à proximité.
             </Text>
           )}
@@ -112,7 +113,7 @@ function LineCard({ line, dark }: { line: TransportLineDisruption; dark: boolean
 export default function TransportScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { dark, primaryColor, classes, layoutStyles } = useAppTheme();
+  const { primaryColor, classes, layoutStyles } = useAppTheme();
   const { config, tenantId } = useCity();
 
   const transportEnabled =
@@ -240,7 +241,7 @@ export default function TransportScreen() {
         ) : (
           <View className='mt-6'>
             {lines.map((line) => (
-              <LineCard key={line.lineId} line={line} dark={dark} />
+              <LineCard key={line.lineId} line={line} />
             ))}
           </View>
         )}

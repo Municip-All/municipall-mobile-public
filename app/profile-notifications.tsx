@@ -36,7 +36,7 @@ const OPTIONS: { key: keyof NotificationPreferences; label: string; description:
 ];
 
 export default function ProfileNotificationsScreen() {
-  const { dark, classes, primaryColor, layoutStyles } = useAppTheme();
+  const { dark, classes, primaryColor, colors, layoutStyles } = useAppTheme();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -97,9 +97,13 @@ export default function ProfileNotificationsScreen() {
             setLoading(true);
             load();
           }}
+          accessibilityRole='button'
+          accessibilityLabel='Réessayer'
           className='mt-4 rounded-xl px-6 py-3'
           style={{ backgroundColor: primaryColor }}>
-          <Text className='font-bold text-white'>Réessayer</Text>
+          <Text className='font-bold' style={{ color: colors.onPrimary }}>
+            Réessayer
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -123,24 +127,27 @@ export default function ProfileNotificationsScreen() {
             ? 'Les alertes push sont actives sur cet appareil. Choisissez les types de messages que vous souhaitez recevoir.'
             : 'Les préférences ci-dessous seront appliquées lorsque les notifications push seront disponibles sur cet appareil (build de production).'}
         </Text>
-        <View className={`overflow-hidden rounded-[24px] ${classes.listGroup}`}>
+        <View className={classes.listGroup}>
           {OPTIONS.map((option, index) => (
             <View
               key={option.key}
-              className={`flex-row items-center justify-between p-4 ${index < OPTIONS.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
+              className={`flex-row items-center justify-between p-4 ${index < OPTIONS.length - 1 ? `border-b ${dark ? 'border-night-border' : 'border-cream-200'}` : ''}`}>
               <View className='mr-4 flex-1'>
                 <Text
-                  className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                  className={`text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
                   {option.label}
                 </Text>
-                <Text className={`mt-1 text-xs ${dark ? 'text-zinc-500' : 'text-zinc-500'}`}>
+                <Text className={`mt-1 text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
                   {option.description}
                 </Text>
               </View>
               <Switch
                 value={prefs[option.key]}
                 onValueChange={(v) => toggle(option.key, v)}
-                trackColor={{ false: '#3F3F46', true: primaryColor }}
+                trackColor={{
+                  false: dark ? colors.palette.nightBorder : colors.palette.cream200,
+                  true: primaryColor,
+                }}
                 accessibilityLabel={`${option.label}: ${prefs[option.key] ? 'activé' : 'désactivé'}`}
               />
             </View>

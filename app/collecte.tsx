@@ -18,7 +18,7 @@ import { getNextCollection, formatCollectionDay } from '../utils/wasteSchedule';
 import type { IconName } from '../lib/types';
 
 export default function Collecte() {
-  const { dark, primaryColor, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
   const { config, refreshConfig, loading, fetchWeather } = useCity();
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
@@ -37,8 +37,20 @@ export default function Collecte() {
   }, [refreshConfig, fetchWeather]);
 
   const schedule = config?.wasteConfig?.services || [
-    { type: 'Ordures ménagères', days: [1, 4], time: '19:00', icon: 'trash', color: '#8E8E93' },
-    { type: 'Emballages & Papiers', days: [3], time: '08:30', icon: 'refresh', color: '#FFD60A' },
+    {
+      type: 'Ordures ménagères',
+      days: [1, 4],
+      time: '19:00',
+      icon: 'trash',
+      color: colors.iconMuted,
+    },
+    {
+      type: 'Emballages & Papiers',
+      days: [3],
+      time: '08:30',
+      icon: 'refresh',
+      color: colors.points,
+    },
   ];
 
   const next = getNextCollection(schedule);
@@ -72,7 +84,7 @@ export default function Collecte() {
   if (error) {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
-        <Text className={`text-center text-base ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
+        <Text className={`text-center text-base ${dark ? 'text-night-text' : 'text-charcoal'}`}>
           {error}
         </Text>
         <TouchableOpacity
@@ -82,7 +94,9 @@ export default function Collecte() {
           }}
           className='mt-4 rounded-xl px-6 py-3'
           style={{ backgroundColor: primaryColor }}>
-          <Text className='font-bold text-white'>Réessayer</Text>
+          <Text className='font-bold' style={{ color: colors.onPrimary }}>
+            Réessayer
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -100,29 +114,21 @@ export default function Collecte() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
         }>
-        {/* Apple Style Header */}
         <View className='mb-8'>
-          <Text
-            className={`text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-            Services
-          </Text>
-          <Text
-            className={`text-4xl font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
-            Collecte
-          </Text>
+          <Text className={classes.eyebrow}>Services</Text>
+          <Text className={classes.title}>Collecte</Text>
         </View>
 
-        {/* Next Collection Card */}
-        <View className='mb-8 rounded-[28px] shadow-sm'>
+        <View className='shadow-soft mb-8 rounded-[20px]'>
           <BlurView
             intensity={dark ? 40 : 80}
             tint={dark ? 'dark' : 'light'}
-            className='overflow-hidden rounded-[28px] border border-white/20 dark:border-zinc-800/50'>
+            className={`overflow-hidden rounded-[20px] border ${
+              dark ? 'border-night-border' : 'border-cream-200'
+            }`}>
             <View className='p-6'>
-              <Text className={`text-sm font-semibold ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                Prochaine collecte
-              </Text>
-              <Text className={`mt-1 text-2xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
+              <Text className={classes.subtitle}>Prochaine collecte</Text>
+              <Text className={`mt-1 ${classes.sectionTitle}`}>
                 {next
                   ? `${formatNextDate(next.date)}, ${next.date.getHours()}h${next.date.getMinutes().toString().padStart(2, '0')}`
                   : 'Aucune collecte prévue'}
@@ -145,27 +151,28 @@ export default function Collecte() {
           </BlurView>
         </View>
 
-        {/* Schedule List */}
-        <Text className={`mb-4 text-2xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
-          Calendrier
-        </Text>
-        <View
-          className={`overflow-hidden rounded-[28px] ${dark ? 'bg-zinc-900' : 'bg-white'} border border-zinc-100 shadow-sm dark:border-zinc-800`}>
+        <Text className={`mb-4 ${classes.sectionTitle}`}>Calendrier</Text>
+        <View className={`shadow-soft ${classes.listGroup}`}>
           {schedule.map((item, i) => (
             <View
               key={i}
               accessibilityLabel={`${item.type}, ${formatDays(item.days)} à ${item.time}`}
-              className={`flex-row items-center p-5 ${i !== schedule.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
+              className={`flex-row items-center p-5 ${
+                i !== schedule.length - 1
+                  ? `border-b ${dark ? 'border-night-border' : 'border-cream-200'}`
+                  : ''
+              }`}>
               <View
                 className='mr-4 h-12 w-12 items-center justify-center rounded-2xl'
                 style={{ backgroundColor: `${item.color}15` }}>
                 <Ionicons name={item.icon as IconName} size={24} color={item.color} />
               </View>
               <View className='flex-1'>
-                <Text className={`text-base font-bold ${dark ? 'text-white' : 'text-black'}`}>
+                <Text
+                  className={`text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
                   {item.type}
                 </Text>
-                <Text className={`mt-0.5 text-sm ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                <Text className={`mt-0.5 ${classes.subtitle}`}>
                   {formatDays(item.days)} • {item.time}
                 </Text>
               </View>
@@ -173,16 +180,18 @@ export default function Collecte() {
           ))}
         </View>
 
-        {/* Info Box */}
         <View
-          className={`mt-8 rounded-[28px] p-6 ${dark ? 'bg-zinc-900/50' : 'bg-zinc-100'} border border-transparent`}>
+          className={`mt-8 rounded-[20px] border border-transparent p-6 ${
+            dark ? 'bg-night-elevated' : 'bg-cream-100'
+          }`}>
           <View className='mb-2 flex-row items-center'>
             <Ionicons name='information-circle' size={20} color={primaryColor} />
-            <Text className={`ml-2 text-sm font-bold ${dark ? 'text-white' : 'text-black'}`}>
+            <Text
+              className={`ml-2 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
               Consignes de tri
             </Text>
           </View>
-          <Text className={`text-xs leading-5 ${dark ? 'text-zinc-500' : 'text-zinc-600'}`}>
+          <Text className={`text-xs leading-5 ${dark ? 'text-night-muted' : 'text-muted'}`}>
             Pensez à sortir vos bacs la veille au soir. Les couvercles doivent être fermés. Pour les
             encombrants, merci de les déposer sur le trottoir sans gêner le passage.
           </Text>

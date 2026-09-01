@@ -1,5 +1,6 @@
 import MapPinMarker from '@components/MapPinMarker';
 import { Circle } from 'react-native-maps';
+import { palette, tintColor } from '@constants/design';
 import { TRANSPORT_SEARCH_RADIUS_M } from '../../services/transportService';
 import type { CompostMarker, ToiletMarker } from '../../lib/map/types';
 import type { ReportLocationGroup } from '../../lib/groupReportsByLocation';
@@ -55,10 +56,14 @@ export default function MapMarkerLayer({
           }}
           radius={TRANSPORT_SEARCH_RADIUS_M}
           strokeColor={
-            transportZoneHasDisruption ? 'rgba(255, 149, 0, 0.85)' : 'rgba(0, 122, 255, 0.75)'
+            transportZoneHasDisruption
+              ? tintColor(palette.amber400, 'D9')
+              : tintColor(palette.info400, 'BF')
           }
           fillColor={
-            transportZoneHasDisruption ? 'rgba(255, 149, 0, 0.12)' : 'rgba(0, 122, 255, 0.1)'
+            transportZoneHasDisruption
+              ? tintColor(palette.amber400, '1F')
+              : tintColor(palette.info400, '1A')
           }
           strokeWidth={2}
         />

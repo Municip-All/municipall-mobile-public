@@ -6,11 +6,34 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        surface: '#F2F2F7',
-        'surface-auth': '#F8FAFC',
-        municipall: {
-          blue: '#0B0080',
+        matcha: {
+          100: '#E6F1DC',
+          300: '#A3C98F',
+          500: '#5C9A4E',
+          700: '#3D6B2F',
+          900: '#24391C',
         },
+        cream: {
+          50: '#FEFDFB',
+          100: '#F8F6EF',
+          200: '#EBE6D9',
+        },
+        charcoal: '#313B2B',
+        muted: '#76806C',
+        sake: '#D2543F',
+        amber: '#E09A2D',
+        info: '#5B87B0',
+        night: {
+          bg: '#161D10',
+          surface: '#1E2715',
+          elevated: '#26301C',
+          border: '#36422B',
+          text: '#EDF3E3',
+          muted: '#A6B397',
+        },
+      },
+      boxShadow: {
+        soft: '0 2px 8px rgba(74, 103, 65, 0.08)',
       },
     },
   },

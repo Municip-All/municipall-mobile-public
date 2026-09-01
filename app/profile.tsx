@@ -104,9 +104,9 @@ export default function Profile() {
   if (profileError) {
     return (
       <View style={layoutStyles.page} className='items-center justify-center'>
-        <Ionicons name='alert-circle-outline' size={48} color={dark ? '#3F3F46' : '#D4D4D8'} />
+        <Ionicons name='alert-circle-outline' size={48} color={colors.iconMuted} />
         <Text
-          className={`mt-4 text-center font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+          className={`mt-4 text-center font-medium ${dark ? 'text-night-muted' : 'text-muted'}`}>
           {profileError}
         </Text>
         <TouchableOpacity onPress={() => loadProfileData()} className='mt-4'>
@@ -193,13 +193,11 @@ export default function Profile() {
             tintColor={primaryColor}
           />
         }>
-        {/* Apple Style Header */}
         <View className='mb-8'>
           <Text className={classes.eyebrow}>Compte</Text>
           <Text className={classes.title}>Profil</Text>
         </View>
 
-        {/* Profile Card */}
         <View className={`mb-8 items-center p-6 ${classes.cardRoundedLg}`}>
           <TouchableOpacity
             onPress={pickImage}
@@ -207,7 +205,7 @@ export default function Profile() {
             className='relative mb-4'
             accessibilityRole='button'
             accessibilityLabel='Changer la photo de profil'>
-            <View className='h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-800'>
+            <View className='border-cream-50 bg-cream-200 dark:border-night-surface dark:bg-night-elevated h-24 w-24 overflow-hidden rounded-full border-4'>
               {displayAvatarUrl ? (
                 <Image
                   source={{ uri: displayAvatarUrl }}
@@ -217,7 +215,7 @@ export default function Profile() {
                 />
               ) : (
                 <View className='flex-1 items-center justify-center'>
-                  <Ionicons name='person' size={40} color={dark ? '#3F3F46' : '#D4D4D8'} />
+                  <Ionicons name='person' size={40} color={colors.iconMuted} />
                 </View>
               )}
             </View>
@@ -226,38 +224,43 @@ export default function Profile() {
                 <ActivityIndicator color='white' />
               </View>
             )}
-            <View className='absolute right-0 bottom-0 h-8 w-8 items-center justify-center rounded-full border border-zinc-100 bg-white shadow-lg dark:border-zinc-600 dark:bg-zinc-700'>
+            <View className='border-cream-200 bg-cream-50 shadow-soft dark:border-night-border dark:bg-night-elevated absolute right-0 bottom-0 h-8 w-8 items-center justify-center rounded-full border'>
               <Ionicons name='camera' size={16} color={primaryColor} />
             </View>
           </TouchableOpacity>
-          <Text className={`text-2xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
+          <Text className={classes.sectionTitle}>
             {user.name} {user.surname}
           </Text>
           <Text className={classes.subtitle}>{user.email}</Text>
         </View>
 
-        {/* Stats Section */}
         <View className='mb-8 flex-row justify-between'>
           {[
             {
               label: 'Signalements',
               value: userStats.reports.toString(),
               icon: 'alert-circle',
-              color: '#FF3B30',
+              color: colors.destructive,
             },
             {
               label: 'Participations',
               value: userStats.participations.toString(),
               icon: 'calendar',
-              color: '#007AFF',
+              color: colors.info,
             },
-            { label: 'Points', value: userStats.points.toString(), icon: 'star', color: '#FFCC00' },
+            {
+              label: 'Points',
+              value: userStats.points.toString(),
+              icon: 'star',
+              color: colors.points,
+            },
           ].map((stat, i) => (
             <View
               key={i}
-              className={`flex-1 items-center rounded-[24px] p-4 ${dark ? 'bg-zinc-900' : 'bg-white'} mx-1 border border-zinc-100 shadow-sm dark:border-zinc-800`}>
+              className={`flex-1 items-center rounded-[20px] p-4 ${dark ? 'bg-night-surface' : 'bg-cream-50'} border-cream-200 shadow-soft dark:border-night-border mx-1 border`}>
               <Ionicons name={stat.icon as IconName} size={20} color={stat.color} />
-              <Text className={`mt-1 text-lg font-black ${dark ? 'text-white' : 'text-black'}`}>
+              <Text
+                className={`mt-1 text-lg font-extrabold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
                 {stat.value}
               </Text>
               <Text className={classes.meta}>{stat.label}</Text>
@@ -265,24 +268,20 @@ export default function Profile() {
           ))}
         </View>
 
-        {/* Ma Résidence Section */}
-        <Text
-          className={`mb-3 ml-4 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-          Ma Résidence
-        </Text>
+        <Text className={`mb-3 ml-4 ${classes.eyebrow}`}>Ma Résidence</Text>
         <View
-          className={`mb-8 overflow-hidden rounded-[24px] ${dark ? 'bg-zinc-900' : 'bg-white'} border border-zinc-100 p-5 shadow-sm dark:border-zinc-800`}>
+          className={`mb-8 overflow-hidden rounded-[20px] ${dark ? 'bg-night-surface' : 'bg-cream-50'} border-cream-200 shadow-soft dark:border-night-border border p-5`}>
           <View className='mb-4 flex-row items-center justify-between'>
             <View className='flex-row items-center'>
               <View
-                className={`mr-3 h-10 w-10 items-center justify-center rounded-xl ${dark ? 'bg-green-900/30' : 'bg-green-50'}`}>
-                <Ionicons name='business' size={20} color='#34C759' />
+                className={`mr-3 h-10 w-10 items-center justify-center rounded-xl ${dark ? 'bg-night-elevated' : 'bg-matcha-100'}`}>
+                <Ionicons name='business' size={20} color={colors.success} />
               </View>
               <View>
-                <Text className={`text-sm font-bold ${dark ? 'text-white' : 'text-zinc-900'}`}>
+                <Text className={`text-sm font-bold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
                   {residenceName ?? 'Commune non référencée'}
                 </Text>
-                <Text className={`text-[11px] ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                <Text className={classes.meta}>
                   {residenceIsPartner
                     ? "Commune partenaire Municip'All"
                     : 'Ville de résidence actuelle'}
@@ -291,13 +290,15 @@ export default function Profile() {
             </View>
             <TouchableOpacity
               onPress={() => setShowCityPicker(!showCityPicker)}
-              className='rounded-full bg-zinc-100 px-4 py-2 dark:bg-zinc-800'>
-              <Text className='text-xs font-bold text-zinc-600 dark:text-zinc-300'>Modifier</Text>
+              className='bg-cream-100 dark:bg-night-elevated rounded-full px-4 py-2'>
+              <Text className={`text-xs font-bold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+                Modifier
+              </Text>
             </TouchableOpacity>
           </View>
 
           {showCityPicker && (
-            <View className='flex-row flex-wrap gap-2 border-t border-zinc-50 pt-3 dark:border-zinc-800'>
+            <View className='border-cream-100 dark:border-night-border flex-row flex-wrap gap-2 border-t pt-3'>
               {availableCities.map((city) => (
                 <TouchableOpacity
                   key={city.id}
@@ -309,7 +310,8 @@ export default function Profile() {
                       : undefined
                   }>
                   <Text
-                    className={`text-xs font-bold ${user.cityId === city.id ? 'text-white' : dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                    className={`text-xs font-bold ${user.cityId === city.id ? '' : dark ? 'text-night-muted' : 'text-muted'}`}
+                    style={user.cityId === city.id ? { color: colors.onPrimary } : undefined}>
                     {cityDisplayName(city)}
                   </Text>
                 </TouchableOpacity>
@@ -325,13 +327,9 @@ export default function Profile() {
           )}
         </View>
 
-        {/* Settings List (Apple Style) */}
-        <Text
-          className={`mb-3 ml-4 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-          Apparence
-        </Text>
+        <Text className={`mb-3 ml-4 ${classes.eyebrow}`}>Apparence</Text>
         <View
-          className={`mb-8 rounded-2xl p-1 ${dark ? 'bg-zinc-900' : 'bg-white'} flex-row border border-zinc-100 dark:border-zinc-800`}>
+          className={`mb-8 rounded-2xl p-1 ${dark ? 'bg-night-surface' : 'bg-cream-50'} border-cream-200 dark:border-night-border flex-row border`}>
           {[
             { id: 'light', label: 'Clair', icon: 'sunny' },
             { id: 'dark', label: 'Sombre', icon: 'moon' },
@@ -340,56 +338,53 @@ export default function Profile() {
             <TouchableOpacity
               key={option.id}
               onPress={() => setTheme(option.id as ThemeId)}
-              className={`flex-1 flex-row items-center justify-center rounded-xl py-3 ${theme === option.id ? (dark ? 'bg-zinc-800' : 'bg-zinc-100') : ''}`}>
+              className={`flex-1 flex-row items-center justify-center rounded-xl py-3 ${theme === option.id ? (dark ? 'bg-night-elevated' : 'bg-cream-100') : ''}`}>
               <Ionicons
                 name={option.icon as IconName}
                 size={16}
-                color={theme === option.id ? primaryColor : dark ? '#71717A' : '#A1A1AA'}
+                color={theme === option.id ? primaryColor : colors.iconMuted}
               />
               <Text
-                className={`ml-2 text-xs font-bold ${theme === option.id ? (dark ? 'text-white' : 'text-black') : dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                className={`ml-2 text-xs font-bold ${theme === option.id ? (dark ? 'text-night-text' : 'text-matcha-900') : dark ? 'text-night-muted' : 'text-muted'}`}>
                 {option.label}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        <Text
-          className={`mb-3 ml-4 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-          Réglages
-        </Text>
+        <Text className={`mb-3 ml-4 ${classes.eyebrow}`}>Réglages</Text>
         <View
-          className={`overflow-hidden rounded-[24px] ${dark ? 'bg-zinc-900' : 'bg-white'} mb-6 border border-zinc-100 shadow-sm dark:border-zinc-800`}>
+          className={`overflow-hidden rounded-[20px] ${dark ? 'bg-night-surface' : 'bg-cream-50'} border-cream-200 shadow-soft dark:border-night-border mb-6 border`}>
           {[
             {
               label: 'Informations personnelles',
               icon: 'person-outline',
-              color: '#007AFF',
+              color: colors.info,
               route: '/profile-personal-info',
             },
             {
               label: 'Sécurité et mot de passe',
               icon: 'shield-checkmark-outline',
-              color: '#34C759',
+              color: colors.success,
               route: '/profile-security',
             },
             {
               label: 'Notifications',
               icon: 'notifications-outline',
-              color: '#FF9500',
+              color: colors.warning,
               route: '/profile-notifications',
             },
             {
               label: "Centre d'aide",
               icon: 'help-buoy-outline',
-              color: '#AF52DE',
+              color: colors.accent,
               route: '/profile-help',
             },
           ].map((item, i, arr) => (
             <TouchableOpacity
               key={i}
               onPress={() => router.push(item.route as RouteHref)}
-              className={`flex-row items-center justify-between p-4 ${i !== arr.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
+              className={`flex-row items-center justify-between p-4 ${i !== arr.length - 1 ? 'border-cream-100 dark:border-night-border border-b' : ''}`}>
               <View className='flex-row items-center'>
                 <View
                   className='mr-3 h-8 w-8 items-center justify-center rounded-lg'
@@ -397,7 +392,7 @@ export default function Profile() {
                   <Ionicons name={item.icon as IconName} size={18} color={item.color} />
                 </View>
                 <Text
-                  className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                  className={`text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
                   {item.label}
                 </Text>
               </View>
@@ -406,42 +401,39 @@ export default function Profile() {
           ))}
         </View>
 
-        <Text
-          className={`mb-3 ml-4 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-          Confidentialité et légal
-        </Text>
+        <Text className={`mb-3 ml-4 ${classes.eyebrow}`}>Confidentialité et légal</Text>
         <View
-          className={`overflow-hidden rounded-[24px] ${dark ? 'bg-zinc-900' : 'bg-white'} mb-6 border border-zinc-100 shadow-sm dark:border-zinc-800`}>
+          className={`overflow-hidden rounded-[20px] ${dark ? 'bg-night-surface' : 'bg-cream-50'} border-cream-200 shadow-soft dark:border-night-border mb-6 border`}>
           {[
             {
               label: 'Mes données personnelles',
               icon: 'shield-outline',
-              color: '#007AFF',
+              color: colors.info,
               route: '/legal/my-data',
             },
             {
               label: 'Politique de confidentialité',
               icon: 'lock-closed-outline',
-              color: '#34C759',
+              color: colors.success,
               route: '/legal/privacy',
             },
             {
               label: "Conditions d'utilisation",
               icon: 'document-text-outline',
-              color: '#FF9500',
+              color: colors.warning,
               route: '/legal/cgu',
             },
             {
               label: 'Informations légales',
               icon: 'library-outline',
-              color: '#AF52DE',
+              color: colors.accent,
               route: '/legal',
             },
           ].map((item, i, arr) => (
             <TouchableOpacity
               key={item.route}
               onPress={() => router.push(item.route as RouteHref)}
-              className={`flex-row items-center justify-between p-4 ${i !== arr.length - 1 ? 'border-b border-zinc-50 dark:border-zinc-800' : ''}`}>
+              className={`flex-row items-center justify-between p-4 ${i !== arr.length - 1 ? 'border-cream-100 dark:border-night-border border-b' : ''}`}>
               <View className='flex-row items-center'>
                 <View
                   className='mr-3 h-8 w-8 items-center justify-center rounded-lg'
@@ -449,7 +441,7 @@ export default function Profile() {
                   <Ionicons name={item.icon as IconName} size={18} color={item.color} />
                 </View>
                 <Text
-                  className={`text-sm font-semibold ${dark ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                  className={`text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
                   {item.label}
                 </Text>
               </View>
@@ -463,7 +455,7 @@ export default function Profile() {
           className='items-center py-4'
           accessibilityRole='button'
           accessibilityLabel='Se déconnecter'>
-          <Text className='text-base font-bold text-red-500'>Se déconnecter</Text>
+          <Text className='text-sake text-base font-bold'>Se déconnecter</Text>
         </TouchableOpacity>
       </ScrollView>
 

@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CityMap, MapHeaderOverlay, type CityMapMethods } from '@components/map';
 import type { MapLayerItem } from '@components/map/MapHeaderOverlay';
 import BottomBar from '@components/BottomBar';
+import ChatBotFloatingButton from '@components/ChatBotFloatingButton';
 import ReportSignalementSheet, {
   type ReportSignalementSheetRef,
 } from '@components/ReportSignalementSheet';
@@ -17,6 +18,7 @@ import { useAuth } from '@context/authcontext';
 import { ensureAuthenticatedForReport } from '../lib/requireAuthForReport';
 import type { ReportLocationGroup } from '../lib/groupReportsByLocation';
 import type { TransportStopMarker } from '../services/transportService';
+import { semanticColors } from '@constants/design';
 
 export default function Carte() {
   const mapRef = useRef<CityMapMethods>(null);
@@ -43,13 +45,13 @@ export default function Carte() {
   const statusLegend = useMemo(
     () =>
       [
-        { label: 'En attente', color: '#FF9500' },
-        { label: 'En cours', color: '#007AFF' },
-        { label: 'Résolu', color: '#34C759' },
+        { label: 'En attente', color: semanticColors.warning },
+        { label: 'En cours', color: semanticColors.info },
+        { label: 'Résolu', color: semanticColors.success },
         ...(transportEnabled
           ? [
-              { label: 'Zone transports', color: '#007AFF' },
-              { label: 'Perturbation', color: '#FF9500' },
+              { label: 'Zone transports', color: semanticColors.info },
+              { label: 'Perturbation', color: semanticColors.warning },
             ]
           : []),
       ] as const,
@@ -102,8 +104,7 @@ export default function Carte() {
       return;
     }
     reportSheetRef.current?.open();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- ouverture liée au deep link ?action=report
-  }, [action, isAuthenticated]);
+  }, [action, isAuthenticated, router]);
 
   if (cityLoading) {
     return (
@@ -138,6 +139,7 @@ export default function Carte() {
           />
         </View>
         <BottomBar />
+        <ChatBotFloatingButton bottomOffset={insets.bottom + 84} />
         <ReportSignalementSheet ref={reportSheetRef} />
         <ReportMapSummarySheet
           visible={selectedReportGroup != null}

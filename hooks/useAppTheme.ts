@@ -2,19 +2,19 @@ import { useMemo } from 'react';
 import { type ViewStyle } from 'react-native';
 import { useTheme } from '@context/themecontext';
 import { useCity } from '@context/citycontext';
-import { DEFAULT_PRIMARY, semanticColors, tintColor } from '@constants/design';
+import { DEFAULT_PRIMARY, palette, semanticColors, softShadow, tintColor } from '@constants/design';
 import { buildBrandTheme } from '@constants/brand';
 
-/**
- * Hook unifié pour le thème : préférence utilisateur, schéma résolu,
- * couleur primaire ville, classes Tailwind et couleurs sémantiques.
- */
 export function useAppTheme() {
   const { colorScheme, theme, setTheme } = useTheme();
   const { config } = useCity();
   const dark = colorScheme === 'dark';
   const brand = useMemo(() => buildBrandTheme(config), [config]);
-  const primaryColor = brand.primaryColor || DEFAULT_PRIMARY;
+  const hasCityColor = Boolean(config?.theme?.primaryColor?.trim());
+  const primaryColor = useMemo(() => {
+    if (hasCityColor) return brand.primaryColor;
+    return dark ? palette.matcha500 : DEFAULT_PRIMARY;
+  }, [hasCityColor, brand.primaryColor, dark]);
 
   const pageBackground = dark
     ? (brand.backgroundColorDark ?? semanticColors.surface.dark)
@@ -34,43 +34,44 @@ export function useAppTheme() {
 
   const classes = useMemo(
     () => ({
-      card: dark ? 'bg-zinc-900 border border-zinc-800' : 'bg-white border border-zinc-200',
+      card: dark
+        ? 'rounded-2xl border border-night-border bg-night-surface'
+        : 'rounded-2xl border border-cream-200 bg-cream-50',
       cardRounded: dark
-        ? 'overflow-hidden rounded-[28px] bg-zinc-900 border border-zinc-800 shadow-sm'
-        : 'overflow-hidden rounded-[28px] bg-white border border-zinc-200 shadow-sm',
+        ? 'overflow-hidden rounded-[20px] border border-night-border bg-night-surface'
+        : 'overflow-hidden rounded-[20px] border border-cream-200 bg-cream-50',
       cardRoundedLg: dark
-        ? 'overflow-hidden rounded-[32px] bg-zinc-900 border border-zinc-800 shadow-sm'
-        : 'overflow-hidden rounded-[32px] bg-white border border-zinc-200 shadow-sm',
+        ? 'overflow-hidden rounded-[20px] border border-night-border bg-night-surface'
+        : 'overflow-hidden rounded-[20px] border border-cream-200 bg-cream-50',
       listGroup: dark
-        ? 'overflow-hidden rounded-[24px] bg-zinc-900 border border-zinc-800 shadow-sm'
-        : 'overflow-hidden rounded-[24px] bg-white border border-zinc-200 shadow-sm',
-      eyebrow: `text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-400' : 'text-zinc-500'}`,
-      title: `text-4xl font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`,
-      sectionTitle: `text-2xl font-bold ${dark ? 'text-white' : 'text-black'}`,
-      subtitle: `text-sm font-medium ${dark ? 'text-zinc-300' : 'text-zinc-600'}`,
-      body: `text-sm leading-5 ${dark ? 'text-zinc-300' : 'text-zinc-700'}`,
-      meta: `text-[11px] font-bold ${dark ? 'text-zinc-500' : 'text-zinc-500'}`,
-      caption: `text-[10px] font-bold ${dark ? 'text-zinc-400' : 'text-zinc-500'}`,
+        ? 'overflow-hidden rounded-2xl border border-night-border bg-night-surface'
+        : 'overflow-hidden rounded-2xl border border-cream-200 bg-cream-50',
+      eyebrow: `text-xs font-semibold tracking-widest uppercase ${dark ? 'text-night-muted' : 'text-muted'}`,
+      title: `text-4xl font-extrabold tracking-tight ${dark ? 'text-night-text' : 'text-matcha-900'}`,
+      sectionTitle: `text-2xl font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`,
+      subtitle: `text-sm font-medium ${dark ? 'text-night-muted' : 'text-muted'}`,
+      body: `text-sm leading-5 ${dark ? 'text-night-text' : 'text-charcoal'}`,
+      meta: `text-[11px] font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`,
+      caption: `text-[10px] font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`,
       chipInactive: dark
-        ? 'border border-zinc-700 bg-transparent'
-        : 'border border-zinc-200 bg-transparent',
+        ? 'border border-night-border bg-transparent'
+        : 'border border-cream-200 bg-transparent',
       input: dark
-        ? 'border border-white/15 bg-zinc-900/80 text-white'
-        : 'border border-zinc-200 bg-white text-zinc-900',
-      /** Labels de formulaire (modales, champs) */
-      formLabel: `mb-3 mt-1 text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-400' : 'text-zinc-500'}`,
+        ? 'rounded-xl border border-night-border bg-night-surface text-night-text'
+        : 'rounded-xl border border-cream-200 bg-cream-100 text-matcha-900',
+      formLabel: `mb-3 mt-1 text-xs font-semibold tracking-widest uppercase ${dark ? 'text-night-muted' : 'text-muted'}`,
       formField: dark
-        ? 'rounded-2xl border border-zinc-600 bg-zinc-800'
-        : 'rounded-2xl border border-zinc-200 bg-white shadow-sm',
-      formFieldText: `text-base font-medium ${dark ? 'text-white' : 'text-zinc-900'}`,
+        ? 'rounded-xl border border-night-border bg-night-surface'
+        : 'rounded-xl border border-cream-200 bg-cream-100',
+      formFieldText: `text-base font-medium ${dark ? 'text-night-text' : 'text-matcha-900'}`,
       chipUnselected: dark
-        ? 'rounded-full border border-zinc-600 bg-zinc-800 px-6 py-3'
-        : 'rounded-full border border-zinc-200 bg-white px-6 py-3',
-      chipUnselectedText: `text-sm font-bold ${dark ? 'text-zinc-200' : 'text-zinc-600'}`,
+        ? 'rounded-xl border border-night-border bg-night-surface px-6 py-3'
+        : 'rounded-xl border border-cream-200 bg-cream-50 px-6 py-3',
+      chipUnselectedText: `text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`,
       photoDropzone: dark
-        ? 'rounded-3xl border-2 border-dashed border-zinc-600 bg-zinc-800'
-        : 'rounded-3xl border-2 border-dashed border-zinc-300 bg-white',
-      photoHint: `mt-2 text-sm font-semibold ${dark ? 'text-zinc-300' : 'text-zinc-500'}`,
+        ? 'rounded-2xl border-2 border-dashed border-night-border bg-night-surface'
+        : 'rounded-2xl border-2 border-dashed border-cream-200 bg-cream-50',
+      photoHint: `mt-2 text-sm font-medium ${dark ? 'text-night-muted' : 'text-muted'}`,
     }),
     [dark]
   );
@@ -78,25 +79,30 @@ export function useAppTheme() {
   const colors = useMemo(
     () => ({
       semantic: semanticColors,
+      palette,
       primary: primaryColor,
       onPrimary: brand.onPrimary,
       primarySoft: brand.primarySoft,
       primaryTint: tintColor(primaryColor),
       iconMuted: dark ? semanticColors.muted.dark : semanticColors.muted.light,
       chevron: dark ? semanticColors.muted.dark : semanticColors.muted.light,
+      text: dark ? semanticColors.secondary.dark : semanticColors.secondary.light,
       surface: pageBackground,
       card: dark ? semanticColors.card.dark : semanticColors.card.light,
       elevated: dark ? semanticColors.elevated.dark : semanticColors.elevated.light,
-      tabBar: dark ? '#18181B' : '#FFFFFF',
-      fabBorder: dark ? '#27272A' : '#F4F4F5',
+      border: dark ? semanticColors.border.dark : semanticColors.border.light,
+      tabBar: dark ? palette.nightBg : palette.cream50,
+      fabBorder: dark ? palette.nightBorder : palette.cream200,
+      softShadow,
       destructive: semanticColors.destructive,
       info: semanticColors.info,
-      success: semanticColors.success,
+      success: dark ? semanticColors.successDark : semanticColors.success,
       warning: semanticColors.warning,
-      accent: semanticColors.accent,
-      placeholder: dark ? '#A1A1AA' : '#71717A',
-      modalSheet: dark ? semanticColors.card.dark : semanticColors.surface.light,
-      handle: dark ? '#52525B' : '#D1D1D6',
+      accent: dark ? semanticColors.accent.dark : semanticColors.accent.light,
+      points: semanticColors.points,
+      placeholder: dark ? palette.nightMuted : palette.muted,
+      modalSheet: dark ? semanticColors.card.dark : semanticColors.card.light,
+      handle: dark ? palette.nightBorder : palette.cream200,
     }),
     [dark, primaryColor, brand.onPrimary, brand.primarySoft, pageBackground]
   );

@@ -25,15 +25,14 @@ export default function LegalDocumentScreen({ document, showBackHeader = true }:
         }}
         showsVerticalScrollIndicator={false}>
         {!showBackHeader ? (
-          <Text className={`mb-2 text-2xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
-            {document.title}
-          </Text>
+          <Text className={`mb-2 ${classes.sectionTitle}`}>{document.title}</Text>
         ) : null}
         <Text className={`mb-6 ${classes.meta}`}>{document.subtitle}</Text>
 
         {document.sections.map((section) => (
           <View key={section.title} className='mb-6'>
-            <Text className={`mb-2 text-base font-bold ${dark ? 'text-white' : 'text-zinc-900'}`}>
+            <Text
+              className={`mb-2 text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
               {section.title}
             </Text>
             {section.paragraphs?.map((p, i) => (
@@ -51,7 +50,7 @@ export default function LegalDocumentScreen({ document, showBackHeader = true }:
         ))}
 
         <View
-          className={`mt-2 rounded-2xl border p-4 ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-zinc-50'}`}>
+          className={`mt-2 rounded-2xl border p-4 ${dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'}`}>
           <Text className={classes.meta}>Document {LEGAL_ENTITY.documentVersion}</Text>
           <Text className={`mt-1 ${classes.body}`}>
             {LEGAL_ENTITY.publisherName} — {LEGAL_ENTITY.website}

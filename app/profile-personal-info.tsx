@@ -18,7 +18,7 @@ import ProfileScreenHeader from '@components/ProfileScreenHeader';
 import { updateUserProfile } from '../services/userProfileService';
 
 export default function ProfilePersonalInfoScreen() {
-  const { dark, classes, primaryColor, layoutStyles } = useAppTheme();
+  const { classes, primaryColor, colors, layoutStyles } = useAppTheme();
   const { user, updateUser, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -97,7 +97,7 @@ export default function ProfilePersonalInfoScreen() {
           paddingTop: 16,
         }}
         keyboardShouldPersistTaps='handled'>
-        <View className={`rounded-[24px] p-5 ${classes.listGroup}`}>
+        <View className={`p-5 ${classes.listGroup}`}>
           {[
             { label: 'Prénom', value: name, onChange: setName },
             { label: 'Nom', value: surname, onChange: setSurname },
@@ -118,7 +118,7 @@ export default function ProfilePersonalInfoScreen() {
                 autoCapitalize={field.keyboard ? 'none' : 'words'}
                 autoCorrect={!field.keyboard}
                 className={`mt-2 rounded-xl px-4 py-3 text-base ${classes.input}`}
-                placeholderTextColor={dark ? '#71717A' : '#A1A1AA'}
+                placeholderTextColor={colors.placeholder}
               />
             </View>
           ))}
@@ -139,12 +139,14 @@ export default function ProfilePersonalInfoScreen() {
           disabled={saving}
           accessibilityLabel='Enregistrer les informations'
           accessibilityRole='button'
-          className='mt-4 items-center rounded-2xl py-4'
+          className='mt-4 items-center rounded-xl py-4'
           style={{ backgroundColor: primaryColor }}>
           {saving ? (
-            <ActivityIndicator color='#FFF' />
+            <ActivityIndicator color={colors.onPrimary} />
           ) : (
-            <Text className='text-base font-bold text-white'>Enregistrer</Text>
+            <Text className='text-base font-bold' style={{ color: colors.onPrimary }}>
+              Enregistrer
+            </Text>
           )}
         </TouchableOpacity>
       </ScrollView>

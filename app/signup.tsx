@@ -47,7 +47,7 @@ const SignupScreen: React.FC = () => {
   const [citiesError, setCitiesError] = useState(false);
   const [showConvinceModal, setShowConvinceModal] = useState(false);
 
-  const secondaryColor = config?.theme.secondaryColor || '#3B82F6';
+  const secondaryColor = config?.theme.secondaryColor || colors.info;
   const useGradient = config?.theme.useGradient ?? false;
   const appName = config?.name || "Municip'All";
 
@@ -131,14 +131,13 @@ const SignupScreen: React.FC = () => {
           dark
             ? colors.semantic.surfaceAuth.dark
             : useGradient
-              ? '#E0E7FF'
+              ? colors.palette.matcha100
               : colors.semantic.surfaceAuth.light,
           dark ? colors.card : colors.semantic.surfaceAuth.light,
         ]}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
 
-      {/* Decorative Brand Circles */}
       {useGradient && (
         <>
           <View
@@ -177,22 +176,19 @@ const SignupScreen: React.FC = () => {
           bounces={false}>
           <View className='mt-10 mb-8 items-center justify-center'>
             <View
-              className='mb-6 h-16 w-16 items-center justify-center rounded-[24px] shadow-xl'
+              className='mb-6 h-16 w-16 items-center justify-center rounded-[20px]'
               style={{
                 backgroundColor: primaryColor,
-                shadowColor: primaryColor,
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.3,
-                shadowRadius: 15,
+                ...colors.softShadow,
               }}>
-              <Ionicons name='business' size={30} color='#FFFFFF' />
+              <Ionicons name='business' size={30} color={colors.onPrimary} />
             </View>
             <Text
-              className={`mb-2 text-center text-3xl font-extrabold tracking-tight ${dark ? 'text-white' : 'text-slate-900'}`}>
+              className={`mb-2 text-center text-3xl font-extrabold tracking-tight ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
               Rejoignez {appName}.
             </Text>
             <Text
-              className={`text-center text-sm font-medium ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
+              className={`text-center text-sm font-medium ${dark ? 'text-night-muted' : 'text-muted'}`}>
               Créez votre compte citoyen
             </Text>
           </View>
@@ -201,8 +197,8 @@ const SignupScreen: React.FC = () => {
             <BlurView
               intensity={dark ? 20 : 60}
               tint={dark ? 'dark' : 'light'}
-              className='w-full overflow-hidden rounded-[32px] border border-white/20 p-6 dark:border-white/10'>
-              <View className='pointer-events-none absolute inset-0 bg-white/40 dark:bg-black/20' />
+              className='border-cream-200 dark:border-night-border w-full overflow-hidden rounded-[20px] border p-6'>
+              <View className='bg-cream-50/40 dark:bg-night-bg/20 pointer-events-none absolute inset-0' />
 
               {[
                 {
@@ -239,15 +235,15 @@ const SignupScreen: React.FC = () => {
               ].map((input, index) => (
                 <View key={index} className='mb-4'>
                   <Text
-                    className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                    className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`}>
                     {input.label}
                   </Text>
                   <View
-                    className={`flex-row items-center rounded-2xl border px-4 py-3 ${dark ? 'border-white/10 bg-black/50' : 'border-blue-50 bg-white'}`}>
+                    className={`flex-row items-center rounded-xl border px-4 py-3 ${dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'}`}>
                     <Ionicons
                       name={input.icon as IconName}
                       size={20}
-                      color={dark ? '#9CA3AF' : '#64748B'}
+                      color={colors.iconMuted}
                       className='mr-2'
                     />
                     <TextInput
@@ -258,8 +254,8 @@ const SignupScreen: React.FC = () => {
                       secureTextEntry={input.secure}
                       autoCapitalize='none'
                       autoCorrect={false}
-                      placeholderTextColor={dark ? '#6B7280' : '#94A3B8'}
-                      className={`ml-2 flex-1 px-0 text-base ${dark ? 'text-white' : 'text-slate-900'}`}
+                      placeholderTextColor={colors.placeholder}
+                      className={`ml-2 flex-1 px-0 text-base ${dark ? 'text-night-text' : 'text-matcha-900'}`}
                     />
                   </View>
                 </View>
@@ -267,12 +263,12 @@ const SignupScreen: React.FC = () => {
 
               <View className='mt-2 mb-6'>
                 <Text
-                  className={`mb-3 ml-1 text-xs font-semibold ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                  className={`mb-3 ml-1 text-xs font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`}>
                   MA VILLE DE RÉSIDENCE
                 </Text>
                 {citiesError ? (
                   <View className='items-center py-3'>
-                    <Text className={`text-sm ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
+                    <Text className={`text-sm ${dark ? 'text-night-muted' : 'text-muted'}`}>
                       Impossible de charger les villes.
                     </Text>
                     <TouchableOpacity
@@ -301,18 +297,25 @@ const SignupScreen: React.FC = () => {
                         activeOpacity={0.7}
                         style={{
                           backgroundColor:
-                            selectedCity === city.id ? primaryColor : dark ? '#27272a' : '#f1f5f9',
-                          borderRadius: 16,
+                            selectedCity === city.id
+                              ? primaryColor
+                              : dark
+                                ? colors.palette.nightBorder
+                                : colors.palette.cream200,
+                          borderRadius: 12,
                           paddingHorizontal: 16,
                           paddingVertical: 10,
                           borderWidth: 1,
                           borderColor:
-                            selectedCity === city.id ? primaryColor : dark ? '#3f3f46' : '#e2e8f0',
+                            selectedCity === city.id
+                              ? primaryColor
+                              : dark
+                                ? colors.palette.nightBorder
+                                : colors.palette.cream200,
                         }}>
                         <Text
                           style={{
-                            color:
-                              selectedCity === city.id ? '#FFFFFF' : dark ? '#9CA3AF' : '#475569',
+                            color: selectedCity === city.id ? colors.onPrimary : colors.iconMuted,
                             fontWeight: 'bold',
                             fontSize: 13,
                           }}>
@@ -340,20 +343,19 @@ const SignupScreen: React.FC = () => {
                 activeOpacity={0.8}
                 accessibilityRole='button'
                 accessibilityLabel='Créer mon compte'
-                className='mt-4 w-full flex-row items-center justify-center rounded-[20px] py-4 shadow-xl'
+                className='shadow-soft mt-4 w-full flex-row items-center justify-center rounded-xl py-4'
                 style={{
                   backgroundColor: primaryColor,
-                  shadowColor: primaryColor,
-                  shadowOffset: { width: 0, height: 8 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 15,
+                  ...colors.softShadow,
                 }}>
                 {isSubmitting ? (
-                  <ActivityIndicator color='#fff' />
+                  <ActivityIndicator color={colors.onPrimary} />
                 ) : (
                   <>
-                    <Text className='mr-2 text-lg font-bold text-white'>Créer mon compte</Text>
-                    <Ionicons name='checkmark' size={20} color='#FFFFFF' />
+                    <Text className='mr-2 text-lg font-bold' style={{ color: colors.onPrimary }}>
+                      Créer mon compte
+                    </Text>
+                    <Ionicons name='checkmark' size={20} color={colors.onPrimary} />
                   </>
                 )}
               </TouchableOpacity>
@@ -364,10 +366,10 @@ const SignupScreen: React.FC = () => {
 
         <TouchableOpacity
           onPress={() => router.push('/login')}
-          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-zinc-950/80' : 'bg-surface-auth/80'}`}
+          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-night-bg/80' : 'bg-cream-50/80'}`}
           accessibilityRole='button'
           accessibilityLabel='Se connecter'>
-          <Text className={`text-[15px] font-medium ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+          <Text className={`text-[15px] font-medium ${dark ? 'text-night-muted' : 'text-muted'}`}>
             Vous avez déjà un compte ?{' '}
             <Text className='font-bold' style={{ color: primaryColor }}>
               Se connecter

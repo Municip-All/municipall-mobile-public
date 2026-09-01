@@ -2,17 +2,18 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Pressable } from 
 import { Ionicons } from '@expo/vector-icons';
 import type { Report } from '../services/reportService';
 import { useTheme } from '@context/themecontext';
+import { palette } from '@constants/design';
 
 function statusColor(status: string): string {
   switch (status) {
     case 'En attente':
-      return '#FF9500';
+      return palette.amber400;
     case 'En cours':
-      return '#007AFF';
+      return palette.info400;
     case 'Résolu':
-      return '#34C759';
+      return palette.matcha700;
     default:
-      return '#8E8E93';
+      return palette.muted;
   }
 }
 
@@ -49,25 +50,29 @@ function ReportSummaryCard({
       style={[
         styles.card,
         showDivider && styles.cardDivider,
-        showDivider && { borderTopColor: dark ? '#3f3f46' : '#e4e4e7' },
+        showDivider && { borderTopColor: dark ? palette.nightBorder : palette.cream200 },
       ]}>
       <View style={styles.cardHeader}>
-        <Text style={[styles.cardTitle, { color: dark ? '#ffffff' : '#18181b' }]} numberOfLines={1}>
+        <Text
+          style={[styles.cardTitle, { color: dark ? palette.nightText : palette.matcha900 }]}
+          numberOfLines={1}>
           {report.category}
         </Text>
         <View style={[styles.statusPill, { backgroundColor: `${color}18` }]}>
           <Text style={[styles.statusText, { color }]}>{report.status}</Text>
         </View>
       </View>
-      <Text style={[styles.cardMeta, { color: dark ? '#a1a1aa' : '#71717a' }]}>
+      <Text style={[styles.cardMeta, { color: dark ? palette.nightMuted : palette.muted }]}>
         Réf. {report.id ?? '—'}
         {report.createdAt ? ` · ${formatDate(report.createdAt)}` : ''}
       </Text>
-      <Text style={[styles.cardBody, { color: dark ? '#d4d4d8' : '#3f3f46' }]} numberOfLines={3}>
+      <Text
+        style={[styles.cardBody, { color: dark ? palette.nightText : palette.charcoal }]}
+        numberOfLines={3}>
         {report.lastMessage?.senderRole === 'agent' ? 'Mairie : ' : ''}
         {preview}
       </Text>
-      <Text style={[styles.cardAction, { color: dark ? '#818cf8' : '#0B0080' }]}>
+      <Text style={[styles.cardAction, { color: dark ? palette.matcha300 : palette.matcha700 }]}>
         Voir le détail →
       </Text>
     </TouchableOpacity>
@@ -82,7 +87,6 @@ type ReportMapSummarySheetProps = {
   onOpenReport: (reportId: number) => void;
 };
 
-/** Feuille résumé signalement(s) — overlay absolu (évite Modal + Callout instables). */
 export default function ReportMapSummarySheet({
   visible,
   reports,
@@ -99,21 +103,30 @@ export default function ReportMapSummarySheet({
 
   return (
     <View style={styles.root} pointerEvents='box-none'>
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel='Fermer' />
+      <Pressable
+        style={styles.backdrop}
+        onPress={onClose}
+        accessibilityLabel='Fermer'
+        accessibilityRole='button'
+      />
       <View
         style={[
           styles.sheet,
           {
             paddingBottom: Math.max(bottomInset, 16),
-            backgroundColor: dark ? '#18181b' : '#ffffff',
+            backgroundColor: dark ? palette.nightSurface : palette.cream50,
           },
         ]}>
         <View style={styles.sheetHeader}>
-          <Text style={[styles.heading, { color: dark ? '#ffffff' : '#18181b' }]}>
+          <Text style={[styles.heading, { color: dark ? palette.nightText : palette.matcha900 }]}>
             {multiple ? `${reports.length} signalements ici` : 'Signalement'}
           </Text>
-          <TouchableOpacity onPress={onClose} hitSlop={12} accessibilityLabel='Fermer'>
-            <Ionicons name='close' size={22} color={dark ? '#a1a1aa' : '#71717a'} />
+          <TouchableOpacity
+            onPress={onClose}
+            hitSlop={12}
+            accessibilityLabel='Fermer'
+            accessibilityRole='button'>
+            <Ionicons name='close' size={22} color={dark ? palette.nightMuted : palette.muted} />
           </TouchableOpacity>
         </View>
 

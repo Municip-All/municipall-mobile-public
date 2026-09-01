@@ -1,5 +1,7 @@
 import { View, Text, TouchableOpacity, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAppTheme } from '@hooks/useAppTheme';
+import { palette } from '@constants/design';
 
 type ConvinceMayorModalProps = {
   visible: boolean;
@@ -10,7 +12,6 @@ type ConvinceMayorModalProps = {
   bottomInset?: number;
 };
 
-/** Overlay plein écran — évite RN Modal (instable avec certains builds Expo/RN). */
 export default function ConvinceMayorModal({
   visible,
   onClose,
@@ -19,6 +20,8 @@ export default function ConvinceMayorModal({
   primaryColor,
   bottomInset = 0,
 }: ConvinceMayorModalProps) {
+  const { colors } = useAppTheme();
+
   if (!visible) return null;
 
   const handleSend = () => {
@@ -39,24 +42,24 @@ export default function ConvinceMayorModal({
           styles.sheet,
           {
             marginBottom: bottomInset + 16,
-            backgroundColor: dark ? '#18181b' : '#ffffff',
-            borderColor: dark ? '#3f3f46' : '#e4e4e7',
+            backgroundColor: colors.modalSheet,
+            borderColor: colors.border,
           },
         ]}
         onPress={(e) => e.stopPropagation()}>
         <View
           style={[
             styles.iconWrap,
-            { backgroundColor: dark ? 'rgba(99,102,241,0.15)' : '#eef2ff' },
+            { backgroundColor: dark ? colors.primaryTint : palette.matcha100 },
           ]}>
-          <Ionicons name='megaphone' size={28} color='#6366F1' />
+          <Ionicons name='megaphone' size={28} color={colors.primary} />
         </View>
 
-        <Text style={[styles.title, { color: dark ? '#fafafa' : '#18181b' }]}>
+        <Text style={[styles.title, { color: dark ? palette.nightText : palette.matcha900 }]}>
           Votre commune n&apos;est pas listée ?
         </Text>
 
-        <Text style={[styles.body, { color: dark ? '#a1a1aa' : '#52525b' }]}>
+        <Text style={[styles.body, { color: dark ? palette.nightMuted : palette.muted }]}>
           Municip&apos;All est déployé commune par commune. Si la vôtre n&apos;apparaît pas encore
           dans la liste, vous pouvez suggérer la solution à votre maire — un email type est prêt à
           envoyer.
@@ -68,8 +71,15 @@ export default function ConvinceMayorModal({
           accessibilityLabel='Envoyer un email à ma mairie'
           accessibilityRole='button'
           style={[styles.primaryBtn, { backgroundColor: primaryColor }]}>
-          <Ionicons name='mail-outline' size={18} color='#fff' style={styles.primaryBtnIcon} />
-          <Text style={styles.primaryBtnText}>Envoyer un email à ma mairie</Text>
+          <Ionicons
+            name='mail-outline'
+            size={18}
+            color={colors.onPrimary}
+            style={styles.primaryBtnIcon}
+          />
+          <Text style={[styles.primaryBtnText, { color: colors.onPrimary }]}>
+            Envoyer un email à ma mairie
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -78,7 +88,8 @@ export default function ConvinceMayorModal({
           activeOpacity={0.7}
           accessibilityLabel='Plus tard'
           accessibilityRole='button'>
-          <Text style={[styles.secondaryBtnText, { color: dark ? '#a1a1aa' : '#71717a' }]}>
+          <Text
+            style={[styles.secondaryBtnText, { color: dark ? palette.nightMuted : palette.muted }]}>
             Plus tard
           </Text>
         </TouchableOpacity>
@@ -100,7 +111,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.45)',
   },
   sheet: {
-    borderRadius: 28,
+    borderRadius: 24,
     borderWidth: 1,
     paddingHorizontal: 24,
     paddingTop: 28,
@@ -110,7 +121,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: 56,
     height: 56,
-    borderRadius: 18,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -131,7 +142,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 16,
+    borderRadius: 12,
     paddingVertical: 14,
     marginBottom: 8,
   },
@@ -139,7 +150,6 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   primaryBtnText: {
-    color: '#fff',
     fontSize: 15,
     fontWeight: '700',
   },

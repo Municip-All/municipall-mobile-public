@@ -9,7 +9,7 @@ import { AuthProvider } from '@context/authcontext';
 import PushNotificationRegistrar from '@components/PushNotificationRegistrar';
 import BrandingSync from '@components/BrandingSync';
 import { CityProvider } from '@context/citycontext';
-import { DEFAULT_PRIMARY } from '@constants/design';
+import { DEFAULT_PRIMARY, palette } from '@constants/design';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import '../global.css';
@@ -80,7 +80,6 @@ export default function RootLayout() {
             <BrandingSync />
             <PushNotificationRegistrar />
             {needsOnboarding && pathname !== '/onboarding' ? <Redirect href='/onboarding' /> : null}
-            {/* Slot au lieu de Stack : react-native-screens + New Arch → crash setColor sur RCTView */}
             <Slot />
           </AuthProvider>
         </CityProvider>
@@ -93,9 +92,10 @@ function LoadingScreen() {
   const { colorScheme } = useTheme();
   const dark = colorScheme === 'dark';
   return (
-    <View style={[styles.loadingRoot, { backgroundColor: dark ? '#000000' : '#F2F2F7' }]}>
-      <ActivityIndicator size='large' color={dark ? '#FFFFFF' : DEFAULT_PRIMARY} />
-      <Text style={[styles.loadingText, { color: dark ? '#D4D4D8' : '#52525B' }]}>
+    <View
+      style={[styles.loadingRoot, { backgroundColor: dark ? palette.nightBg : palette.cream100 }]}>
+      <ActivityIndicator size='large' color={dark ? palette.cream50 : DEFAULT_PRIMARY} />
+      <Text style={[styles.loadingText, { color: dark ? palette.nightMuted : palette.muted }]}>
         Chargement...
       </Text>
     </View>

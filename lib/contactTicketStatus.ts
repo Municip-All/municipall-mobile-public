@@ -1,3 +1,5 @@
+import { palette } from '../constants/design';
+
 export type ContactTicketType = 'question' | 'suggestion';
 
 const SUGGESTION_TERMINAL = new Set<string>(['Réalisée', 'Non retenue', 'Clôturé']);
@@ -15,22 +17,22 @@ export function isTerminalContactStatus(
 export function getContactStatusColor(status: string): string {
   switch (status) {
     case 'En attente':
-      return '#FF9500';
+      return palette.amber400;
     case 'En cours':
-      return '#007AFF';
+      return palette.info400;
     case "À l'étude":
-      return '#5856D6';
+      return palette.info400;
     case 'Retenue':
-      return '#34C759';
+      return palette.matcha700;
     case 'Mise en œuvre':
-      return '#007AFF';
+      return palette.info400;
     case 'Réalisée':
-      return '#34C759';
+      return palette.matcha700;
     case 'Non retenue':
-      return '#FF3B30';
+      return palette.sake400;
     case 'Clôturé':
-      return '#8E8E93';
+      return palette.muted;
     default:
-      return '#8E8E93';
+      return palette.muted;
   }
 }

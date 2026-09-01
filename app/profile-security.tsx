@@ -120,7 +120,7 @@ export default function ProfileSecurityScreen() {
           Choisissez un mot de passe d&apos;au moins 8 caractères. Vous resterez connecté après la
           modification.
         </Text>
-        <View className={`rounded-[24px] p-5 ${classes.listGroup}`}>
+        <View className={`p-5 ${classes.listGroup}`}>
           {fields.map((field, index) => (
             <View key={field.label} className={index > 0 ? 'mt-4' : ''}>
               <Text className={classes.meta}>{field.label}</Text>
@@ -157,12 +157,14 @@ export default function ProfileSecurityScreen() {
           disabled={saving}
           accessibilityLabel='Mettre à jour le mot de passe'
           accessibilityRole='button'
-          className='mt-6 items-center rounded-2xl py-4'
+          className='mt-6 items-center rounded-xl py-4'
           style={{ backgroundColor: primaryColor }}>
           {saving ? (
-            <ActivityIndicator color='#FFF' />
+            <ActivityIndicator color={colors.onPrimary} />
           ) : (
-            <Text className='text-base font-bold text-white'>Mettre à jour le mot de passe</Text>
+            <Text className='text-base font-bold' style={{ color: colors.onPrimary }}>
+              Mettre à jour le mot de passe
+            </Text>
           )}
         </TouchableOpacity>
       </ScrollView>

@@ -1,5 +1,6 @@
 import { Image, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
 import { Marker, type MapMarkerProps } from 'react-native-maps';
+import { palette } from '@constants/design';
 import type { ReportStatusDot } from '../lib/reportMapTypes';
 
 export const MAP_PINS = {
@@ -13,10 +14,10 @@ export type MapPinKind = keyof typeof MAP_PINS;
 export type { ReportStatusDot };
 
 const STATUS_DOT_COLORS: Record<ReportStatusDot, string> = {
-  orange: '#FF9500',
-  blue: '#007AFF',
-  green: '#34C759',
-  gray: '#8E8E93',
+  orange: palette.amber400,
+  blue: palette.info400,
+  green: palette.matcha700,
+  gray: palette.muted,
 };
 
 type MapPinMarkerProps = Omit<MapMarkerProps, 'image'> & {
@@ -91,20 +92,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     zIndex: 2,
     borderWidth: 2,
-    borderColor: '#ffffff',
+    borderColor: palette.cream50,
   },
   countBadge: {
     position: 'absolute',
     zIndex: 3,
-    backgroundColor: '#0B0080',
+    backgroundColor: palette.matcha700,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 4,
     borderWidth: 2,
-    borderColor: '#ffffff',
+    borderColor: palette.cream50,
   },
   countBadgeText: {
-    color: '#ffffff',
+    color: palette.cream50,
     fontWeight: '800',
   },
 });

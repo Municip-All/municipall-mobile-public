@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import BottomBar from '@components/BottomBar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { palette } from '@constants/design';
 import { eventsService, CityEvent } from '../services/eventsService';
 
 const FILTERS = ['Tous', 'Culture', 'Sport', 'Social', 'Éducation', 'Cérémonie'] as const;
@@ -51,38 +52,27 @@ function categoryIcon(category: string): keyof typeof Ionicons.glyphMap {
   }
 }
 
-function categoryAccent(category: string, fallback: string): string {
+function categoryAccent(category: string, dark: boolean, fallback: string): string {
   switch (category) {
     case 'Sport':
-      return '#FF9500';
+      return palette.amber400;
     case 'Social':
-      return '#34C759';
-    case 'Éducation':
-      return '#5856D6';
+      return dark ? palette.matcha300 : palette.matcha700;
     case 'Cérémonie':
-      return '#007AFF';
+      return palette.info400;
+    case 'Éducation':
     case 'Culture':
     default:
       return fallback;
   }
 }
 
-function EventCard({
-  event,
-  dark,
-  primaryColor,
-}: {
-  event: CityEvent;
-  dark: boolean;
-  primaryColor: string;
-}) {
-  const accent = categoryAccent(event.category, primaryColor);
+function EventCard({ event }: { event: CityEvent }) {
+  const { dark, primaryColor, classes, colors } = useAppTheme();
+  const accent = categoryAccent(event.category, dark, primaryColor);
 
   return (
-    <View
-      className={`mb-4 overflow-hidden rounded-[28px] border shadow-sm ${
-        dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
-      }`}>
+    <View className={`shadow-soft mb-4 ${classes.cardRounded}`}>
       {event.imageUrl ? (
         <Image
           source={{ uri: event.imageUrl }}
@@ -100,40 +90,29 @@ function EventCard({
             <Ionicons name={categoryIcon(event.category)} size={24} color={accent} />
           </View>
           <View className='flex-1'>
-            <Text className={`text-xl font-bold ${dark ? 'text-white' : 'text-black'}`}>
+            <Text className={`text-xl font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
               {event.title}
             </Text>
-            <Text className={`text-sm font-medium ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-              {event.category}
-            </Text>
+            <Text className={classes.subtitle}>{event.category}</Text>
           </View>
         </View>
 
         {event.description ? (
-          <Text
-            className={`mb-4 text-sm leading-5 ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}
-            numberOfLines={3}>
+          <Text className={`mb-4 ${classes.body}`} numberOfLines={3}>
             {event.description}
           </Text>
         ) : null}
 
         <View className='mb-2 space-y-2'>
           <View className='flex-row items-center'>
-            <Ionicons
-              name='calendar-clear-outline'
-              size={16}
-              color={dark ? '#71717A' : '#A1A1AA'}
-            />
-            <Text
-              className={`ml-2 text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+            <Ionicons name='calendar-clear-outline' size={16} color={colors.iconMuted} />
+            <Text className={`ml-2 ${classes.subtitle}`}>
               {formatEventDateRange(event.startDate, event.endDate)}
             </Text>
           </View>
           <View className='flex-row items-center'>
-            <Ionicons name='location-outline' size={16} color={dark ? '#71717A' : '#A1A1AA'} />
-            <Text
-              className={`ml-2 flex-1 text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}
-              numberOfLines={2}>
+            <Ionicons name='location-outline' size={16} color={colors.iconMuted} />
+            <Text className={`ml-2 flex-1 ${classes.subtitle}`} numberOfLines={2}>
               {event.location}
             </Text>
           </View>
@@ -144,7 +123,7 @@ function EventCard({
 }
 
 export default function Events() {
-  const { dark, primaryColor, classes, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
   const { config, refreshConfig } = useCity();
   const insets = useSafeAreaInsets();
   const [activeFilter, setActiveFilter] = useState<(typeof FILTERS)[number]>('Tous');
@@ -221,25 +200,18 @@ export default function Events() {
         }>
         <View className='mb-6'>
           <Text className={classes.eyebrow}>Agenda</Text>
-          <Text
-            className={`text-4xl font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
-            Événements
-          </Text>
-          {config?.name ? (
-            <Text className={`mt-1 text-sm ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-              {config.name}
-            </Text>
-          ) : null}
+          <Text className={classes.title}>Événements</Text>
+          {config?.name ? <Text className={`mt-1 ${classes.subtitle}`}>{config.name}</Text> : null}
         </View>
 
         {!agendaEnabled ? (
-          <View
-            className={`rounded-[28px] border p-8 ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-white'}`}>
+          <View className={`p-8 ${classes.cardRounded}`}>
             <Ionicons name='calendar-outline' size={40} color={primaryColor} />
-            <Text className={`mt-4 text-lg font-bold ${dark ? 'text-white' : 'text-black'}`}>
+            <Text
+              className={`mt-4 text-lg font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
               Agenda non activé
             </Text>
-            <Text className={`mt-2 text-sm leading-5 ${classes.body}`}>
+            <Text className={`mt-2 ${classes.body}`}>
               Votre mairie peut activer l&apos;agenda culturel depuis le backoffice (Services GPS →
               Agenda culturel).
             </Text>
@@ -259,14 +231,15 @@ export default function Events() {
                       isActive
                         ? 'border-transparent'
                         : dark
-                          ? 'border-zinc-800 bg-zinc-900'
-                          : 'border-zinc-200 bg-white'
+                          ? 'border-night-border bg-night-surface'
+                          : 'border-cream-200 bg-cream-50'
                     }`}
                     style={isActive ? { backgroundColor: primaryColor } : {}}>
                     <Text
                       className={`text-sm font-bold ${
-                        isActive ? 'text-white' : dark ? 'text-zinc-400' : 'text-zinc-500'
-                      }`}>
+                        isActive ? '' : dark ? 'text-night-muted' : 'text-muted'
+                      }`}
+                      style={isActive ? { color: colors.onPrimary } : undefined}>
                       {filter}
                     </Text>
                   </TouchableOpacity>
@@ -279,8 +252,7 @@ export default function Events() {
                 <ActivityIndicator color={primaryColor} />
               </View>
             ) : error ? (
-              <View
-                className={`rounded-[28px] border p-6 ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-white'}`}>
+              <View className={`p-6 ${classes.cardRounded}`}>
                 <Text className={classes.body}>{error}</Text>
                 <TouchableOpacity onPress={onRefresh} className='mt-4'>
                   <Text style={{ color: primaryColor }} className='font-bold'>
@@ -289,20 +261,16 @@ export default function Events() {
                 </TouchableOpacity>
               </View>
             ) : filteredEvents.length === 0 ? (
-              <View
-                className={`items-center rounded-[28px] border p-8 ${dark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-200 bg-white'}`}>
-                <Ionicons name='calendar-outline' size={36} color={dark ? '#52525B' : '#A1A1AA'} />
-                <Text
-                  className={`mt-4 text-center text-sm font-medium ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              <View className={`items-center p-8 ${classes.cardRounded}`}>
+                <Ionicons name='calendar-outline' size={36} color={colors.iconMuted} />
+                <Text className={`mt-4 text-center ${classes.subtitle}`}>
                   {activeFilter === 'Tous'
                     ? 'Aucun événement à venir pour le moment.'
                     : `Aucun événement dans la catégorie « ${activeFilter} ».`}
                 </Text>
               </View>
             ) : (
-              filteredEvents.map((event) => (
-                <EventCard key={event.id} event={event} dark={dark} primaryColor={primaryColor} />
-              ))
+              filteredEvents.map((event) => <EventCard key={event.id} event={event} />)
             )}
           </>
         )}
