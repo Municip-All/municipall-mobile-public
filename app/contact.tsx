@@ -301,7 +301,7 @@ const ContactScreen: React.FC = () => {
                 style={{ backgroundColor: primaryColor }}
                 accessibilityRole='button'
                 accessibilityLabel={showNew ? 'Annuler' : 'Nouveau message'}>
-                <Text className='text-cream-50 text-xs font-bold'>
+                <Text className='text-xs font-bold' style={{ color: colors.onPrimary }}>
                   {showNew ? 'Annuler' : 'Nouveau'}
                 </Text>
               </TouchableOpacity>
@@ -398,7 +398,7 @@ const ContactScreen: React.FC = () => {
                 {isSubmitting ? (
                   <ActivityIndicator color={colors.onPrimary} />
                 ) : (
-                  <Text className='text-cream-50 font-bold'>
+                  <Text className='font-bold' style={{ color: colors.onPrimary }}>
                     {newType === 'suggestion' ? 'Envoyer ma suggestion' : 'Poser ma question'}
                   </Text>
                 )}
@@ -415,7 +415,9 @@ const ContactScreen: React.FC = () => {
                 onPress={() => router.push('/login')}
                 className='mt-4 rounded-full px-6 py-3'
                 style={{ backgroundColor: primaryColor }}>
-                <Text className='text-cream-50 font-bold'>Se connecter</Text>
+                <Text className='font-bold' style={{ color: colors.onPrimary }}>
+                  Se connecter
+                </Text>
               </TouchableOpacity>
             </View>
           ) : loading ? (

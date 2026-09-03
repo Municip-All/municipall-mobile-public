@@ -82,17 +82,6 @@ export default function Home() {
     cityServicesEnabled &&
     ((config?.isTransportFeatureAllowed && config?.isTransportFeatureEnabled) ?? false);
 
-  const explorerItems = [
-    { label: 'Ma commune', sub: 'Actualités et infos', icon: 'business', path: '/ma-commune' },
-    { label: 'Événements', sub: 'Agenda citoyen', icon: 'calendar', path: '/events' },
-    { label: 'Collecte', sub: 'Jours de ramassage', icon: 'trash', path: '/collecte' },
-    { label: 'Social', sub: 'Associations', icon: 'heart', path: '/social' },
-    ...(transportEnabled
-      ? [{ label: 'Transports', sub: 'Horaires en temps réel', icon: 'bus', path: '/transport' }]
-      : []),
-    { label: 'Contact', sub: 'Écrire à la mairie', icon: 'chatbubble', path: '/contact' },
-  ];
-
   const appDisplayName = brand.appName;
   const weatherLocation = weatherData?.city;
 
@@ -285,46 +274,6 @@ export default function Home() {
             </TouchableOpacity>
           ))
         )
-        ) : null}
-
-        {cityServicesEnabled ? (
-        <>
-        <Text className={`mb-4 ${classes.sectionTitle}`}>Explorer votre commune</Text>
-        <View className='flex-row flex-wrap justify-between'>
-          {explorerItems.map((item) => (
-            <TouchableOpacity
-              key={item.label}
-              onPress={() => router.push(item.path as RouteHref)}
-              className='mb-4 w-[48.5%] active:opacity-80'
-              accessibilityRole='button'
-              accessibilityLabel={item.label}>
-              <View
-                className={`rounded-[20px] border p-5 ${
-                  dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'
-                }`}>
-                <View
-                  className='h-11 w-11 items-center justify-center rounded-full'
-                  style={{
-                    backgroundColor: dark ? colors.palette.nightElevated : colors.palette.matcha100,
-                  }}>
-                  <Ionicons
-                    name={item.icon as IconName}
-                    size={22}
-                    color={dark ? colors.palette.matcha300 : colors.palette.matcha700}
-                  />
-                </View>
-                <Text
-                  className={`mt-3 text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
-                  {item.label}
-                </Text>
-                <Text className={`mt-1 text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
-                  {item.sub}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-        </>
         ) : null}
       </ScrollView>
 

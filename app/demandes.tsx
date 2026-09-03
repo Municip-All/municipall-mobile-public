@@ -248,7 +248,9 @@ export default function SignalementsList() {
               style={{ backgroundColor: primaryColor }}
               accessibilityRole='button'
               accessibilityLabel='Se connecter'>
-              <Text className='text-cream-50 text-sm font-bold'>Se connecter</Text>
+              <Text className='text-sm font-bold' style={{ color: colors.onPrimary }}>
+                Se connecter
+              </Text>
             </TouchableOpacity>
           </View>
         ) : needsPartnerCity ? (
