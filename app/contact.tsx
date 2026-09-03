@@ -28,6 +28,8 @@ import {
 } from '../services/contactService';
 import { getContactStatusColor, isTerminalContactStatus } from '../lib/contactTicketStatus';
 import { semanticColors } from '@constants/design';
+import { useCityServicesAccess } from '@hooks/useCityServicesAccess';
+import NoPartnerCityBanner from '@components/NoPartnerCityBanner';
 
 function SuggestionCard({
   ticket,
@@ -104,6 +106,7 @@ const ContactScreen: React.FC = () => {
   const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
   const { config } = useCity();
   const { isAuthenticated } = useAuth();
+  const { needsPartnerCity } = useCityServicesAccess();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -119,7 +122,7 @@ const ContactScreen: React.FC = () => {
 
   const loadTickets = useCallback(
     async (signal?: { cancelled: boolean }) => {
-      if (!isAuthenticated) {
+      if (!isAuthenticated || needsPartnerCity) {
         setTickets([]);
         setLoading(false);
         return;
@@ -137,7 +140,7 @@ const ContactScreen: React.FC = () => {
         if (!signal?.cancelled) setLoading(false);
       }
     },
-    [isAuthenticated]
+    [isAuthenticated, needsPartnerCity]
   );
 
   useEffect(() => {
@@ -249,6 +252,10 @@ const ContactScreen: React.FC = () => {
             <Text className={classes.title}>Contact</Text>
           </View>
 
+          {needsPartnerCity ? (
+            <NoPartnerCityBanner />
+          ) : (
+            <>
           <View className={`mb-8 p-6 ${classes.cardRounded}`}>
             <Text
               className={`mb-2 text-lg font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
@@ -532,6 +539,8 @@ const ContactScreen: React.FC = () => {
                   )}
                 </View>
               )}
+            </>
+          )}
             </>
           )}
         </ScrollView>

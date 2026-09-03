@@ -8,13 +8,20 @@ import {
   groupReportsByLocation,
   type ReportLocationGroup,
 } from '../../lib/groupReportsByLocation';
+import {
+  MAP_MARKER_MAX_RADIUS_M,
+  MAX_COMPOST_MARKERS_VISIBLE,
+  MAX_REPORT_MARKERS_VISIBLE,
+  MAX_TOILET_MARKERS_VISIBLE,
+  TRANSPORT_REFETCH_DEBOUNCE_MS,
+  TRANSPORT_REFETCH_MIN_MOVE_M,
+} from '../../lib/map/constants';
+import { filterMarkersNear } from '../../lib/map/filterMarkersNear';
+import { sameTransportStops } from '../../lib/map/transportStops';
 import type { CompostMarker, ToiletMarker } from '../../lib/map/types';
 import { fetchCompostMarkers, fetchPublicToilets } from '../../services/openDataService';
 import { reportService } from '../../services/reportService';
 import { transportService, type TransportStopMarker } from '../../services/transportService';
-
-const TRANSPORT_REFETCH_DEBOUNCE_MS = 1200;
-const TRANSPORT_REFETCH_MIN_MOVE_M = 600;
 
 type MapCenter = { lat: number; lon: number };
 
@@ -31,8 +38,8 @@ export function useMapMarkerData({ showReports, showTransports, mapLat, mapLon }
   const transportEnabled =
     (config?.isTransportFeatureAllowed && config?.isTransportFeatureEnabled) ?? false;
 
-  const [compostMarkers, setCompostMarkers] = useState<CompostMarker[]>([]);
-  const [toiletMarkers, setToiletMarkers] = useState<ToiletMarker[]>([]);
+  const [allCompostMarkers, setAllCompostMarkers] = useState<CompostMarker[]>([]);
+  const [allToiletMarkers, setAllToiletMarkers] = useState<ToiletMarker[]>([]);
   const [citizenReports, setCitizenReports] = useState<
     Awaited<ReturnType<typeof reportService.getReports>>
   >([]);
@@ -55,13 +62,13 @@ export function useMapMarkerData({ showReports, showTransports, mapLat, mapLon }
           fetchPublicToilets(),
         ]);
         if (!cancelled) {
-          setCompostMarkers(composts);
-          setToiletMarkers(toilets);
+          setAllCompostMarkers(composts);
+          setAllToiletMarkers(toilets);
         }
       } catch {
         if (!cancelled) {
-          setCompostMarkers([]);
-          setToiletMarkers([]);
+          setAllCompostMarkers([]);
+          setAllToiletMarkers([]);
         }
       }
     };
@@ -126,9 +133,20 @@ export function useMapMarkerData({ showReports, showTransports, mapLat, mapLon }
         });
         if (requestId !== transportRequestIdRef.current) return;
 
+        const nextStops = data.stops ?? [];
         lastTransportFetchCenterRef.current = center;
-        setTransportZoneCenter(center);
-        setTransportMarkers(data.stops ?? []);
+
+        setTransportMarkers((prev) => (sameTransportStops(prev, nextStops) ? prev : nextStops));
+        setTransportZoneCenter((prev) => {
+          if (!prev) return center;
+          if (
+            distanceMeters(prev.lat, prev.lon, center.lat, center.lon) <
+            TRANSPORT_REFETCH_MIN_MOVE_M
+          ) {
+            return prev;
+          }
+          return center;
+        });
       } catch (error: unknown) {
         if (controller.signal.aborted) return;
         if (isAxiosError(error) && error.code === 'ERR_CANCELED') return;
@@ -185,12 +203,48 @@ export function useMapMarkerData({ showReports, showTransports, mapLat, mapLon }
 
   const reportGroups = useMemo(() => groupReportsByLocation(citizenReports), [citizenReports]);
 
+  const compostMarkers = useMemo(() => {
+    if (mapLat == null || mapLon == null) return [];
+    return filterMarkersNear(
+      allCompostMarkers,
+      (m) => ({ lat: m.geo_point_2d.lat, lon: m.geo_point_2d.lon }),
+      mapLat,
+      mapLon,
+      MAP_MARKER_MAX_RADIUS_M,
+      MAX_COMPOST_MARKERS_VISIBLE,
+    );
+  }, [allCompostMarkers, mapLat, mapLon]);
+
+  const toiletMarkers = useMemo(() => {
+    if (mapLat == null || mapLon == null) return [];
+    return filterMarkersNear(
+      allToiletMarkers,
+      (m) => ({ lat: m.geo_point_2d.lat, lon: m.geo_point_2d.lon }),
+      mapLat,
+      mapLon,
+      MAP_MARKER_MAX_RADIUS_M,
+      MAX_TOILET_MARKERS_VISIBLE,
+    );
+  }, [allToiletMarkers, mapLat, mapLon]);
+
+  const visibleReportGroups = useMemo(() => {
+    if (mapLat == null || mapLon == null) return reportGroups;
+    return filterMarkersNear(
+      reportGroups,
+      (g) => ({ lat: g.lat, lon: g.lon }),
+      mapLat,
+      mapLon,
+      MAP_MARKER_MAX_RADIUS_M,
+      MAX_REPORT_MARKERS_VISIBLE,
+    );
+  }, [mapLat, mapLon, reportGroups]);
+
   const transportZoneHasDisruption = transportMarkers.some((m) => m.status === 'disrupted');
 
   return {
     compostMarkers,
     toiletMarkers,
-    reportGroups,
+    reportGroups: visibleReportGroups,
     transportMarkers,
     transportZoneCenter,
     transportZoneHasDisruption,

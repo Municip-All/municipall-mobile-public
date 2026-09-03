@@ -1,3 +1,4 @@
+import '../lib/map/pinImages';
 import 'react-native-reanimated';
 import { useEffect, useState } from 'react';
 import { Slot, Redirect, usePathname } from 'expo-router';

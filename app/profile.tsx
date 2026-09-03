@@ -19,13 +19,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { pickProofImage } from '../utils/pickProofImage';
 import type { IconName, RouteHref, ThemeId } from '../lib/types';
-import { cityService } from '../services/cityService';
+import { getPartnerCitiesCached } from '../services/partnerCitiesCache';
 import { isPartnerCity, partnerCityName } from '../lib/partnerCities';
 import { cityDisplayName } from '../lib/cityDisplay';
 import ConvinceMayorModal from '@components/ConvinceMayorModal';
 import CityNotListedChip from '@components/CityNotListedChip';
 import { openReferCityEmail } from '../lib/referCity';
-import { uploadUserAvatar, getUserStats, updateUserCity } from '../services/userProfileService';
+import { uploadUserAvatar, getUserStats, updateUserCity, getAvatarUploadErrorMessage } from '../services/userProfileService';
 import { isPersistentAvatarUrl } from '../utils/avatarImage';
 
 export default function Profile() {
@@ -51,7 +51,7 @@ export default function Profile() {
       const stats = await getUserStats();
       if (!signal?.cancelled) setUserStats(stats);
 
-      const cities = await cityService.getAllCities();
+      const cities = await getPartnerCitiesCached();
       if (!signal?.cancelled) setAvailableCities(cities);
     } catch {
       if (!signal?.cancelled) setProfileError('Impossible de charger les données du profil.');
@@ -148,20 +148,22 @@ export default function Profile() {
     const uri = await pickProofImage({
       title: 'Photo de profil',
       message: 'Prenez une photo ou choisissez une image dans votre galerie.',
-      pickerOptions: { aspect: [1, 1], quality: 0.5, allowsEditing: true },
+      pickerOptions: { aspect: [1, 1], quality: 0.4, allowsEditing: true },
     });
     if (uri) uploadAvatar(uri);
   };
 
   const uploadAvatar = async (uri: string) => {
+    const previousAvatar = user.avatar_url;
     setIsUploading(true);
     try {
       updateUser({ avatar_url: uri });
       const avatarUrl = await uploadUserAvatar(uri, user.id);
       updateUser({ avatar_url: avatarUrl });
       Alert.alert('Succès', 'Photo mise à jour.');
-    } catch {
-      Alert.alert('Erreur', 'Mise à jour impossible.');
+    } catch (error: unknown) {
+      updateUser({ avatar_url: previousAvatar });
+      Alert.alert('Erreur', getAvatarUploadErrorMessage(error));
     } finally {
       setIsUploading(false);
     }
@@ -284,7 +286,9 @@ export default function Profile() {
                 <Text className={classes.meta}>
                   {residenceIsPartner
                     ? "Commune partenaire Municip'All"
-                    : 'Ville de résidence actuelle'}
+                    : user.cityId
+                      ? 'Commune non partenaire'
+                      : 'Commune non renseignée — services municipaux limités'}
                 </Text>
               </View>
             </View>
@@ -318,6 +322,8 @@ export default function Profile() {
               ))}
               <CityNotListedChip
                 dark={dark}
+                selected={!user.cityId}
+                primaryColor={primaryColor}
                 onPress={() => {
                   setShowCityPicker(false);
                   setShowConvinceModal(true);

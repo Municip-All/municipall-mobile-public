@@ -21,18 +21,21 @@ import FloatingMapButton from '@components/FloatingMapButton';
 import ChatBotFloatingButton from '@components/ChatBotFloatingButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@context/authcontext';
-import { ensureAuthenticatedForReport } from '../lib/requireAuthForReport';
+import { ensureCanReport } from '../lib/requireAuthForReport';
+import { useCityServicesAccess } from '@hooks/useCityServicesAccess';
+import NoPartnerCityBanner from '@components/NoPartnerCityBanner';
 import type { IconName, RouteHref } from '../lib/types';
 
 export default function Home() {
   const { dark, primaryColor, classes, colors, brand, layoutStyles } = useAppTheme();
   const { config, weatherData, weatherLoading, weatherError, fetchWeather, refreshConfig } =
     useCity();
+  const { cityServicesEnabled, needsPartnerCity } = useCityServicesAccess();
   const {
     highlights,
     loading: highlightsLoading,
     refresh: refreshHighlights,
-  } = useHomeHighlights(config);
+  } = useHomeHighlights(config, cityServicesEnabled);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -70,13 +73,14 @@ export default function Home() {
   const { isAuthenticated } = useAuth();
 
   const handleReport = () => {
-    if (!ensureAuthenticatedForReport(isAuthenticated, router)) return;
+    if (!ensureCanReport(isAuthenticated, cityServicesEnabled, router)) return;
     router.push({ pathname: '/carte', params: { action: 'report' } } as RouteHref);
   };
 
-  const weatherEnabled = config?.features?.includes('weather') ?? false;
+  const weatherEnabled = cityServicesEnabled && (config?.features?.includes('weather') ?? false);
   const transportEnabled =
-    (config?.isTransportFeatureAllowed && config?.isTransportFeatureEnabled) ?? false;
+    cityServicesEnabled &&
+    ((config?.isTransportFeatureAllowed && config?.isTransportFeatureEnabled) ?? false);
 
   const explorerItems = [
     { label: 'Ma commune', sub: 'Actualités et infos', icon: 'business', path: '/ma-commune' },
@@ -124,6 +128,9 @@ export default function Home() {
           </TouchableOpacity>
         </View>
 
+        {needsPartnerCity ? <NoPartnerCityBanner /> : null}
+
+        {cityServicesEnabled ? (
         <TouchableOpacity
           onPress={handleReport}
           activeOpacity={0.9}
@@ -154,6 +161,7 @@ export default function Home() {
             </View>
           </View>
         </TouchableOpacity>
+        ) : null}
 
         {weatherEnabled && (
           <Pressable
@@ -203,6 +211,7 @@ export default function Home() {
           </Pressable>
         )}
 
+        {cityServicesEnabled ? (
         <View className='mb-8 flex-row flex-wrap justify-between gap-y-4'>
           {[
             {
@@ -235,10 +244,14 @@ export default function Home() {
             </TouchableOpacity>
           ))}
         </View>
+        ) : null}
 
+        {cityServicesEnabled ? (
         <Text className={`mb-4 ${classes.sectionTitle}`}>À ne pas manquer</Text>
+        ) : null}
 
-        {highlightsLoading ? (
+        {cityServicesEnabled ? (
+        highlightsLoading ? (
           <View className='items-center py-8'>
             <ActivityIndicator color={primaryColor} />
           </View>
@@ -271,7 +284,11 @@ export default function Home() {
               </View>
             </TouchableOpacity>
           ))
-        )}
+        )
+        ) : null}
+
+        {cityServicesEnabled ? (
+        <>
         <Text className={`mb-4 ${classes.sectionTitle}`}>Explorer votre commune</Text>
         <View className='flex-row flex-wrap justify-between'>
           {explorerItems.map((item) => (
@@ -307,6 +324,8 @@ export default function Home() {
             </TouchableOpacity>
           ))}
         </View>
+        </>
+        ) : null}
       </ScrollView>
 
       <FloatingMapButton />

@@ -16,10 +16,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { getNextCollection, formatCollectionDay } from '../utils/wasteSchedule';
 import type { IconName } from '../lib/types';
+import { useCityServicesAccess } from '@hooks/useCityServicesAccess';
+import NoPartnerCityBanner from '@components/NoPartnerCityBanner';
 
 export default function Collecte() {
   const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
   const { config, refreshConfig, loading, fetchWeather } = useCity();
+  const { cityServicesEnabled, needsPartnerCity } = useCityServicesAccess();
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +80,36 @@ export default function Collecte() {
     return (
       <View style={layoutStyles.page} className='items-center justify-center'>
         <ActivityIndicator size='large' color={primaryColor} />
+      </View>
+    );
+  }
+
+  if (!cityServicesEnabled) {
+    return (
+      <View style={layoutStyles.page}>
+        <ScrollView
+          contentContainerStyle={{
+            paddingTop: insets.top + 20,
+            paddingBottom: 120,
+            paddingHorizontal: 20,
+          }}>
+          <Text
+            className={`text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+            Environnement
+          </Text>
+          <Text
+            className={`mb-6 text-3xl font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
+            Collecte
+          </Text>
+          {needsPartnerCity ? (
+            <NoPartnerCityBanner />
+          ) : (
+            <Text className={dark ? 'text-zinc-400' : 'text-zinc-600'}>
+              Les horaires de collecte ne sont pas disponibles pour cette commune.
+            </Text>
+          )}
+        </ScrollView>
+        <BottomBar />
       </View>
     );
   }

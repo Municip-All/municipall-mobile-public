@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
@@ -10,28 +9,30 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { useAuth } from '@context/authcontext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BlurView } from 'expo-blur';
 import { authService } from '../services/authService';
 import { cityService } from '../services/cityService';
+import { getPartnerCitiesCached } from '../services/partnerCitiesCache';
 import { cityDisplayName } from '../lib/cityDisplay';
 import ConvinceMayorModal from '@components/ConvinceMayorModal';
 import CityNotListedChip from '@components/CityNotListedChip';
 import { openReferCityEmail } from '../lib/referCity';
 import BottomBar from '@components/BottomBar';
+import BrandedLogo from '@components/BrandedLogo';
 import LegalConsentBlock from '@components/LegalConsentBlock';
 import LegalFooterLinks from '@components/LegalFooterLinks';
+import AuthField from '@components/AuthField';
 import { recordLegalConsent } from '../services/legalConsent';
-import type { IconName, KeyboardType } from '../lib/types';
 
-const SignupScreen: React.FC = () => {
-  const { dark, primaryColor, colors, layoutStyles } = useAppTheme();
+const SCROLL_PADDING_X = 28;
+
+export default function SignupScreen() {
+  const { dark, primaryColor, classes, colors, brand, layoutStyles } = useAppTheme();
   const { config } = useCity();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -40,16 +41,17 @@ const SignupScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [availableCities, setAvailableCities] = useState<
     { id: string; name: string; officialName?: string }[]
   >([]);
   const [citiesError, setCitiesError] = useState(false);
   const [showConvinceModal, setShowConvinceModal] = useState(false);
+  const [residenceNotListed, setResidenceNotListed] = useState(false);
 
-  const secondaryColor = config?.theme.secondaryColor || colors.info;
-  const useGradient = config?.theme.useGradient ?? false;
-  const appName = config?.name || "Municip'All";
+  const appName = brand.appName;
+  const communeName = config ? cityDisplayName(config) : appName;
 
   const { login: authLogin } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,11 +59,13 @@ const SignupScreen: React.FC = () => {
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [acceptedAge, setAcceptedAge] = useState(false);
 
+  const canSubmit = acceptedCgu && acceptedPrivacy && acceptedAge && !isSubmitting;
+
   useEffect(() => {
     let cancelled = false;
     const loadCities = async () => {
       try {
-        const cities = await cityService.getAllCities();
+        const cities = await getPartnerCitiesCached();
         if (!cancelled) {
           setAvailableCities(cities);
           if (cities.length > 0) setSelectedCity(cities[0].id);
@@ -78,37 +82,43 @@ const SignupScreen: React.FC = () => {
   }, []);
 
   const handleRegister = async () => {
-    if (!email || !password || !username || !phone || !selectedCity) {
-      Alert.alert(
-        'Erreur',
-        'Veuillez entrer toutes les informations, y compris votre ville de résidence.'
-      );
+    if (!email.trim() || !password || !username.trim() || !phone.trim()) {
+      Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires.');
+      return;
+    }
+
+    if (!residenceNotListed && !selectedCity) {
+      Alert.alert('Erreur', 'Veuillez sélectionner votre ville de résidence.');
       return;
     }
 
     if (!acceptedCgu || !acceptedPrivacy || !acceptedAge) {
       Alert.alert(
         'Consentements requis',
-        `Vous devez accepter les CGU, la politique de confidentialité et certifier avoir au moins 16 ans.`
+        'Vous devez accepter les CGU, la politique de confidentialité et certifier avoir au moins 16 ans.'
       );
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const payload = {
-        name: username,
+      const { access_token, user } = await authService.signup({
+        name: username.trim(),
         surname: '',
-        email,
+        email: email.trim(),
         password,
-        phone,
-        cityId: selectedCity,
-      };
-      const { access_token, user } = await authService.signup(payload);
+        phone: phone.trim(),
+        ...(residenceNotListed ? {} : { cityId: selectedCity! }),
+      });
       await recordLegalConsent();
       await authLogin(access_token, user);
 
-      Alert.alert('Succès', `Bienvenue ${user.name} ! Votre compte est créé.`);
+      Alert.alert(
+        'Succès',
+        residenceNotListed
+          ? `Bienvenue ${user.name} ! Votre compte est créé. Les services municipaux seront disponibles lorsque votre commune rejoindra Municip'All.`
+          : `Bienvenue ${user.name} ! Votre compte est créé.`
+      );
       router.replace('/home');
     } catch {
       Alert.alert(
@@ -124,264 +134,249 @@ const SignupScreen: React.FC = () => {
     }
   };
 
+  const bgTop = dark ? '#0F0F12' : '#F8FAFC';
+  const bgBottom = dark ? colors.semantic.surface.dark : '#FFFFFF';
+
   return (
     <View style={layoutStyles.pageAuth}>
       <LinearGradient
-        colors={[
-          dark
-            ? colors.semantic.surfaceAuth.dark
-            : useGradient
-              ? colors.palette.matcha100
-              : colors.semantic.surfaceAuth.light,
-          dark ? colors.card : colors.semantic.surfaceAuth.light,
-        ]}
+        colors={[bgTop, bgBottom]}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
 
-      {useGradient && (
-        <>
-          <View
-            className='absolute rounded-full opacity-30 blur-3xl'
-            style={{
-              top: -50,
-              left: -100,
-              width: 300,
-              height: 300,
-              backgroundColor: secondaryColor,
-            }}
-          />
-          <View
-            className='absolute rounded-full opacity-20 blur-3xl'
-            style={{
-              bottom: -100,
-              right: -50,
-              width: 250,
-              height: 250,
-              backgroundColor: primaryColor,
-            }}
-          />
-        </>
-      )}
+      {brand.useGradient && !dark ? (
+        <View
+          pointerEvents='none'
+          className='absolute -left-24 -top-16 h-56 w-56 rounded-full opacity-25'
+          style={{ backgroundColor: brand.secondaryColor }}
+        />
+      ) : null}
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className='flex-1'>
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        className='flex-1'
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
         <ScrollView
           contentContainerStyle={{
-            paddingTop: Math.max(insets.top, 40),
-            paddingBottom: Math.max(insets.bottom, 100),
-            paddingHorizontal: 24,
+            paddingTop: insets.top + 16,
+            paddingBottom: insets.bottom + 120,
+            paddingHorizontal: SCROLL_PADDING_X,
+            maxWidth: 480,
+            width: '100%',
+            alignSelf: 'center',
           }}
-          showsVerticalScrollIndicator={false}
-          bounces={false}>
-          <View className='mt-10 mb-8 items-center justify-center'>
+          keyboardShouldPersistTaps='handled'
+          showsVerticalScrollIndicator={false}>
+          {/* En-tête */}
+          <View className='mb-8 items-center'>
             <View
-              className='mb-6 h-16 w-16 items-center justify-center rounded-[20px]'
-              style={{
-                backgroundColor: primaryColor,
-                ...colors.softShadow,
-              }}>
-              <Ionicons name='business' size={30} color={colors.onPrimary} />
+              className={`mb-5 items-center justify-center rounded-3xl p-3 shadow-sm ${dark ? 'bg-zinc-900' : 'bg-white'}`}>
+              <BrandedLogo
+                size={72}
+                radius={20}
+                backgroundColor={dark ? '#18181B' : '#FFFFFF'}
+                iconColor={primaryColor}
+                mode='contain'
+              />
             </View>
+            <Text className={classes.eyebrow}>{communeName}</Text>
             <Text
-              className={`mb-2 text-center text-3xl font-extrabold tracking-tight ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
-              Rejoignez {appName}.
+              className={`mt-2 text-center text-3xl font-black tracking-tight ${dark ? 'text-white' : 'text-zinc-900'}`}>
+              Créer un compte
             </Text>
             <Text
-              className={`text-center text-sm font-medium ${dark ? 'text-night-muted' : 'text-muted'}`}>
-              Créez votre compte citoyen
+              className={`mt-2 px-4 text-center text-base leading-6 ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              Rejoignez {appName}
             </Text>
           </View>
 
-          <View className='w-full items-center'>
-            <BlurView
-              intensity={dark ? 20 : 60}
-              tint={dark ? 'dark' : 'light'}
-              className='border-cream-200 dark:border-night-border w-full overflow-hidden rounded-[20px] border p-6'>
-              <View className='bg-cream-50/40 dark:bg-night-bg/20 pointer-events-none absolute inset-0' />
+          {/* Formulaire */}
+          <View className={`px-7 py-8 ${classes.cardRoundedLg}`}>
+            <AuthField
+              label='Identifiant'
+              icon='person-outline'
+              value={username}
+              onChangeText={setUsername}
+              placeholder='Votre identifiant'
+              dark={dark}
+              colors={colors}
+              classes={classes}
+            />
 
-              {[
-                {
-                  placeholder: 'Identifiant',
-                  value: username,
-                  setter: setUsername,
-                  icon: 'person-outline',
-                  label: 'IDENTIFIANT',
-                },
-                {
-                  placeholder: 'votre@email.fr',
-                  value: email,
-                  setter: setEmail,
-                  icon: 'mail-outline',
-                  keyboardType: 'email-address',
-                  label: 'EMAIL',
-                },
-                {
-                  placeholder: '••••••••',
-                  value: password,
-                  setter: setPassword,
-                  icon: 'lock-closed-outline',
-                  secure: true,
-                  label: 'MOT DE PASSE',
-                },
-                {
-                  placeholder: '06 12 34 56 78',
-                  value: phone,
-                  setter: setPhone,
-                  icon: 'call-outline',
-                  keyboardType: 'phone-pad',
-                  label: 'TÉLÉPHONE',
-                },
-              ].map((input, index) => (
-                <View key={index} className='mb-4'>
-                  <Text
-                    className={`mb-1.5 ml-1 text-xs font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`}>
-                    {input.label}
+            <AuthField
+              label='E-mail'
+              icon='mail-outline'
+              value={email}
+              onChangeText={setEmail}
+              placeholder='votre@email.fr'
+              keyboardType='email-address'
+              dark={dark}
+              colors={colors}
+              classes={classes}
+            />
+
+            <AuthField
+              label='Mot de passe'
+              icon='lock-closed-outline'
+              value={password}
+              onChangeText={setPassword}
+              placeholder='Votre mot de passe'
+              secureTextEntry={!showPassword}
+              showPasswordToggle
+              showPassword={showPassword}
+              onTogglePassword={() => setShowPassword((v) => !v)}
+              dark={dark}
+              colors={colors}
+              classes={classes}
+            />
+
+            <AuthField
+              label='Téléphone'
+              icon='call-outline'
+              value={phone}
+              onChangeText={setPhone}
+              placeholder='06 12 34 56 78'
+              keyboardType='phone-pad'
+              dark={dark}
+              colors={colors}
+              classes={classes}
+            />
+
+            <View className='mb-6'>
+              <Text className={classes.formLabel}>Ma ville de résidence</Text>
+              {citiesError ? (
+                <View className='items-center py-2'>
+                  <Text className={`text-sm ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                    Impossible de charger les villes.
                   </Text>
-                  <View
-                    className={`flex-row items-center rounded-xl border px-4 py-3 ${dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'}`}>
-                    <Ionicons
-                      name={input.icon as IconName}
-                      size={20}
-                      color={colors.iconMuted}
-                      className='mr-2'
-                    />
-                    <TextInput
-                      value={input.value}
-                      onChangeText={input.setter}
-                      placeholder={input.placeholder}
-                      keyboardType={input.keyboardType as KeyboardType}
-                      secureTextEntry={input.secure}
-                      autoCapitalize='none'
-                      autoCorrect={false}
-                      placeholderTextColor={colors.placeholder}
-                      className={`ml-2 flex-1 px-0 text-base ${dark ? 'text-night-text' : 'text-matcha-900'}`}
-                    />
-                  </View>
+                  <TouchableOpacity
+                    onPress={async () => {
+                      try {
+                        const cities = await getPartnerCitiesCached();
+                        setAvailableCities(cities);
+                        if (cities.length > 0) setSelectedCity(cities[0].id);
+                        setCitiesError(false);
+                      } catch {
+                        setCitiesError(true);
+                      }
+                    }}
+                    className='mt-2 py-1'
+                    accessibilityRole='button'
+                    accessibilityLabel='Réessayer le chargement des villes'>
+                    <Text className='font-bold' style={{ color: primaryColor }}>Réessayer</Text>
+                  </TouchableOpacity>
                 </View>
-              ))}
-
-              <View className='mt-2 mb-6'>
-                <Text
-                  className={`mb-3 ml-1 text-xs font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`}>
-                  MA VILLE DE RÉSIDENCE
-                </Text>
-                {citiesError ? (
-                  <View className='items-center py-3'>
-                    <Text className={`text-sm ${dark ? 'text-night-muted' : 'text-muted'}`}>
-                      Impossible de charger les villes.
-                    </Text>
-                    <TouchableOpacity
-                      onPress={async () => {
-                        try {
-                          const cities = await cityService.getAllCities();
-                          setAvailableCities(cities);
-                          if (cities.length > 0) setSelectedCity(cities[0].id);
-                          setCitiesError(false);
-                        } catch {
-                          setCitiesError(true);
-                        }
-                      }}
-                      className='mt-2'>
-                      <Text className='font-bold' style={{ color: primaryColor }}>
-                        Réessayer
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <View className='flex-row flex-wrap gap-2'>
-                    {availableCities.map((city) => (
+              ) : (
+                <View className='flex-row flex-wrap gap-2'>
+                  {availableCities.map((city) => {
+                    const selected = !residenceNotListed && selectedCity === city.id;
+                    return (
                       <TouchableOpacity
                         key={city.id}
-                        onPress={() => setSelectedCity(city.id)}
+                        onPress={() => {
+                          setResidenceNotListed(false);
+                          setSelectedCity(city.id);
+                        }}
                         activeOpacity={0.7}
+                        accessibilityRole='button'
+                        accessibilityLabel={cityDisplayName(city)}
+                        className='rounded-2xl px-4 py-2.5'
                         style={{
-                          backgroundColor:
-                            selectedCity === city.id
-                              ? primaryColor
-                              : dark
-                                ? colors.palette.nightBorder
-                                : colors.palette.cream200,
-                          borderRadius: 12,
-                          paddingHorizontal: 16,
-                          paddingVertical: 10,
+                          backgroundColor: selected
+                            ? primaryColor
+                            : dark
+                              ? '#27272A'
+                              : '#F4F4F5',
                           borderWidth: 1,
-                          borderColor:
-                            selectedCity === city.id
-                              ? primaryColor
-                              : dark
-                                ? colors.palette.nightBorder
-                                : colors.palette.cream200,
+                          borderColor: selected
+                            ? primaryColor
+                            : dark
+                              ? '#3F3F46'
+                              : '#E4E4E7',
                         }}>
                         <Text
+                          className='text-sm font-bold'
                           style={{
-                            color: selectedCity === city.id ? colors.onPrimary : colors.iconMuted,
-                            fontWeight: 'bold',
-                            fontSize: 13,
+                            color: selected ? brand.onPrimary : dark ? '#A1A1AA' : '#52525B',
                           }}>
                           {cityDisplayName(city)}
                         </Text>
                       </TouchableOpacity>
-                    ))}
-                    <CityNotListedChip dark={dark} onPress={() => setShowConvinceModal(true)} />
-                  </View>
-                )}
-              </View>
+                    );
+                  })}
+                  <CityNotListedChip
+                    dark={dark}
+                    selected={residenceNotListed}
+                    primaryColor={primaryColor}
+                    onPress={() => setShowConvinceModal(true)}
+                  />
+                </View>
+              )}
+              {residenceNotListed ? (
+                <Text
+                  className={`mt-3 text-xs leading-5 ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  Vous pourrez utiliser Municip&apos;All dès que votre commune sera partenaire. En
+                  attendant, invitez votre mairie ou choisissez votre commune si elle apparaît dans
+                  la liste.
+                </Text>
+              ) : null}
+            </View>
 
-              <LegalConsentBlock
-                acceptedCgu={acceptedCgu}
-                acceptedPrivacy={acceptedPrivacy}
-                acceptedAge={acceptedAge}
-                onCguChange={setAcceptedCgu}
-                onPrivacyChange={setAcceptedPrivacy}
-                onAgeChange={setAcceptedAge}
-              />
+            <LegalConsentBlock
+              acceptedCgu={acceptedCgu}
+              acceptedPrivacy={acceptedPrivacy}
+              acceptedAge={acceptedAge}
+              onCguChange={setAcceptedCgu}
+              onPrivacyChange={setAcceptedPrivacy}
+              onAgeChange={setAcceptedAge}
+            />
 
-              <TouchableOpacity
-                onPress={handleRegister}
-                disabled={isSubmitting || !acceptedCgu || !acceptedPrivacy || !acceptedAge}
-                activeOpacity={0.8}
-                accessibilityRole='button'
-                accessibilityLabel='Créer mon compte'
-                className='shadow-soft mt-4 w-full flex-row items-center justify-center rounded-xl py-4'
-                style={{
-                  backgroundColor: primaryColor,
-                  ...colors.softShadow,
-                }}>
-                {isSubmitting ? (
-                  <ActivityIndicator color={colors.onPrimary} />
-                ) : (
-                  <>
-                    <Text className='mr-2 text-lg font-bold' style={{ color: colors.onPrimary }}>
-                      Créer mon compte
-                    </Text>
-                    <Ionicons name='checkmark' size={20} color={colors.onPrimary} />
-                  </>
-                )}
-              </TouchableOpacity>
-            </BlurView>
+            <TouchableOpacity
+              onPress={handleRegister}
+              disabled={!canSubmit}
+              activeOpacity={0.85}
+              accessibilityRole='button'
+              accessibilityLabel='Créer mon compte'
+              className='mt-6 flex-row items-center justify-center rounded-2xl py-4'
+              style={{
+                backgroundColor: primaryColor,
+                opacity: canSubmit ? 1 : 0.5,
+              }}>
+              {isSubmitting ? (
+                <ActivityIndicator color={brand.onPrimary} />
+              ) : (
+                <Text className='text-base font-bold' style={{ color: brand.onPrimary }}>
+                  Créer mon compte
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => router.push('/login')}
+            className='mt-6 items-center py-3'
+            accessibilityRole='button'
+            accessibilityLabel='Se connecter'>
+            <Text className={`text-sm ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+              Vous avez déjà un compte ?{' '}
+              <Text className='font-bold' style={{ color: primaryColor }}>Se connecter</Text>
+            </Text>
+          </TouchableOpacity>
+
+          <View className='mt-4'>
             <LegalFooterLinks />
           </View>
         </ScrollView>
-
-        <TouchableOpacity
-          onPress={() => router.push('/login')}
-          className={`absolute bottom-36 w-full flex-row justify-center py-4 ${dark ? 'bg-night-bg/80' : 'bg-cream-50/80'}`}
-          accessibilityRole='button'
-          accessibilityLabel='Se connecter'>
-          <Text className={`text-[15px] font-medium ${dark ? 'text-night-muted' : 'text-muted'}`}>
-            Vous avez déjà un compte ?{' '}
-            <Text className='font-bold' style={{ color: primaryColor }}>
-              Se connecter
-            </Text>
-          </Text>
-        </TouchableOpacity>
       </KeyboardAvoidingView>
 
       <ConvinceMayorModal
         visible={showConvinceModal}
         onClose={() => setShowConvinceModal(false)}
         onSendEmail={openReferCityEmail}
+        onContinueWithoutCity={() => {
+          setResidenceNotListed(true);
+          setSelectedCity(null);
+        }}
         dark={dark}
         primaryColor={primaryColor}
         bottomInset={insets.bottom}
@@ -390,6 +385,4 @@ const SignupScreen: React.FC = () => {
       <BottomBar />
     </View>
   );
-};
-
-export default SignupScreen;
+}

@@ -1,6 +1,7 @@
 import MapPinMarker from '@components/MapPinMarker';
 import { Circle } from 'react-native-maps';
 import { palette, tintColor } from '@constants/design';
+import { mapMarkerKey } from '../../lib/mapMarkerKey';
 import { TRANSPORT_SEARCH_RADIUS_M } from '../../services/transportService';
 import type { CompostMarker, ToiletMarker } from '../../lib/map/types';
 import type { ReportLocationGroup } from '../../lib/groupReportsByLocation';
@@ -72,7 +73,7 @@ export default function MapMarkerLayer({
       {showComposts
         ? compostMarkers.map((marker) => (
             <MapPinMarker
-              key={marker.id}
+              key={mapMarkerKey('compost', marker.geo_point_2d.lat, marker.geo_point_2d.lon)}
               kind='composte'
               coordinate={{
                 latitude: marker.geo_point_2d.lat,
@@ -87,7 +88,7 @@ export default function MapMarkerLayer({
       {showToilets
         ? toiletMarkers.map((marker) => (
             <MapPinMarker
-              key={marker.id}
+              key={mapMarkerKey('toilet', marker.geo_point_2d.lat, marker.geo_point_2d.lon)}
               kind='toilet'
               coordinate={{
                 latitude: marker.geo_point_2d.lat,

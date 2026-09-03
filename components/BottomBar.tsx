@@ -4,14 +4,58 @@ import { useTheme } from '@context/themecontext';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@context/authcontext';
 import { useAppTheme } from '@hooks/useAppTheme';
-import { palette } from '@constants/design';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { ensureAuthenticatedForReport } from '../lib/requireAuthForReport';
+import { ensureCanReport } from '../lib/requireAuthForReport';
+import { useCityServicesAccess } from '@hooks/useCityServicesAccess';
 import type { IconName, RouteHref } from '../lib/types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+const TAB_BAR_HEIGHT = 60;
+const FAB_SIZE = 56;
+const FAB_RING = 4;
+const FAB_LIFT = -24;
+const CUTOUT_RADIUS = 36;
+const CURVE_DEPTH = 26;
+
+type TabItem = {
+  id: string;
+  label: string;
+  icon: IconName;
+  path: string;
+  isCenter?: boolean;
+};
+
+const TABS: TabItem[] = [
+  { id: 'home', label: 'Accueil', icon: 'home', path: '/home' },
+  { id: 'events', label: 'Événements', icon: 'calendar', path: '/events' },
+  { id: 'center', label: 'Signaler', icon: 'paper-plane', path: '/carte', isCenter: true },
+  { id: 'contact', label: 'Contact', icon: 'chatbubble', path: '/contact' },
+  { id: 'profile', label: 'Profil', icon: 'person', path: '/profile' },
+];
+
+/** Courbe symétrique pour encaisser le bouton central (sans angles durs). */
+function buildTabBarPath(width: number, height: number): string {
+  const center = width / 2;
+  const left = center - CUTOUT_RADIUS - 22;
+  const right = center + CUTOUT_RADIUS + 22;
+  const d = CURVE_DEPTH;
+
+  return `
+    M 0 0
+    H ${left}
+    C ${center - CUTOUT_RADIUS - 6} 0 ${center - CUTOUT_RADIUS} 0 ${center - CUTOUT_RADIUS + 8} ${d * 0.4}
+    C ${center - CUTOUT_RADIUS * 0.5} ${d} ${center - CUTOUT_RADIUS * 0.22} ${d} ${center} ${d}
+    C ${center + CUTOUT_RADIUS * 0.22} ${d} ${center + CUTOUT_RADIUS * 0.5} ${d} ${center + CUTOUT_RADIUS - 8} ${d * 0.4}
+    C ${center + CUTOUT_RADIUS} 0 ${center + CUTOUT_RADIUS + 6} 0 ${right} 0
+    H ${width}
+    V ${height}
+    H 0
+    Z
+  `;
+}
 
 const BottomBar: React.FC = () => {
   const router = useRouter();
@@ -19,50 +63,18 @@ const BottomBar: React.FC = () => {
   const { colorScheme } = useTheme();
   const { primaryColor, colors, brand } = useAppTheme();
   const { isAuthenticated } = useAuth();
+  const { cityServicesEnabled } = useCityServicesAccess();
   const insets = useSafeAreaInsets();
   const dark = colorScheme === 'dark';
-  const tabHeight = 64;
-  const totalHeight = tabHeight + insets.bottom;
 
-  const tabs = [
-    { id: 'home', label: 'Accueil', icon: 'home', path: '/home' },
-    { id: 'events', label: 'Évènement', icon: 'calendar', path: '/events' },
-    { id: 'center', label: 'Signaler', icon: 'paper-plane', path: '/carte', isCenter: true },
-    { id: 'contact', label: 'Contact', icon: 'chatbubble', path: '/contact' },
-    { id: 'profile', label: 'Profile', icon: 'person', path: '/profile' },
-  ];
+  const totalHeight = TAB_BAR_HEIGHT + insets.bottom;
+  const surfaceColor = dark ? '#18181B' : '#FFFFFF';
+  const inactiveColor = dark ? '#71717A' : '#6B7280';
+  const borderColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const tabBarPath = buildTabBarPath(SCREEN_WIDTH, totalHeight);
+  const isCarteActive = pathname === '/carte';
 
-  const inactiveColor = dark ? palette.nightMuted : palette.muted;
-
-  const getIconColor = (path: string) => {
-    if (pathname === path) return primaryColor;
-    return inactiveColor;
-  };
-
-  const getLabelStyle = (path: string) => {
-    if (pathname === path) return { color: primaryColor, fontWeight: '700' as const };
-    return { color: inactiveColor };
-  };
-
-  const fabBorderColor = colors.fabBorder;
-
-  const center = SCREEN_WIDTH / 2;
-  const cutoutRadius = 42;
-  const cornerRadius = 12;
-
-  const d = `
-    M 0 0
-    L ${center - cutoutRadius - cornerRadius} 0
-    Q ${center - cutoutRadius} 0, ${center - cutoutRadius} ${cornerRadius}
-    A ${cutoutRadius} ${cutoutRadius} 0 0 0 ${center + cutoutRadius} ${cornerRadius}
-    Q ${center + cutoutRadius} 0, ${center + cutoutRadius + cornerRadius} 0
-    L ${SCREEN_WIDTH} 0
-    V ${totalHeight}
-    H 0
-    Z
-  `;
-
-  const handlePress = (tab: (typeof tabs)[0]) => {
+  const handlePress = (tab: TabItem) => {
     if (tab.id === 'profile' && !isAuthenticated) {
       router.replace({ pathname: '/login', params: { redirectTo: '/profile' } } as RouteHref);
       return;
@@ -74,44 +86,77 @@ const BottomBar: React.FC = () => {
     <View style={StyleSheet.absoluteFill}>
       {Platform.OS === 'ios' ? (
         <BlurView
-          intensity={dark ? 80 : 95}
+          intensity={dark ? 72 : 88}
           tint={dark ? 'dark' : 'light'}
           style={StyleSheet.absoluteFill}
         />
-      ) : (
-        <View
-          style={[StyleSheet.absoluteFill, { backgroundColor: colors.tabBar, opacity: 0.95 }]}
+      ) : null}
+      <View
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor: surfaceColor,
+            opacity: Platform.OS === 'ios' ? 0.92 : 0.98,
+          },
+        ]}
+      />
+      <Svg width={SCREEN_WIDTH} height={totalHeight} style={styles.svgLayer}>
+        <Path d={tabBarPath} fill={surfaceColor} />
+        <Path
+          d={`M 0 0.5 H ${SCREEN_WIDTH}`}
+          stroke={borderColor}
+          strokeWidth={StyleSheet.hairlineWidth}
         />
-      )}
-      <Svg width={SCREEN_WIDTH} height={totalHeight} style={{ position: 'absolute', top: 0 }}>
-        <Path d={d} fill={colors.tabBar} />
       </Svg>
     </View>
   );
 
   return (
-    <View pointerEvents='box-none' style={[styles.container, { height: totalHeight }]}>
+    <View
+      pointerEvents='box-none'
+      style={[
+        styles.container,
+        styles.containerShadow,
+        { height: totalHeight, shadowOpacity: dark ? 0.35 : 0.1 },
+      ]}>
       <Background />
 
-      <View style={[styles.tabsContainer, { height: tabHeight }]}>
-        {tabs.map((tab, _index) => {
+      <View style={[styles.tabsContainer, { height: TAB_BAR_HEIGHT }]}>
+        {TABS.map((tab) => {
           if (tab.isCenter) {
             return <View key={tab.id} style={styles.centerSpace} pointerEvents='none' />;
           }
+
+          const active = pathname === tab.path;
+          const iconName = (active ? tab.icon : `${tab.icon}-outline`) as IconName;
 
           return (
             <Pressable
               key={tab.id}
               onPress={() => handlePress(tab)}
-              style={styles.tab}
+              style={({ pressed }) => [styles.tab, pressed && styles.tabPressed]}
               accessibilityRole='button'
-              accessibilityLabel={tab.label}>
-              <Ionicons
-                name={(pathname === tab.path ? tab.icon : `${tab.icon}-outline`) as IconName}
-                size={22}
-                color={getIconColor(tab.path)}
-              />
-              <Text style={[styles.label, getLabelStyle(tab.path)]}>{tab.label}</Text>
+              accessibilityLabel={tab.label}
+              accessibilityState={{ selected: active }}>
+              <View
+                style={[
+                  styles.tabIconWrap,
+                  active && {
+                    backgroundColor: dark ? 'rgba(255,255,255,0.08)' : `${primaryColor}14`,
+                  },
+                ]}>
+                <Ionicons name={iconName} size={22} color={active ? primaryColor : inactiveColor} />
+              </View>
+              <Text
+                style={[
+                  styles.label,
+                  active
+                    ? { color: primaryColor, fontFamily: 'Inter_700Bold' }
+                    : { color: inactiveColor },
+                ]}
+                numberOfLines={1}>
+                {tab.label}
+              </Text>
             </Pressable>
           );
         })}
@@ -120,19 +165,32 @@ const BottomBar: React.FC = () => {
       <View style={styles.centerButtonContainer} pointerEvents='box-none'>
         <Pressable
           onPress={() => {
-            if (!ensureAuthenticatedForReport(isAuthenticated, router)) return;
+            if (!ensureCanReport(isAuthenticated, cityServicesEnabled, router)) return;
             router.push({ pathname: '/carte', params: { action: 'report' } } as RouteHref);
           }}
-          style={[
+          style={({ pressed }) => [
             styles.centerButton,
-            colors.softShadow,
-            { backgroundColor: primaryColor, borderColor: fabBorderColor },
+            {
+              backgroundColor: primaryColor,
+              borderColor: surfaceColor,
+              transform: [{ scale: pressed ? 0.96 : 1 }],
+            },
+            isCarteActive && styles.centerButtonActiveRing,
+            isCarteActive && { borderColor: `${primaryColor}40` },
           ]}
           accessibilityRole='button'
-          accessibilityLabel='Signaler'>
-          <Ionicons name='paper-plane' size={24} color={brand.onPrimary} />
+          accessibilityLabel='Signaler'
+          accessibilityState={{ selected: isCarteActive }}>
+          <Ionicons name='paper-plane' size={26} color={brand.onPrimary} />
         </Pressable>
-        <Text style={[styles.centerLabel, { color: dark ? palette.nightText : primaryColor }]}>
+        <Text
+          style={[
+            styles.centerLabel,
+            {
+              color: isCarteActive || !dark ? primaryColor : '#FFFFFF',
+              fontFamily: isCarteActive ? 'Inter_700Bold' : 'Inter_600SemiBold',
+            },
+          ]}>
           Signaler
         </Text>
       </View>
@@ -147,45 +205,76 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
+  containerShadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -6 },
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  svgLayer: {
+    position: 'absolute',
+    top: 0,
+  },
   tabsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
   },
   tab: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 8,
+    paddingTop: 6,
+    minHeight: 48,
+  },
+  tabPressed: {
+    opacity: 0.75,
+  },
+  tabIconWrap: {
+    width: 40,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
   },
   centerSpace: {
     flex: 1,
   },
   label: {
     fontSize: 10,
-    marginTop: 4,
+    marginTop: 2,
     fontFamily: 'Inter_500Medium',
+    letterSpacing: 0.1,
   },
   centerButtonContainer: {
     position: 'absolute',
-    top: -15,
+    top: FAB_LIFT,
     left: 0,
     right: 0,
     alignItems: 'center',
   },
   centerButton: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
+    width: FAB_SIZE,
+    height: FAB_SIZE,
+    borderRadius: FAB_SIZE / 2,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 4,
+    borderWidth: FAB_RING,
+    shadowColor: '#0B0080',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
+    elevation: 10,
+  },
+  centerButtonActiveRing: {
+    shadowOpacity: 0.38,
+    shadowRadius: 18,
   },
   centerLabel: {
     fontSize: 11,
-    fontWeight: '700',
-    marginTop: 6,
+    marginTop: 5,
+    letterSpacing: 0.2,
   },
 });
 

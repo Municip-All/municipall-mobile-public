@@ -10,6 +10,8 @@ type ConvinceMayorModalProps = {
   dark: boolean;
   primaryColor: string;
   bottomInset?: number;
+  /** Inscription : créer un compte sans commune partenaire */
+  onContinueWithoutCity?: () => void;
 };
 
 export default function ConvinceMayorModal({
@@ -19,6 +21,7 @@ export default function ConvinceMayorModal({
   dark,
   primaryColor,
   bottomInset = 0,
+  onContinueWithoutCity,
 }: ConvinceMayorModalProps) {
   const { colors } = useAppTheme();
 
@@ -81,6 +84,25 @@ export default function ConvinceMayorModal({
             Envoyer un email à ma mairie
           </Text>
         </TouchableOpacity>
+
+        {onContinueWithoutCity ? (
+          <TouchableOpacity
+            onPress={() => {
+              onClose();
+              onContinueWithoutCity();
+            }}
+            activeOpacity={0.85}
+            accessibilityLabel='Créer mon compte quand même'
+            accessibilityRole='button'
+            style={[
+              styles.outlineBtn,
+              { borderColor: dark ? '#52525b' : '#d4d4d8' },
+            ]}>
+            <Text style={[styles.outlineBtnText, { color: dark ? '#fafafa' : '#18181b' }]}>
+              Créer mon compte quand même
+            </Text>
+          </TouchableOpacity>
+        ) : null}
 
         <TouchableOpacity
           onPress={onClose}
@@ -150,6 +172,18 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   primaryBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  outlineBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingVertical: 14,
+    marginBottom: 8,
+  },
+  outlineBtnText: {
     fontSize: 15,
     fontWeight: '700',
   },

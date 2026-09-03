@@ -19,7 +19,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useAuth } from '@context/authcontext';
-import { ensureAuthenticatedForReport } from '../lib/requireAuthForReport';
+import { ensureCanReport } from '../lib/requireAuthForReport';
+import { useCityServicesAccess } from '@hooks/useCityServicesAccess';
 import { reportService } from '../services/reportService';
 import { pickProofImage } from '../utils/pickProofImage';
 import { getReportLocation, LocationPermissionError } from '../utils/reportLocation';
@@ -37,6 +38,7 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
     const allowCloseRef = useRef(false);
     const { dark, primaryColor, classes, colors } = useAppTheme();
     const { isAuthenticated, user } = useAuth();
+    const { cityServicesEnabled } = useCityServicesAccess();
     const router = useRouter();
     const insets = useSafeAreaInsets();
 
@@ -103,7 +105,7 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
 
     useImperativeHandle(ref, () => ({
       open: () => {
-        if (!ensureAuthenticatedForReport(isAuthenticated, router)) return;
+        if (!ensureCanReport(isAuthenticated, cityServicesEnabled, router)) return;
         modalizeRef.current?.open();
       },
       close: () => closeWithoutConfirm(),
@@ -151,8 +153,7 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
         return;
       }
 
-      if (!isAuthenticated || !user) {
-        ensureAuthenticatedForReport(false, router);
+      if (!ensureCanReport(isAuthenticated, cityServicesEnabled, router) || !user) {
         return;
       }
 

@@ -17,6 +17,8 @@ import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { palette } from '@constants/design';
 import { eventsService, CityEvent } from '../services/eventsService';
+import { useCityServicesAccess } from '@hooks/useCityServicesAccess';
+import NoPartnerCityBanner from '@components/NoPartnerCityBanner';
 
 const FILTERS = ['Tous', 'Culture', 'Sport', 'Social', 'Éducation', 'Cérémonie'] as const;
 
@@ -125,6 +127,7 @@ function EventCard({ event }: { event: CityEvent }) {
 export default function Events() {
   const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
   const { config, refreshConfig } = useCity();
+  const { cityServicesEnabled, needsPartnerCity } = useCityServicesAccess();
   const insets = useSafeAreaInsets();
   const [activeFilter, setActiveFilter] = useState<(typeof FILTERS)[number]>('Tous');
   const [events, setEvents] = useState<CityEvent[]>([]);
@@ -132,7 +135,8 @@ export default function Events() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const agendaEnabled = config?.features?.includes('agenda') ?? false;
+  const agendaEnabled =
+    cityServicesEnabled && (config?.features?.includes('agenda') ?? false);
 
   useFocusEffect(
     useCallback(() => {
@@ -204,7 +208,17 @@ export default function Events() {
           {config?.name ? <Text className={`mt-1 ${classes.subtitle}`}>{config.name}</Text> : null}
         </View>
 
-        {!agendaEnabled ? (
+        {!cityServicesEnabled ? (
+          needsPartnerCity ? (
+            <NoPartnerCityBanner />
+          ) : (
+            <View className={`p-8 ${classes.cardRounded}`}>
+              <Text className={classes.body}>
+                Les événements municipaux ne sont pas disponibles pour cette commune.
+              </Text>
+            </View>
+          )
+        ) : !agendaEnabled ? (
           <View className={`p-8 ${classes.cardRounded}`}>
             <Ionicons name='calendar-outline' size={40} color={primaryColor} />
             <Text

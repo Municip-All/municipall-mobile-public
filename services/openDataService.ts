@@ -9,7 +9,7 @@ type ParisRecord = {
   geo_point_2d?: { lat?: number; lon?: number };
 };
 
-export async function fetchCompostMarkers(limit = 30): Promise<CompostMarker[]> {
+export async function fetchCompostMarkers(limit = 24): Promise<CompostMarker[]> {
   const response = await axios.get<{ results: ParisRecord[] }>(
     `${PARIS_API}/dechets-menagers-points-dapport-volontaire-composteurs/records`,
     { params: { limit } }
@@ -33,7 +33,7 @@ export async function fetchCompostMarkers(limit = 30): Promise<CompostMarker[]> 
   return markers;
 }
 
-export async function fetchPublicToilets(limit = 50): Promise<ToiletMarker[]> {
+export async function fetchPublicToilets(limit = 40): Promise<ToiletMarker[]> {
   const response = await axios.get<{ results: ParisRecord[] }>(
     `${PARIS_API}/sanisettesparis/records`,
     { params: { limit } }

@@ -17,8 +17,10 @@ import BottomBar from '@components/BottomBar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { reportService, Report } from '../services/reportService';
-import { ensureAuthenticatedForReport } from '../lib/requireAuthForReport';
+import { ensureCanReport } from '../lib/requireAuthForReport';
 import { palette, semanticColors } from '@constants/design';
+import { useCityServicesAccess } from '@hooks/useCityServicesAccess';
+import NoPartnerCityBanner from '@components/NoPartnerCityBanner';
 
 function normalizeStatus(status: string): string {
   return status.trim().toLowerCase();
@@ -158,6 +160,7 @@ function ReportCard({
 export default function SignalementsList() {
   const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
   const { isAuthenticated } = useAuth();
+  const { needsPartnerCity, cityServicesEnabled } = useCityServicesAccess();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -169,7 +172,7 @@ export default function SignalementsList() {
 
   const loadReports = useCallback(
     async (signal?: { cancelled: boolean }) => {
-      if (!isAuthenticated) {
+      if (!isAuthenticated || needsPartnerCity) {
         setReports([]);
         setLoading(false);
         return;
@@ -187,7 +190,7 @@ export default function SignalementsList() {
         if (!signal?.cancelled) setLoading(false);
       }
     },
-    [isAuthenticated]
+    [isAuthenticated, needsPartnerCity]
   );
 
   useEffect(() => {
@@ -209,7 +212,7 @@ export default function SignalementsList() {
   const filteredReports = activeReports.filter((r) => matchesFilter(r, activeFilter));
 
   const openNewReport = () => {
-    if (!ensureAuthenticatedForReport(isAuthenticated, router)) return;
+    if (!ensureCanReport(isAuthenticated, cityServicesEnabled, router)) return;
     router.push({ pathname: '/carte', params: { action: 'report' } });
   };
 
@@ -248,6 +251,8 @@ export default function SignalementsList() {
               <Text className='text-cream-50 text-sm font-bold'>Se connecter</Text>
             </TouchableOpacity>
           </View>
+        ) : needsPartnerCity ? (
+          <NoPartnerCityBanner />
         ) : (
           <>
             <View style={styles.filterRow}>
