@@ -19,7 +19,7 @@ module.exports = {
           200: '#EBE6D9',
         },
         charcoal: '#313B2B',
-        muted: '#76806C',
+        muted: '#5C6654',
         sake: '#D2543F',
         amber: '#E09A2D',
         info: '#5B87B0',

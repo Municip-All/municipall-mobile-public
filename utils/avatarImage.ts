@@ -1,7 +1,18 @@
-import { File, Paths } from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
+import { File } from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const localAvatarKey = (userId: number) => `user_avatar_local_${userId}`;
+
+/** Limite pratique (~900 KB binaire) pour éviter 413 / timeouts API. */
+const MAX_AVATAR_DATA_URL_LENGTH = 1_200_000;
+
+function inferMimeFromUri(uri: string): string {
+  const lower = uri.toLowerCase().split('?')[0];
+  if (lower.endsWith('.png')) return 'image/png';
+  if (lower.endsWith('.webp')) return 'image/webp';
+  return 'image/jpeg';
+}
 
 function uint8ToBase64(bytes: Uint8Array): string {
   let binary = '';
@@ -12,19 +23,39 @@ function uint8ToBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
+function assertAvatarSize(dataUrl: string): void {
+  if (dataUrl.length > MAX_AVATAR_DATA_URL_LENGTH) {
+    throw new Error('AVATAR_TOO_LARGE');
+  }
+}
+
 /** Convertit une image locale en data URL pour persistance côté API. */
 export async function localImageUriToDataUrl(uri: string): Promise<string> {
+  try {
+    const base64 = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    const dataUrl = `data:${inferMimeFromUri(uri)};base64,${base64}`;
+    assertAvatarSize(dataUrl);
+    return dataUrl;
+  } catch (error) {
+    if (error instanceof Error && error.message === 'AVATAR_TOO_LARGE') {
+      throw error;
+    }
+  }
+
   const file = new File(uri);
   const buffer = await file.arrayBuffer();
   const ext = file.extension?.toLowerCase();
   const mime = ext === '.png' ? 'image/png' : 'image/jpeg';
-  const base64 = uint8ToBase64(new Uint8Array(buffer));
-  return `data:${mime};base64,${base64}`;
+  const dataUrl = `data:${mime};base64,${uint8ToBase64(new Uint8Array(buffer))}`;
+  assertAvatarSize(dataUrl);
+  return dataUrl;
 }
 
 /**
  * Prépare une image pour l'API.
- * La compression se fait à la sélection (quality dans ImagePicker), pas via module natif.
+ * La compression se fait à la sélection (quality dans ImagePicker).
  */
 export async function prepareImageForUpload(uri: string): Promise<string> {
   return localImageUriToDataUrl(uri);
@@ -41,8 +72,8 @@ function isLocalFileAvatar(url: string): boolean {
 
 async function localFileAvatarExists(url: string): Promise<boolean> {
   try {
-    const info = Paths.info(url);
-    return info.exists === true;
+    const info = await FileSystem.getInfoAsync(url);
+    return info.exists;
   } catch {
     return false;
   }

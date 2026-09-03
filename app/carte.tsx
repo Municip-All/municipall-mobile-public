@@ -15,7 +15,8 @@ import TransportMapCallout from '@components/TransportMapCallout';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { useAuth } from '@context/authcontext';
-import { ensureAuthenticatedForReport } from '../lib/requireAuthForReport';
+import { ensureCanReport } from '../lib/requireAuthForReport';
+import { useCityServicesAccess } from '@hooks/useCityServicesAccess';
 import type { ReportLocationGroup } from '../lib/groupReportsByLocation';
 import type { TransportStopMarker } from '../services/transportService';
 import { semanticColors } from '@constants/design';
@@ -26,6 +27,7 @@ export default function Carte() {
   const { layoutStyles, primaryColor } = useAppTheme();
   const { config, loading: cityLoading } = useCity();
   const { isAuthenticated } = useAuth();
+  const { cityServicesEnabled } = useCityServicesAccess();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { action } = useLocalSearchParams<{ action?: string }>();
@@ -98,13 +100,13 @@ export default function Carte() {
 
   useEffect(() => {
     if (action !== 'report') return;
-    if (!isAuthenticated) {
-      ensureAuthenticatedForReport(false, router);
+    if (!ensureCanReport(isAuthenticated, cityServicesEnabled, router)) {
       router.replace('/carte');
       return;
     }
     reportSheetRef.current?.open();
-  }, [action, isAuthenticated, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ouverture liée au deep link ?action=report
+  }, [action, isAuthenticated, cityServicesEnabled]);
 
   if (cityLoading) {
     return (
@@ -147,7 +149,7 @@ export default function Carte() {
           bottomInset={insets.bottom}
           onClose={() => setSelectedReportGroup(null)}
           onOpenReport={(reportId) => {
-            if (!ensureAuthenticatedForReport(isAuthenticated, router)) return;
+            if (!ensureCanReport(isAuthenticated, cityServicesEnabled, router)) return;
             router.push({ pathname: '/report-chat', params: { id: String(reportId) } });
           }}
         />

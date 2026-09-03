@@ -12,7 +12,7 @@ export interface AuthSignupPayload {
   email: string;
   password: string;
   phone: string;
-  cityId: string;
+  cityId?: string;
 }
 
 export const authService = {

@@ -10,7 +10,8 @@ export const palette = {
   cream100: '#F8F6EF',
   cream200: '#EBE6D9',
   charcoal: '#313B2B',
-  muted: '#76806C',
+  /** Secondaire light — ≥ 4.5:1 sur cream/blanc (WCAG AA) */
+  muted: '#5C6654',
   sake400: '#D2543F',
   amber400: '#E09A2D',
   info400: '#5B87B0',

@@ -4,6 +4,7 @@ import { cityService, CityConfig } from '../services/cityService';
 import * as Location from 'expo-location';
 import { isAxiosError } from 'axios';
 import apiClient, { setApiTenantId } from '../services/apiClient';
+import { buildGenericMunicipallConfig } from '../lib/genericMunicipallConfig';
 
 export interface WeatherData {
   temp: number;
@@ -23,6 +24,10 @@ interface CityContextType {
   refreshConfig: () => Promise<void>;
   /** Recharge config + tenant (marque blanche après login ou changement de ville) */
   applyBrandingCity: (cityId: string) => Promise<void>;
+  /** Marque Municip'All générique (compte sans commune partenaire) */
+  applyGenericBranding: () => void;
+  /** Repositionne tenant/config après déconnexion (GPS ou défaut) */
+  reinitializeFromLocation: () => Promise<void>;
 }
 
 const CityContext = createContext<CityContextType | undefined>(undefined);
@@ -41,11 +46,12 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const refreshConfig = useCallback(async () => {
-    if (!tenantId) return;
+    if (!tenantId || tenantId === 'platform') return;
     try {
       const cfg = await cityService.getCityConfig(tenantId);
       setConfig(cfg);
     } catch (error: unknown) {
+      if (isAxiosError(error) && error.response?.status === 429) return;
       console.error('CityContext: Failed to refresh config', error);
     }
   }, [tenantId]);
@@ -58,11 +64,51 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
         setTenantId(cityId);
         setConfig(cfg);
       } catch (error: unknown) {
+        if (isAxiosError(error) && error.response?.status === 429) return;
         console.error('CityContext: Failed to apply branding city', error);
       }
     },
     [setTenantId]
   );
+
+  const applyGenericBranding = useCallback(() => {
+    setTenantId('platform');
+    setConfig(buildGenericMunicipallConfig());
+    setWeatherData(null);
+    setWeatherError(null);
+  }, [setTenantId]);
+
+  const reinitializeFromLocation = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        const detectedCity = await cityService.detectCity(
+          location.coords.latitude,
+          location.coords.longitude
+        );
+        if (detectedCity?.id) {
+          setTenantId(detectedCity.id);
+          setConfig(detectedCity);
+          return;
+        }
+      }
+    } catch {}
+
+    try {
+      const fallbackConfig = await cityService.getCityConfig(Config.DEFAULT_TENANT_ID);
+      setTenantId(Config.DEFAULT_TENANT_ID);
+      setConfig(fallbackConfig);
+    } catch (error: unknown) {
+      console.error('CityContext: Failed to fetch fallback config', error);
+      applyGenericBranding();
+    } finally {
+      setLoading(false);
+    }
+  }, [setTenantId, applyGenericBranding]);
 
   const fetchWeather = useCallback(async () => {
     if (!config?.features?.includes('weather')) {
@@ -182,6 +228,8 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
       fetchWeather,
       refreshConfig,
       applyBrandingCity,
+      applyGenericBranding,
+      reinitializeFromLocation,
     }),
     [
       config,
@@ -193,6 +241,8 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
       fetchWeather,
       refreshConfig,
       applyBrandingCity,
+      applyGenericBranding,
+      reinitializeFromLocation,
     ]
   );
 

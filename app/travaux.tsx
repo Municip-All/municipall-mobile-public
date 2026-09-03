@@ -13,9 +13,12 @@ import BottomBar from '@components/BottomBar';
 import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constructionWorksService, ConstructionWork } from '../services/constructionWorksService';
+import { useCityServicesAccess } from '@hooks/useCityServicesAccess';
+import NoPartnerCityBanner from '@components/NoPartnerCityBanner';
 
 export default function Travaux() {
   const { dark, primaryColor, classes, colors, tintColor, layoutStyles } = useAppTheme();
+  const { needsPartnerCity, cityServicesEnabled } = useCityServicesAccess();
   const insets = useSafeAreaInsets();
 
   const [works, setWorks] = useState<ConstructionWork[]>([]);
@@ -64,6 +67,32 @@ export default function Travaux() {
   };
 
   const getStatusBg = (status: string) => tintColor(getStatusColor(status), '18');
+
+  if (!cityServicesEnabled) {
+    return (
+      <View style={layoutStyles.page}>
+        <ScrollView
+          contentContainerStyle={{
+            paddingTop: insets.top + 20,
+            paddingBottom: 120,
+            paddingHorizontal: 20,
+          }}>
+          <View className='mb-8'>
+            <Text className={classes.eyebrow}>Infrastructure</Text>
+            <Text className={classes.title}>Travaux</Text>
+          </View>
+          {needsPartnerCity ? (
+            <NoPartnerCityBanner />
+          ) : (
+            <Text className={classes.body}>
+              Les informations sur les travaux ne sont pas disponibles pour cette commune.
+            </Text>
+          )}
+        </ScrollView>
+        <BottomBar />
+      </View>
+    );
+  }
 
   return (
     <View style={layoutStyles.page}>

@@ -12,7 +12,7 @@ function configCacheKey(config: CityConfig | null): string {
   ].join('|');
 }
 
-export function useHomeHighlights(config: CityConfig | null) {
+export function useHomeHighlights(config: CityConfig | null, enabled = true) {
   const [highlights, setHighlights] = useState<HomeHighlight[]>([]);
   const [loading, setLoading] = useState(false);
   const configRef = useRef(config);
@@ -22,7 +22,7 @@ export function useHomeHighlights(config: CityConfig | null) {
 
   const refresh = useCallback(async (options?: { silent?: boolean }) => {
     const cfg = configRef.current;
-    if (!cfg) {
+    if (!cfg || !enabled) {
       setHighlights([]);
       setLoading(false);
       return;
@@ -52,9 +52,9 @@ export function useHomeHighlights(config: CityConfig | null) {
       inFlightRef.current = false;
       if (!silent) setLoading(false);
     }
-  }, []);
+  }, [enabled]);
 
-  const cacheKey = configCacheKey(config);
+  const cacheKey = enabled ? configCacheKey(config) : '';
 
   useEffect(() => {
     if (!cacheKey) return;
