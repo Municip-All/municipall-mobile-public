@@ -11,7 +11,7 @@ type Props = {
 };
 
 export default function LegalDocumentScreen({ document, showBackHeader = true }: Props) {
-  const { dark, classes, layoutStyles } = useAppTheme();
+  const { classes, layoutStyles, typeStyles, colors } = useAppTheme();
   const insets = useSafeAreaInsets();
 
   return (
@@ -25,34 +25,35 @@ export default function LegalDocumentScreen({ document, showBackHeader = true }:
         }}
         showsVerticalScrollIndicator={false}>
         {!showBackHeader ? (
-          <Text className={`mb-2 ${classes.sectionTitle}`}>{document.title}</Text>
+          <Text className={`mb-2 ${classes.sectionTitle}`} style={typeStyles.sectionTitle}>{document.title}</Text>
         ) : null}
-        <Text className={`mb-6 ${classes.meta}`}>{document.subtitle}</Text>
+        <Text className={`mb-6 ${classes.meta}`} style={typeStyles.meta}>{document.subtitle}</Text>
 
         {document.sections.map((section) => (
           <View key={section.title} className='mb-6'>
             <Text
-              className={`mb-2 text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`mb-2 text-base font-bold`} style={{ color: colors.textPrimary }}>
               {section.title}
             </Text>
             {section.paragraphs?.map((p, i) => (
-              <Text key={`p-${i}`} className={`mb-3 ${classes.body}`}>
+              <Text key={`p-${i}`} className={`mb-3 ${classes.body}`} style={typeStyles.body}>
                 {p}
               </Text>
             ))}
             {section.bullets?.map((b, i) => (
               <View key={`b-${i}`} className='mb-2 flex-row pl-1'>
-                <Text className={`mr-2 ${classes.body}`}>•</Text>
-                <Text className={`flex-1 ${classes.body}`}>{b}</Text>
+                <Text className={`mr-2 ${classes.body}`} style={typeStyles.body}>•</Text>
+                <Text className={`flex-1 ${classes.body}`} style={typeStyles.body}>{b}</Text>
               </View>
             ))}
           </View>
         ))}
 
         <View
-          className={`mt-2 rounded-2xl border p-4 ${dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'}`}>
-          <Text className={classes.meta}>Document {LEGAL_ENTITY.documentVersion}</Text>
-          <Text className={`mt-1 ${classes.body}`}>
+          className='mt-2 rounded-2xl border p-4'
+          style={{ borderColor: colors.border, backgroundColor: colors.card }}>
+          <Text className={classes.meta} style={typeStyles.meta}>Document {LEGAL_ENTITY.documentVersion}</Text>
+          <Text className={`mt-1 ${classes.body}`} style={typeStyles.body}>
             {LEGAL_ENTITY.publisherName} — {LEGAL_ENTITY.website}
           </Text>
         </View>

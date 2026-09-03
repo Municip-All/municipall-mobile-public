@@ -24,7 +24,7 @@ const FAQ = [
 ];
 
 export default function ProfileHelpScreen() {
-  const { dark, classes, primaryColor, colors, layoutStyles } = useAppTheme();
+  const { dark, classes, primaryColor, colors, layoutStyles, typeStyles } = useAppTheme();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -54,7 +54,7 @@ export default function ProfileHelpScreen() {
     if (authError) {
       return (
         <View style={layoutStyles.page} className='items-center justify-center px-6'>
-          <Text className={`text-center text-base ${classes.body}`}>
+          <Text className={`text-center text-base ${classes.body}`} style={typeStyles.body}>
             Vous devez être connecté pour accéder à cette page.
           </Text>
           <TouchableOpacity
@@ -103,7 +103,7 @@ export default function ProfileHelpScreen() {
           paddingBottom: insets.bottom + 32,
           paddingTop: 16,
         }}>
-        <Text className={`mb-3 ml-1 ${classes.meta}`}>Questions fréquentes</Text>
+        <Text className={`mb-3 ml-1 ${classes.meta}`} style={typeStyles.meta}>Questions fréquentes</Text>
         <View className={`mb-8 p-4 ${classes.listGroup}`}>
           {FAQ.map((item, i) => (
             <View
@@ -113,15 +113,15 @@ export default function ProfileHelpScreen() {
                   ? `mb-5 border-b pb-5 ${dark ? 'border-night-border' : 'border-cream-200'}`
                   : ''
               }>
-              <Text className={`text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+              <Text className={`text-sm font-bold`} style={{ color: colors.textPrimary }}>
                 {item.q}
               </Text>
-              <Text className={`mt-2 ${classes.body}`}>{item.a}</Text>
+              <Text className={`mt-2 ${classes.body}`} style={typeStyles.body}>{item.a}</Text>
             </View>
           ))}
         </View>
 
-        <Text className={`mb-3 ml-1 ${classes.meta}`}>Liens utiles</Text>
+        <Text className={`mb-3 ml-1 ${classes.meta}`} style={typeStyles.meta}>Liens utiles</Text>
         <View className={classes.listGroup}>
           {links.map((item, i) => (
             <TouchableOpacity
@@ -137,7 +137,7 @@ export default function ProfileHelpScreen() {
                   <Ionicons name={item.icon} size={18} color={item.color} />
                 </View>
                 <Text
-                  className={`text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+ className={`text-sm font-semibold`} style={{ color: colors.textBody }}>
                   {item.label}
                 </Text>
               </View>

@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { TransportStopMarker } from '../services/transportService';
 import { useTheme } from '@context/themecontext';
 import { palette, softShadow } from '@constants/design';
+import { decodeHtmlEntities } from '../utils/decodeHtmlEntities';
 
 type TransportMapCalloutProps = {
   visible: boolean;
@@ -23,7 +24,9 @@ export default function TransportMapCallout({
   if (!visible || !stop) return null;
 
   const disrupted = stop.status === 'disrupted';
-  const statusColor = disrupted ? palette.amber400 : palette.matcha700;
+  const accent = disrupted ? palette.amber400 : dark ? palette.matcha300 : palette.matcha700;
+  const badgeBg = disrupted ? '#FBBF24' : dark ? '#A3C98F' : palette.matcha700;
+  const badgeFg = disrupted || dark ? '#111827' : '#FFFFFF';
 
   return (
     <View pointerEvents='box-none' style={StyleSheet.absoluteFill}>
@@ -48,8 +51,12 @@ export default function TransportMapCallout({
           ]}
         />
         <View style={styles.header}>
-          <View style={[styles.iconWrap, { backgroundColor: `${statusColor}22` }]}>
-            <Ionicons name='bus' size={22} color={statusColor} />
+          <View
+            style={[
+              styles.iconWrap,
+              { backgroundColor: dark ? palette.nightElevated : `${accent}22` },
+            ]}>
+            <Ionicons name='bus' size={22} color={accent} />
           </View>
           <View style={styles.headerText}>
             <Text
@@ -58,14 +65,14 @@ export default function TransportMapCallout({
               {stop.name}
             </Text>
             {stop.modes.length > 0 ? (
-              <Text style={[styles.subtitle, { color: dark ? palette.nightMuted : palette.muted }]}>
+              <Text style={[styles.subtitle, { color: dark ? '#D4D4D8' : palette.muted }]}>
                 {stop.modes.join(' · ')}
               </Text>
             ) : null}
           </View>
-          <View style={[styles.pill, { backgroundColor: `${statusColor}18` }]}>
-            <Text style={[styles.pillText, { color: statusColor }]}>
-              {disrupted ? 'Perturbation' : 'Trafic normal'}
+          <View style={[styles.pill, { backgroundColor: badgeBg }]}>
+            <Text style={[styles.pillText, { color: badgeFg }]}>
+              {disrupted ? 'PERTURBATION' : 'NORMAL'}
             </Text>
           </View>
         </View>
@@ -75,13 +82,12 @@ export default function TransportMapCallout({
             stop.messages.map((msg, i) => (
               <Text
                 key={`${stop.stopId}-msg-${i}`}
-                style={[styles.message, { color: dark ? palette.nightText : palette.charcoal }]}>
-                {msg}
+                style={[styles.message, { color: dark ? '#F4F4F5' : palette.charcoal }]}>
+                {decodeHtmlEntities(msg)}
               </Text>
             ))
           ) : (
-            <Text
-              style={[styles.messageMuted, { color: dark ? palette.nightMuted : palette.muted }]}>
+            <Text style={[styles.messageMuted, { color: dark ? '#D4D4D8' : palette.muted }]}>
               Aucune perturbation signalée sur cet arrêt pour le moment.
             </Text>
           )}

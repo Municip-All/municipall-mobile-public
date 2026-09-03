@@ -5,7 +5,7 @@ import type { RouteHref } from '../lib/types';
 
 export default function LegalFooterLinks() {
   const router = useRouter();
-  const { dark, primaryColor } = useAppTheme();
+  const { primaryColor, colors } = useAppTheme();
 
   const Item = ({ label, href }: { label: string; href: string }) => (
     <TouchableOpacity
@@ -23,9 +23,9 @@ export default function LegalFooterLinks() {
     <View className='items-center px-4 pb-2'>
       <View className='flex-row flex-wrap items-center justify-center'>
         <Item label='CGU' href='/legal/cgu' />
-        <Text className={`text-[11px] ${dark ? 'text-night-muted' : 'text-muted'}`}>·</Text>
+        <Text className={`text-[11px]`} style={{ color: colors.textSecondary }}>·</Text>
         <Item label='Confidentialité' href='/legal/privacy' />
-        <Text className={`text-[11px] ${dark ? 'text-night-muted' : 'text-muted'}`}>·</Text>
+        <Text className={`text-[11px]`} style={{ color: colors.textSecondary }}>·</Text>
         <Item label='Mentions légales' href='/legal/mentions-legales' />
       </View>
       <TouchableOpacity
@@ -33,7 +33,7 @@ export default function LegalFooterLinks() {
         className='mt-1 py-1'
         accessibilityLabel='Informations légales complètes'
         accessibilityRole='link'>
-        <Text className={`text-[10px] ${dark ? 'text-night-muted' : 'text-muted'}`}>
+        <Text className={`text-[10px]`} style={{ color: colors.textSecondary }}>
           Informations légales complètes
         </Text>
       </TouchableOpacity>

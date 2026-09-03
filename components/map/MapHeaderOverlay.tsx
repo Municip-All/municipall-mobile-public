@@ -90,9 +90,9 @@ export default function MapHeaderOverlay({
         ]}>
         <View style={styles.bar}>
           <Text
-            numberOfLines={1}
-            className={`flex-1 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}
-            style={styles.title}>
+ numberOfLines={1}
+ className={`flex-1 text-sm font-bold`}
+ style={[{ color: colors.textPrimary }, styles.title]}>
             {cityName}
           </Text>
           <View style={styles.actions}>
@@ -162,8 +162,8 @@ export default function MapHeaderOverlay({
                     color={layer.active ? primaryColor : colors.iconMuted}
                   />
                   <Text
-                    numberOfLines={1}
-                    className={`ml-1.5 text-[10px] font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+ numberOfLines={1}
+ className={`ml-1.5 text-[10px] font-semibold`} style={{ color: colors.textBody }}>
                     {layer.label}
                   </Text>
                 </TouchableOpacity>
@@ -174,8 +174,8 @@ export default function MapHeaderOverlay({
                 <View key={item.label} style={styles.legendItem}>
                   <View style={[styles.legendDot, { backgroundColor: item.color }]} />
                   <Text
-                    numberOfLines={1}
-                    className={`text-[9px] font-medium ${dark ? 'text-night-muted' : 'text-muted'}`}>
+ numberOfLines={1}
+ className={`text-[9px] font-medium`} style={{ color: colors.textSecondary }}>
                     {item.label}
                   </Text>
                 </View>

@@ -26,7 +26,7 @@ export default function ReportChatScreen() {
   const reportId = Number(id);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles, typeStyles } = useAppTheme();
   const { user } = useAuth();
 
   const [report, setReport] = useState<ReportDetail | null>(null);
@@ -109,7 +109,7 @@ export default function ReportChatScreen() {
   if (!report) {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
-        <Text className={classes.body}>Signalement introuvable.</Text>
+        <Text className={classes.body} style={typeStyles.body}>Signalement introuvable.</Text>
         <TouchableOpacity
           onPress={() => router.back()}
           className='mt-4'
@@ -140,11 +140,11 @@ export default function ReportChatScreen() {
           </TouchableOpacity>
           <View className='flex-1'>
             <Text
-              numberOfLines={1}
-              className={`text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ numberOfLines={1}
+ className={`text-base font-bold`} style={{ color: colors.textPrimary }}>
               {report.category}
             </Text>
-            <Text className={`text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
+            <Text className={`text-xs`} style={{ color: colors.textSecondary }}>
               REF-{String(report.id).padStart(4, '0')} · {report.status}
               {isClosed ? ' · Dossier clôturé' : ''}
             </Text>
@@ -156,10 +156,10 @@ export default function ReportChatScreen() {
         <View
           className={`border-b px-4 py-3 ${dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-100'}`}>
           <Text
-            className={`text-xs font-bold tracking-wide uppercase ${dark ? 'text-night-muted' : 'text-muted'}`}>
+ className={`text-xs font-bold tracking-wide uppercase`} style={{ color: colors.textSecondary }}>
             Votre signalement
           </Text>
-          <Text className={`mt-1 ${classes.body}`}>{report.description}</Text>
+          <Text className={`mt-1 ${classes.body}`} style={typeStyles.body}>{report.description}</Text>
         </View>
       ) : null}
 
@@ -173,7 +173,7 @@ export default function ReportChatScreen() {
           contentContainerStyle={styles.scrollContent}
           onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}>
           {report.messages.length === 0 ? (
-            <Text className={`py-8 text-center text-sm ${classes.body}`}>
+            <Text className={`py-8 text-center text-sm ${classes.body}`} style={typeStyles.body}>
               La mairie vous écrira ici si des précisions sont nécessaires.
             </Text>
           ) : (
@@ -267,7 +267,7 @@ export default function ReportChatScreen() {
             <View
               style={{ paddingBottom: insets.bottom + 8 }}
               className={`px-4 pb-2 ${dark ? 'bg-night-bg' : 'bg-cream-50'}`}>
-              <Text className={`text-center text-xs ${classes.body}`}>
+              <Text className={`text-center text-xs ${classes.body}`} style={typeStyles.body}>
                 Ce signalement est clôturé. Vous ne pouvez plus envoyer de messages.
               </Text>
             </View>

@@ -18,7 +18,7 @@ import FloatingMapButton from '@components/FloatingMapButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function MaCommuneScreen() {
-  const { dark, primaryColor, classes, colors, layoutStyles, brand } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles, brand, typeStyles } = useAppTheme();
   const { config, refreshConfig, loading } = useCity();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -53,7 +53,7 @@ export default function MaCommuneScreen() {
   if (error) {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
-        <Text className={`text-center text-base ${classes.body}`}>{error}</Text>
+        <Text className={`text-center text-base ${classes.body}`} style={typeStyles.body}>{error}</Text>
         <TouchableOpacity
           onPress={() => {
             setError(null);
@@ -93,23 +93,21 @@ export default function MaCommuneScreen() {
           </Text>
         </TouchableOpacity>
 
-        <View className={`mb-6 items-center p-8 ${classes.cardRounded}`}>
+        <View className={`mb-6 items-center p-8 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
           <BrandedLogo size={88} radius={44} mode='contain' />
           <Text
-            className={`mt-4 text-center text-2xl font-extrabold ${
-              dark ? 'text-night-text' : 'text-matcha-900'
-            }`}>
+ className={`mt-4 text-center text-2xl font-extrabold`} style={{ color: colors.textPrimary }}>
             {cityName}
           </Text>
           {appName !== cityName && (
-            <Text className={`mt-1 text-center ${classes.subtitle}`}>Application {appName}</Text>
+            <Text className={`mt-1 text-center ${classes.subtitle}`} style={typeStyles.subtitle}>Application {appName}</Text>
           )}
           {profile?.welcomeText ? (
-            <Text className={`mt-4 text-center text-sm leading-6 ${classes.body}`}>
+            <Text className={`mt-4 text-center text-sm leading-6 ${classes.body}`} style={typeStyles.body}>
               {profile.welcomeText}
             </Text>
           ) : (
-            <Text className={`mt-4 text-center text-sm leading-6 ${classes.body}`}>
+            <Text className={`mt-4 text-center text-sm leading-6 ${classes.body}`} style={typeStyles.body}>
               Bienvenue sur l&apos;application municipale de {cityName}. Retrouvez ici les services,
               l&apos;actualité et les démarches de votre commune.
             </Text>
@@ -117,42 +115,42 @@ export default function MaCommuneScreen() {
         </View>
 
         {mayorName ? (
-          <View className={`mb-4 p-5 ${classes.cardRounded}`}>
-            <Text className={`tracking-widest uppercase ${classes.caption}`}>Élu référent</Text>
+          <View className={`mb-4 p-5 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
+            <Text className={`tracking-widest uppercase ${classes.caption}`} style={typeStyles.caption}>Élu référent</Text>
             <Text
-              className={`mt-2 text-lg font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`mt-2 text-lg font-bold`} style={{ color: colors.textPrimary }}>
               {mayorName}
             </Text>
-            <Text className={`mt-0.5 ${classes.subtitle}`}>{mayorTitle}</Text>
+            <Text className={`mt-0.5 ${classes.subtitle}`} style={typeStyles.subtitle}>{mayorTitle}</Text>
           </View>
         ) : null}
 
         {profile?.description ? (
-          <View className={`mb-4 p-5 ${classes.cardRounded}`}>
+          <View className={`mb-4 p-5 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
             <Text
-              className={`mb-2 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`mb-2 text-sm font-bold`} style={{ color: colors.textPrimary }}>
               À propos
             </Text>
-            <Text className={classes.body}>{profile.description}</Text>
+            <Text className={classes.body} style={typeStyles.body}>{profile.description}</Text>
           </View>
         ) : null}
         <View
           className={`mb-4 p-5 ${classes.cardRounded}`}
-          accessibilityLabel='Informations pratiques'>
+          accessibilityLabel='Informations pratiques' style={layoutStyles.cardRounded}>
           <Text
-            className={`mb-3 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`mb-3 text-sm font-bold`} style={{ color: colors.textPrimary }}>
             Informations pratiques
           </Text>
           {profile?.address ? (
             <View className='mb-3 flex-row gap-3'>
               <Ionicons name='location-outline' size={18} color={primaryColor} />
-              <Text className={`flex-1 ${classes.body}`}>{profile.address}</Text>
+              <Text className={`flex-1 ${classes.body}`} style={typeStyles.body}>{profile.address}</Text>
             </View>
           ) : null}
           {profile?.openingHours ? (
             <View className='mb-3 flex-row gap-3'>
               <Ionicons name='time-outline' size={18} color={primaryColor} />
-              <Text className={`flex-1 ${classes.body}`}>{profile.openingHours}</Text>
+              <Text className={`flex-1 ${classes.body}`} style={typeStyles.body}>{profile.openingHours}</Text>
             </View>
           ) : null}
           {config?.contact?.phone ? (
@@ -205,13 +203,11 @@ export default function MaCommuneScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => router.push('/social')}
-            className={`flex-1 items-center rounded-xl border py-4 ${
-              dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'
-            }`}
+            className={`flex-1 items-center rounded-xl border py-4 ${ dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50' }`}
             style={{ minWidth: '45%' }}
             accessibilityRole='button'
             accessibilityLabel='Vie associative'>
-            <Text className={`text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+            <Text className={`text-sm font-bold`} style={{ color: colors.textPrimary }}>
               Vie associative
             </Text>
           </TouchableOpacity>

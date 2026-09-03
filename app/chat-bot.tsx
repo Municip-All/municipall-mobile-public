@@ -143,10 +143,10 @@ export default function ChatBotScreen() {
             <Ionicons name='leaf' size={20} color={primaryColor} />
           </View>
           <View className='flex-1'>
-            <Text className={`text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+            <Text className={`text-base font-bold`} style={{ color: colors.textPrimary }}>
               Assistant municipal
             </Text>
-            <Text className={`text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
+            <Text className={`text-xs`} style={{ color: colors.textSecondary }}>
               Municip’All · En ligne
             </Text>
           </View>
@@ -169,7 +169,7 @@ export default function ChatBotScreen() {
               <View style={[styles.bubble, dark ? styles.bubbleBotDark : styles.bubbleBotLight]}>
                 <View className='flex-row items-center gap-2'>
                   <ActivityIndicator size='small' color={primaryColor} />
-                  <Text className={`text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
+                  <Text className={`text-xs`} style={{ color: colors.textSecondary }}>
                     L’assistant rédige une réponse…
                   </Text>
                 </View>

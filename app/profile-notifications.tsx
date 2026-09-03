@@ -36,7 +36,7 @@ const OPTIONS: { key: keyof NotificationPreferences; label: string; description:
 ];
 
 export default function ProfileNotificationsScreen() {
-  const { dark, classes, primaryColor, colors, layoutStyles } = useAppTheme();
+  const { dark, classes, primaryColor, colors, layoutStyles, typeStyles } = useAppTheme();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -90,7 +90,7 @@ export default function ProfileNotificationsScreen() {
   if (loadError) {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
-        <Text className={`text-center text-base ${classes.body}`}>{loadError}</Text>
+        <Text className={`text-center text-base ${classes.body}`} style={typeStyles.body}>{loadError}</Text>
         <TouchableOpacity
           onPress={() => {
             setLoadError(null);
@@ -122,7 +122,7 @@ export default function ProfileNotificationsScreen() {
           paddingBottom: insets.bottom + 32,
           paddingTop: 16,
         }}>
-        <Text className={`mb-4 ${classes.body}`}>
+        <Text className={`mb-4 ${classes.body}`} style={typeStyles.body}>
           {pushAvailable
             ? 'Les alertes push sont actives sur cet appareil. Choisissez les types de messages que vous souhaitez recevoir.'
             : 'Les préférences ci-dessous seront appliquées lorsque les notifications push seront disponibles sur cet appareil (build de production).'}
@@ -134,10 +134,10 @@ export default function ProfileNotificationsScreen() {
               className={`flex-row items-center justify-between p-4 ${index < OPTIONS.length - 1 ? `border-b ${dark ? 'border-night-border' : 'border-cream-200'}` : ''}`}>
               <View className='mr-4 flex-1'>
                 <Text
-                  className={`text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+ className={`text-sm font-semibold`} style={{ color: colors.textBody }}>
                   {option.label}
                 </Text>
-                <Text className={`mt-1 text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
+                <Text className={`mt-1 text-xs`} style={{ color: colors.textSecondary }}>
                   {option.description}
                 </Text>
               </View>

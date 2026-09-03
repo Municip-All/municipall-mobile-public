@@ -21,8 +21,14 @@ export default function BrandedLogo({
   imageStyle,
   mode = 'contain',
 }: BrandedLogoProps) {
-  const { brand } = useAppTheme();
-  const bg = backgroundColor ?? brand.primarySoft;
+  const { brand, dark, colors } = useAppTheme();
+  const bg =
+    backgroundColor ??
+    (brand.logoUrl
+      ? dark
+        ? colors.palette.nightElevated
+        : colors.palette.cream50
+      : brand.primarySoft);
   const icon = iconColor ?? brand.primaryColor;
 
   return (

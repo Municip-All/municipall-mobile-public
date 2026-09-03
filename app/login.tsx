@@ -25,7 +25,7 @@ import { cityDisplayName } from '../lib/cityDisplay';
 const SCROLL_PADDING_X = 28;
 
 export default function LoginScreen() {
-  const { dark, primaryColor, classes, colors, brand, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, brand, layoutStyles, typeStyles } = useAppTheme();
   const { config } = useCity();
   const router = useRouter();
   const { login } = useAuth();
@@ -114,18 +114,20 @@ export default function LoginScreen() {
                 mode='contain'
               />
             </View>
-            <Text className={classes.eyebrow}>{communeName}</Text>
+            <Text className={classes.eyebrow} style={typeStyles.eyebrow}>{communeName}</Text>
             <Text
-              className={`mt-2 text-center text-3xl font-black tracking-tight ${dark ? 'text-white' : 'text-zinc-900'}`}>
+              className='mt-2 text-center text-3xl font-black tracking-tight'
+              style={{ color: colors.textPrimary }}>
               Bienvenue
             </Text>
             <Text
-              className={`mt-2 px-4 text-center text-base leading-6 ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              className='mt-2 px-4 text-center text-base leading-6'
+              style={{ color: colors.textSecondary }}>
               Connectez-vous à {appName}
             </Text>
           </View>
 
-          <View className={`px-7 py-8 ${classes.cardRoundedLg}`}>
+          <View className={`px-7 py-8 ${classes.cardRoundedLg}`} style={layoutStyles.cardRoundedLg}>
             <AuthField
               label='E-mail'
               icon='mail-outline'
@@ -136,6 +138,7 @@ export default function LoginScreen() {
               dark={dark}
               colors={colors}
               classes={classes}
+              typeStyles={typeStyles}
             />
 
             <AuthField
@@ -151,6 +154,7 @@ export default function LoginScreen() {
               dark={dark}
               colors={colors}
               classes={classes}
+              typeStyles={typeStyles}
             />
 
             <TouchableOpacity
@@ -195,7 +199,7 @@ export default function LoginScreen() {
             className='mt-6 items-center py-3'
             accessibilityRole='button'
             accessibilityLabel='Créer un compte'>
-            <Text className={`text-sm ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+            <Text className='text-sm' style={{ color: colors.textSecondary }}>
               Nouveau citoyen ?{' '}
               <Text className='font-bold' style={{ color: primaryColor }}>Créer un compte</Text>
             </Text>

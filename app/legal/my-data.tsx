@@ -26,7 +26,7 @@ type Action = {
 };
 
 export default function LegalMyDataScreen() {
-  const { dark, classes, primaryColor, colors, layoutStyles } = useAppTheme();
+  const { dark, classes, primaryColor, colors, layoutStyles, typeStyles } = useAppTheme();
   const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -136,23 +136,23 @@ export default function LegalMyDataScreen() {
           paddingBottom: insets.bottom + 32,
           paddingTop: 8,
         }}>
-        <Text className={`mb-4 ${classes.body}`}>
+        <Text className={`mb-4 ${classes.body}`} style={typeStyles.body}>
           Conformément au RGPD, vous contrôlez vos données. Les actions ci-dessous vous permettent
           d&apos;exercer vos droits. Contact DPO : {LEGAL_ENTITY.dpoEmail}
         </Text>
 
         <View className={`mb-6 p-4 ${classes.listGroup}`}>
-          <Text className={classes.meta}>Données associées à votre compte</Text>
-          <Text className={`mt-2 text-sm ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+          <Text className={classes.meta} style={typeStyles.meta}>Données associées à votre compte</Text>
+          <Text className={`mt-2 text-sm`} style={{ color: colors.textBody }}>
             {user.name} {user.surname} — {user.email}
           </Text>
           {cityLegal.cityName ? (
-            <Text className={`mt-1 text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
+            <Text className={`mt-1 text-xs`} style={{ color: colors.textSecondary }}>
               Commune : {cityLegal.cityName}
             </Text>
           ) : null}
           {cityLegal.dataRetentionPolicy ? (
-            <Text className={`mt-3 text-xs leading-5 ${dark ? 'text-night-muted' : 'text-muted'}`}>
+            <Text className={`mt-3 text-xs leading-5`} style={{ color: colors.textSecondary }}>
               Durées contractuelles : {cityLegal.dataRetentionPolicy}
             </Text>
           ) : null}
@@ -173,10 +173,10 @@ export default function LegalMyDataScreen() {
               </View>
               <View className='flex-1'>
                 <Text
-                  className={`text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+ className={`text-sm font-semibold`} style={{ color: colors.textBody }}>
                   {action.title}
                 </Text>
-                <Text className={`mt-0.5 text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
+                <Text className={`mt-0.5 text-xs`} style={{ color: colors.textSecondary }}>
                   {action.description}
                 </Text>
               </View>

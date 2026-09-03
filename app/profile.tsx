@@ -29,7 +29,7 @@ import { uploadUserAvatar, getUserStats, updateUserCity, getAvatarUploadErrorMes
 import { isPersistentAvatarUrl } from '../utils/avatarImage';
 
 export default function Profile() {
-  const { theme, dark, primaryColor, classes, colors, setTheme, layoutStyles } = useAppTheme();
+  const { theme, dark, primaryColor, classes, colors, setTheme, layoutStyles, typeStyles } = useAppTheme();
   const { applyBrandingCity } = useCity();
   const { user, logout, updateUser, isAuthenticated, isLoading: authLoading } = useAuth();
   const insets = useSafeAreaInsets();
@@ -106,7 +106,7 @@ export default function Profile() {
       <View style={layoutStyles.page} className='items-center justify-center'>
         <Ionicons name='alert-circle-outline' size={48} color={colors.iconMuted} />
         <Text
-          className={`mt-4 text-center font-medium ${dark ? 'text-night-muted' : 'text-muted'}`}>
+ className={`mt-4 text-center font-medium`} style={{ color: colors.textSecondary }}>
           {profileError}
         </Text>
         <TouchableOpacity onPress={() => loadProfileData()} className='mt-4'>
@@ -196,11 +196,15 @@ export default function Profile() {
           />
         }>
         <View className='mb-8'>
-          <Text className={classes.eyebrow}>Compte</Text>
-          <Text className={classes.title}>Profil</Text>
+          <Text className={classes.eyebrow} style={[typeStyles.eyebrow, { color: colors.textSecondary }]}>
+            Compte
+          </Text>
+          <Text className={classes.title} style={[typeStyles.title, { color: colors.textPrimary }]}>
+            Profil
+          </Text>
         </View>
 
-        <View className={`mb-8 items-center p-6 ${classes.cardRoundedLg}`}>
+        <View className={`mb-8 items-center p-6 ${classes.cardRoundedLg}`} style={layoutStyles.cardRoundedLg}>
           <TouchableOpacity
             onPress={pickImage}
             disabled={isUploading}
@@ -230,10 +234,12 @@ export default function Profile() {
               <Ionicons name='camera' size={16} color={primaryColor} />
             </View>
           </TouchableOpacity>
-          <Text className={classes.sectionTitle}>
+          <Text className={classes.sectionTitle} style={[typeStyles.sectionTitle, { color: colors.textPrimary }]}>
             {user.name} {user.surname}
           </Text>
-          <Text className={classes.subtitle}>{user.email}</Text>
+          <Text className={classes.subtitle} style={[typeStyles.subtitle, { color: colors.textSecondary }]}>
+            {user.email}
+          </Text>
         </View>
 
         <View className='mb-8 flex-row justify-between'>
@@ -262,28 +268,33 @@ export default function Profile() {
               className={`flex-1 items-center rounded-[20px] p-4 ${dark ? 'bg-night-surface' : 'bg-cream-50'} border-cream-200 shadow-soft dark:border-night-border mx-1 border`}>
               <Ionicons name={stat.icon as IconName} size={20} color={stat.color} />
               <Text
-                className={`mt-1 text-lg font-extrabold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+                className='mt-1 text-lg font-extrabold'
+                style={{ color: colors.textPrimary }}>
                 {stat.value}
               </Text>
-              <Text className={classes.meta}>{stat.label}</Text>
+              <Text className={classes.meta} style={[typeStyles.meta, { color: colors.textSecondary }]}>
+                {stat.label}
+              </Text>
             </View>
           ))}
         </View>
 
-        <Text className={`mb-3 ml-4 ${classes.eyebrow}`}>Ma Résidence</Text>
+        <Text className={`mb-3 ml-4 ${classes.eyebrow}`} style={[typeStyles.eyebrow, { color: colors.textSecondary }]}>
+          Ma Résidence
+        </Text>
         <View
           className={`mb-8 overflow-hidden rounded-[20px] ${dark ? 'bg-night-surface' : 'bg-cream-50'} border-cream-200 shadow-soft dark:border-night-border border p-5`}>
           <View className='mb-4 flex-row items-center justify-between'>
-            <View className='flex-row items-center'>
+            <View className='min-w-0 flex-1 flex-row items-center'>
               <View
                 className={`mr-3 h-10 w-10 items-center justify-center rounded-xl ${dark ? 'bg-night-elevated' : 'bg-matcha-100'}`}>
                 <Ionicons name='business' size={20} color={colors.success} />
               </View>
-              <View>
-                <Text className={`text-sm font-bold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+              <View className='min-w-0 flex-1 pr-2'>
+                <Text className='text-sm font-bold' style={{ color: colors.textBody }}>
                   {residenceName ?? 'Commune non référencée'}
                 </Text>
-                <Text className={classes.meta}>
+                <Text className={classes.meta} style={[typeStyles.meta, { color: colors.textSecondary }]}>
                   {residenceIsPartner
                     ? "Commune partenaire Municip'All"
                     : user.cityId
@@ -294,8 +305,8 @@ export default function Profile() {
             </View>
             <TouchableOpacity
               onPress={() => setShowCityPicker(!showCityPicker)}
-              className='bg-cream-100 dark:bg-night-elevated rounded-full px-4 py-2'>
-              <Text className={`text-xs font-bold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+              className='bg-cream-100 dark:bg-night-elevated shrink-0 rounded-full px-4 py-2'>
+              <Text className='text-xs font-bold' style={{ color: colors.textBody }}>
                 Modifier
               </Text>
             </TouchableOpacity>
@@ -314,8 +325,11 @@ export default function Profile() {
                       : undefined
                   }>
                   <Text
-                    className={`text-xs font-bold ${user.cityId === city.id ? '' : dark ? 'text-night-muted' : 'text-muted'}`}
-                    style={user.cityId === city.id ? { color: colors.onPrimary } : undefined}>
+                    className='text-xs font-bold'
+                    style={{
+                      color:
+                        user.cityId === city.id ? colors.onPrimary : colors.textSecondary,
+                    }}>
                     {cityDisplayName(city)}
                   </Text>
                 </TouchableOpacity>
@@ -333,7 +347,9 @@ export default function Profile() {
           )}
         </View>
 
-        <Text className={`mb-3 ml-4 ${classes.eyebrow}`}>Apparence</Text>
+        <Text className={`mb-3 ml-4 ${classes.eyebrow}`} style={[typeStyles.eyebrow, { color: colors.textSecondary }]}>
+          Apparence
+        </Text>
         <View
           className={`mb-8 rounded-2xl p-1 ${dark ? 'bg-night-surface' : 'bg-cream-50'} border-cream-200 dark:border-night-border flex-row border`}>
           {[
@@ -351,14 +367,20 @@ export default function Profile() {
                 color={theme === option.id ? primaryColor : colors.iconMuted}
               />
               <Text
-                className={`ml-2 text-xs font-bold ${theme === option.id ? (dark ? 'text-night-text' : 'text-matcha-900') : dark ? 'text-night-muted' : 'text-muted'}`}>
+                className='ml-2 text-xs font-bold'
+                style={{
+                  color:
+                    theme === option.id ? colors.textPrimary : colors.textSecondary,
+                }}>
                 {option.label}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        <Text className={`mb-3 ml-4 ${classes.eyebrow}`}>Réglages</Text>
+        <Text className={`mb-3 ml-4 ${classes.eyebrow}`} style={[typeStyles.eyebrow, { color: colors.textSecondary }]}>
+          Réglages
+        </Text>
         <View
           className={`overflow-hidden rounded-[20px] ${dark ? 'bg-night-surface' : 'bg-cream-50'} border-cream-200 shadow-soft dark:border-night-border mb-6 border`}>
           {[
@@ -397,8 +419,7 @@ export default function Profile() {
                   style={{ backgroundColor: `${item.color}15` }}>
                   <Ionicons name={item.icon as IconName} size={18} color={item.color} />
                 </View>
-                <Text
-                  className={`text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+                <Text className='text-sm font-semibold' style={{ color: colors.textBody }}>
                   {item.label}
                 </Text>
               </View>
@@ -407,7 +428,9 @@ export default function Profile() {
           ))}
         </View>
 
-        <Text className={`mb-3 ml-4 ${classes.eyebrow}`}>Confidentialité et légal</Text>
+        <Text className={`mb-3 ml-4 ${classes.eyebrow}`} style={[typeStyles.eyebrow, { color: colors.textSecondary }]}>
+          Confidentialité et légal
+        </Text>
         <View
           className={`overflow-hidden rounded-[20px] ${dark ? 'bg-night-surface' : 'bg-cream-50'} border-cream-200 shadow-soft dark:border-night-border mb-6 border`}>
           {[
@@ -446,8 +469,7 @@ export default function Profile() {
                   style={{ backgroundColor: `${item.color}15` }}>
                   <Ionicons name={item.icon as IconName} size={18} color={item.color} />
                 </View>
-                <Text
-                  className={`text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+                <Text className='text-sm font-semibold' style={{ color: colors.textBody }}>
                   {item.label}
                 </Text>
               </View>
@@ -461,7 +483,9 @@ export default function Profile() {
           className='items-center py-4'
           accessibilityRole='button'
           accessibilityLabel='Se déconnecter'>
-          <Text className='text-sake text-base font-bold'>Se déconnecter</Text>
+          <Text className='text-base font-bold' style={{ color: colors.destructive }}>
+            Se déconnecter
+          </Text>
         </TouchableOpacity>
       </ScrollView>
 

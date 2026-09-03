@@ -20,7 +20,7 @@ export default function SatisfactionPrompt({
   onSubmitted,
   title = "Comment s'est passé votre échange avec la mairie ?",
 }: SatisfactionPromptProps) {
-  const { dark, primaryColor, classes, colors } = useAppTheme();
+  const { primaryColor, classes, colors, typeStyles } = useAppTheme();
   const [rating, setRating] = useState<UserRating | undefined>(initialRating);
   const [stars, setStars] = useState(initialRating?.stars ?? 0);
   const [message, setMessage] = useState(initialRating?.message ?? '');
@@ -28,9 +28,8 @@ export default function SatisfactionPrompt({
 
   if (rating) {
     return (
-      <View className={`border-t px-4 py-5 ${dark ? 'border-night-border' : 'border-cream-200'}`}>
-        <Text
-          className={`mb-2 text-center text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+      <View className='border-t px-4 py-5' style={{ borderColor: colors.border }}>
+        <Text className='mb-2 text-center text-sm font-bold' style={{ color: colors.textPrimary }}>
           Merci pour votre avis !
         </Text>
         <View className='flex-row items-center justify-center gap-1'>
@@ -44,7 +43,7 @@ export default function SatisfactionPrompt({
           ))}
         </View>
         {rating.message ? (
-          <Text className={`mt-3 text-center text-xs leading-5 ${classes.body}`}>
+          <Text className={`mt-3 text-center text-xs leading-5 ${classes.body}`} style={typeStyles.body}>
             « {rating.message} »
           </Text>
         ) : null}
@@ -71,12 +70,12 @@ export default function SatisfactionPrompt({
 
   return (
     <View
-      className={`border-t px-4 py-5 ${dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'}`}>
-      <Text
-        className={`mb-1 text-center text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+      className='border-t px-4 py-5'
+      style={{ borderColor: colors.border, backgroundColor: colors.card }}>
+      <Text className='mb-1 text-center text-sm font-bold' style={{ color: colors.textPrimary }}>
         {title}
       </Text>
-      <Text className={`mb-4 text-center text-xs ${classes.body}`}>
+      <Text className={`mb-4 text-center text-xs ${classes.body}`} style={typeStyles.body}>
         Votre note aide la mairie à s&apos;améliorer. Le commentaire est optionnel.
       </Text>
 

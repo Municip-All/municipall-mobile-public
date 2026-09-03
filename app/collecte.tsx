@@ -20,7 +20,7 @@ import { useCityServicesAccess } from '@hooks/useCityServicesAccess';
 import NoPartnerCityBanner from '@components/NoPartnerCityBanner';
 
 export default function Collecte() {
-  const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles, typeStyles } = useAppTheme();
   const { config, refreshConfig, loading, fetchWeather } = useCity();
   const { cityServicesEnabled, needsPartnerCity } = useCityServicesAccess();
   const insets = useSafeAreaInsets();
@@ -93,18 +93,16 @@ export default function Collecte() {
             paddingBottom: 120,
             paddingHorizontal: 20,
           }}>
-          <Text
-            className={`text-xs font-bold tracking-widest uppercase ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+          <Text className={classes.eyebrow} style={typeStyles.eyebrow}>
             Environnement
           </Text>
-          <Text
-            className={`mb-6 text-3xl font-black tracking-tight ${dark ? 'text-white' : 'text-black'}`}>
+          <Text className={`mb-6 ${classes.title}`} style={typeStyles.title}>
             Collecte
           </Text>
           {needsPartnerCity ? (
             <NoPartnerCityBanner />
           ) : (
-            <Text className={dark ? 'text-zinc-400' : 'text-zinc-600'}>
+            <Text style={{ color: colors.textSecondary }}>
               Les horaires de collecte ne sont pas disponibles pour cette commune.
             </Text>
           )}
@@ -117,7 +115,7 @@ export default function Collecte() {
   if (error) {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
-        <Text className={`text-center text-base ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+        <Text className={`text-center text-base`} style={{ color: colors.textBody }}>
           {error}
         </Text>
         <TouchableOpacity
@@ -148,20 +146,18 @@ export default function Collecte() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
         }>
         <View className='mb-8'>
-          <Text className={classes.eyebrow}>Services</Text>
-          <Text className={classes.title}>Collecte</Text>
+          <Text className={classes.eyebrow} style={typeStyles.eyebrow}>Services</Text>
+          <Text className={classes.title} style={typeStyles.title}>Collecte</Text>
         </View>
 
         <View className='shadow-soft mb-8 rounded-[20px]'>
           <BlurView
             intensity={dark ? 40 : 80}
             tint={dark ? 'dark' : 'light'}
-            className={`overflow-hidden rounded-[20px] border ${
-              dark ? 'border-night-border' : 'border-cream-200'
-            }`}>
+            className={`overflow-hidden rounded-[20px] border ${ dark ? 'border-night-border' : 'border-cream-200' }`}>
             <View className='p-6'>
-              <Text className={classes.subtitle}>Prochaine collecte</Text>
-              <Text className={`mt-1 ${classes.sectionTitle}`}>
+              <Text className={classes.subtitle} style={typeStyles.subtitle}>Prochaine collecte</Text>
+              <Text className={`mt-1 ${classes.sectionTitle}`} style={typeStyles.sectionTitle}>
                 {next
                   ? `${formatNextDate(next.date)}, ${next.date.getHours()}h${next.date.getMinutes().toString().padStart(2, '0')}`
                   : 'Aucune collecte prévue'}
@@ -184,17 +180,13 @@ export default function Collecte() {
           </BlurView>
         </View>
 
-        <Text className={`mb-4 ${classes.sectionTitle}`}>Calendrier</Text>
+        <Text className={`mb-4 ${classes.sectionTitle}`} style={typeStyles.sectionTitle}>Calendrier</Text>
         <View className={`shadow-soft ${classes.listGroup}`}>
           {schedule.map((item, i) => (
             <View
               key={i}
               accessibilityLabel={`${item.type}, ${formatDays(item.days)} à ${item.time}`}
-              className={`flex-row items-center p-5 ${
-                i !== schedule.length - 1
-                  ? `border-b ${dark ? 'border-night-border' : 'border-cream-200'}`
-                  : ''
-              }`}>
+              className={`flex-row items-center p-5 ${ i !== schedule.length - 1 ? `border-b ${dark ? 'border-night-border' : 'border-cream-200'}` : '' }`}>
               <View
                 className='mr-4 h-12 w-12 items-center justify-center rounded-2xl'
                 style={{ backgroundColor: `${item.color}15` }}>
@@ -202,10 +194,10 @@ export default function Collecte() {
               </View>
               <View className='flex-1'>
                 <Text
-                  className={`text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`text-base font-bold`} style={{ color: colors.textPrimary }}>
                   {item.type}
                 </Text>
-                <Text className={`mt-0.5 ${classes.subtitle}`}>
+                <Text className={`mt-0.5 ${classes.subtitle}`} style={typeStyles.subtitle}>
                   {formatDays(item.days)} • {item.time}
                 </Text>
               </View>
@@ -214,17 +206,15 @@ export default function Collecte() {
         </View>
 
         <View
-          className={`mt-8 rounded-[20px] border border-transparent p-6 ${
-            dark ? 'bg-night-elevated' : 'bg-cream-100'
-          }`}>
+          className={`mt-8 rounded-[20px] border border-transparent p-6 ${ dark ? 'bg-night-elevated' : 'bg-cream-100' }`}>
           <View className='mb-2 flex-row items-center'>
             <Ionicons name='information-circle' size={20} color={primaryColor} />
             <Text
-              className={`ml-2 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`ml-2 text-sm font-bold`} style={{ color: colors.textPrimary }}>
               Consignes de tri
             </Text>
           </View>
-          <Text className={`text-xs leading-5 ${dark ? 'text-night-muted' : 'text-muted'}`}>
+          <Text className={`text-xs leading-5`} style={{ color: colors.textSecondary }}>
             Pensez à sortir vos bacs la veille au soir. Les couvercles doivent être fermés. Pour les
             encombrants, merci de les déposer sur le trottoir sans gêner le passage.
           </Text>

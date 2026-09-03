@@ -19,7 +19,7 @@ import ProfileScreenHeader from '@components/ProfileScreenHeader';
 import { updateUserPassword } from '../services/userProfileService';
 
 export default function ProfileSecurityScreen() {
-  const { classes, primaryColor, colors, layoutStyles } = useAppTheme();
+  const { classes, primaryColor, colors, layoutStyles, typeStyles } = useAppTheme();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -116,14 +116,14 @@ export default function ProfileSecurityScreen() {
           paddingTop: 16,
         }}
         keyboardShouldPersistTaps='handled'>
-        <Text className={`mb-4 ${classes.body}`}>
+        <Text className={`mb-4 ${classes.body}`} style={typeStyles.body}>
           Choisissez un mot de passe d&apos;au moins 8 caractères. Vous resterez connecté après la
           modification.
         </Text>
         <View className={`p-5 ${classes.listGroup}`}>
           {fields.map((field, index) => (
             <View key={field.label} className={index > 0 ? 'mt-4' : ''}>
-              <Text className={classes.meta}>{field.label}</Text>
+              <Text className={classes.meta} style={typeStyles.meta}>{field.label}</Text>
               <View className='relative mt-2'>
                 <TextInput
                   value={field.value}

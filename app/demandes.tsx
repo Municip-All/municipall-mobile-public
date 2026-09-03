@@ -63,11 +63,13 @@ function ReportCard({
   report,
   dark,
   primaryColor,
+  colors,
   onPress,
 }: {
   report: Report;
   dark: boolean;
   primaryColor: string;
+  colors: ReturnType<typeof useAppTheme>['colors'];
   onPress: () => void;
 }) {
   const statusColor = getStatusColor(report.status, dark);
@@ -87,10 +89,14 @@ function ReportCard({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.85}
-      style={styles.reportCard}
-      className={`overflow-hidden rounded-[20px] border ${
-        dark ? 'bg-night-surface' : 'bg-cream-50'
-      } ${lastFromAgent ? 'border-info' : dark ? 'border-night-border' : 'border-cream-200'}`}>
+      style={[
+        styles.reportCard,
+        {
+          backgroundColor: colors.card,
+          borderColor: lastFromAgent ? semanticColors.info : colors.border,
+        },
+      ]}
+      className='overflow-hidden rounded-[20px] border'>
       {lastFromAgent ? (
         <View className='h-1 w-full' style={{ backgroundColor: semanticColors.info }} />
       ) : null}
@@ -98,13 +104,10 @@ function ReportCard({
       <View className='p-5'>
         <View className='flex-row items-start justify-between gap-3'>
           <View className='min-w-0 flex-1'>
-            <Text
-              className={`text-lg font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}
-              numberOfLines={1}>
+            <Text className='text-lg font-bold' numberOfLines={1} style={{ color: colors.textPrimary }}>
               {report.category}
             </Text>
-            <Text
-              className={`mt-0.5 text-[11px] font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`}>
+            <Text className='mt-0.5 text-[11px] font-semibold' style={{ color: colors.textSecondary }}>
               Réf. {report.id ?? '—'} · {formatDate(report.createdAt)}
             </Text>
           </View>
@@ -118,16 +121,14 @@ function ReportCard({
         </View>
 
         <View
-          className={`mt-4 rounded-2xl px-3.5 py-3 ${dark ? 'bg-night-elevated' : 'bg-cream-100'}`}>
+          className='mt-4 rounded-2xl px-3.5 py-3'
+          style={{ backgroundColor: colors.elevated }}>
           <Text
-            className={`text-[10px] font-bold tracking-wide uppercase ${
-              lastFromAgent ? 'text-info' : dark ? 'text-night-muted' : 'text-muted'
-            }`}>
+            className='text-[10px] font-bold tracking-wide uppercase'
+            style={{ color: lastFromAgent ? semanticColors.info : colors.textSecondary }}>
             {previewCaption}
           </Text>
-          <Text
-            className={`mt-1 text-sm leading-5 ${dark ? 'text-night-text' : 'text-charcoal'}`}
-            numberOfLines={3}>
+          <Text className='mt-1 text-sm leading-5' numberOfLines={3} style={{ color: colors.textBody }}>
             {previewBody}
           </Text>
         </View>
@@ -140,17 +141,12 @@ function ReportCard({
               color={lastFromAgent ? semanticColors.info : primaryColor}
             />
             <Text
-              className={`text-xs font-semibold ${
-                lastFromAgent ? 'text-info' : dark ? 'text-night-muted' : 'text-muted'
-              }`}>
+              className='text-xs font-semibold'
+              style={{ color: lastFromAgent ? semanticColors.info : colors.textSecondary }}>
               {lastFromAgent ? 'Réponse à lire' : 'Voir la conversation'}
             </Text>
           </View>
-          <Ionicons
-            name='chevron-forward'
-            size={16}
-            color={dark ? palette.nightMuted : palette.muted}
-          />
+          <Ionicons name='chevron-forward' size={16} color={colors.chevron} />
         </View>
       </View>
     </TouchableOpacity>
@@ -158,7 +154,7 @@ function ReportCard({
 }
 
 export default function SignalementsList() {
-  const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles, typeStyles } = useAppTheme();
   const { isAuthenticated } = useAuth();
   const { needsPartnerCity, cityServicesEnabled } = useCityServicesAccess();
   const router = useRouter();
@@ -229,9 +225,9 @@ export default function SignalementsList() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
         }>
         <View className='mb-6'>
-          <Text className={classes.eyebrow}>Vigilance</Text>
+          <Text className={classes.eyebrow} style={typeStyles.eyebrow}>Vigilance</Text>
           <Text
-            className={`text-3xl font-extrabold tracking-tight ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`text-3xl font-extrabold tracking-tight`} style={{ color: colors.textPrimary }}>
             Signalements
           </Text>
         </View>
@@ -239,7 +235,7 @@ export default function SignalementsList() {
         {!isAuthenticated ? (
           <View className='mt-16 items-center px-4'>
             <Ionicons name='lock-closed-outline' size={48} color={colors.iconMuted} />
-            <Text className={`mt-4 text-center text-sm ${classes.body}`}>
+            <Text className={`mt-4 text-center text-sm ${classes.body}`} style={typeStyles.body}>
               Connectez-vous pour suivre vos signalements et échanger avec la mairie.
             </Text>
             <TouchableOpacity
@@ -294,7 +290,7 @@ export default function SignalementsList() {
                   size={56}
                   color={dark ? palette.nightBorder : palette.cream200}
                 />
-                <Text className={`mt-4 ${classes.subtitle}`}>Aucun signalement en cours</Text>
+                <Text className={`mt-4 ${classes.subtitle}`} style={typeStyles.subtitle}>Aucun signalement en cours</Text>
                 <TouchableOpacity
                   onPress={openNewReport}
                   className='mt-6'
@@ -309,7 +305,7 @@ export default function SignalementsList() {
               <>
                 {filteredReports.length === 0 ? (
                   <Text
-                    className={`mb-4 text-center text-sm ${dark ? 'text-night-muted' : 'text-muted'}`}>
+ className={`mb-4 text-center text-sm`} style={{ color: colors.textSecondary }}>
                     Aucun signalement pour ce filtre
                   </Text>
                 ) : (
@@ -320,6 +316,7 @@ export default function SignalementsList() {
                         report={report}
                         dark={dark}
                         primaryColor={primaryColor}
+                        colors={colors}
                         onPress={() =>
                           report.id &&
                           router.push({
@@ -337,9 +334,7 @@ export default function SignalementsList() {
                     <TouchableOpacity
                       onPress={() => setShowArchives((v) => !v)}
                       activeOpacity={0.8}
-                      className={`mb-3 flex-row items-center justify-between rounded-2xl px-4 py-3 ${
-                        dark ? 'bg-night-surface' : 'bg-cream-100'
-                      }`}
+                      className={`mb-3 flex-row items-center justify-between rounded-2xl px-4 py-3 ${ dark ? 'bg-night-surface' : 'bg-cream-100' }`}
                       accessibilityRole='button'
                       accessibilityLabel={
                         showArchives ? 'Masquer les archives' : 'Afficher les archives'
@@ -350,7 +345,7 @@ export default function SignalementsList() {
                           size={18}
                           color={dark ? palette.nightMuted : palette.muted}
                         />
-                        <Text className={classes.eyebrow}>Archives ({archivedReports.length})</Text>
+                        <Text className={classes.eyebrow} style={typeStyles.eyebrow}>Archives ({archivedReports.length})</Text>
                       </View>
                       <Ionicons
                         name={showArchives ? 'chevron-up' : 'chevron-down'}
@@ -365,6 +360,7 @@ export default function SignalementsList() {
                             report={report}
                             dark={dark}
                             primaryColor={primaryColor}
+                            colors={colors}
                             onPress={() =>
                               report.id &&
                               router.push({

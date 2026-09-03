@@ -33,13 +33,13 @@ import NoPartnerCityBanner from '@components/NoPartnerCityBanner';
 
 function SuggestionCard({
   ticket,
-  dark,
   primaryColor,
+  colors,
   onPress,
 }: {
   ticket: ContactTicketListItem;
-  dark: boolean;
   primaryColor: string;
+  colors: ReturnType<typeof useAppTheme>['colors'];
   onPress: () => void;
 }) {
   const statusColor = getContactStatusColor(ticket.status);
@@ -49,22 +49,21 @@ function SuggestionCard({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.85}
-      className={`mb-3 overflow-hidden rounded-[20px] border ${
-        dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'
-      }`}>
+      className='mb-3 overflow-hidden rounded-[20px] border'
+      style={{
+        backgroundColor: colors.card,
+        borderColor: colors.border,
+      }}>
       {lastFromAgent ? (
         <View className='h-1 w-full' style={{ backgroundColor: semanticColors.info }} />
       ) : null}
       <View className='p-5'>
         <View className='flex-row items-start justify-between gap-3'>
           <View className='min-w-0 flex-1'>
-            <Text
-              className={`text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}
-              numberOfLines={2}>
+            <Text className='text-base font-bold' numberOfLines={2} style={{ color: colors.textPrimary }}>
               {ticket.subject}
             </Text>
-            <Text
-              className={`mt-1 text-[11px] font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`}>
+            <Text className='mt-1 text-[11px] font-semibold' style={{ color: colors.textSecondary }}>
               Suggestion · Réf. {ticket.id}
             </Text>
           </View>
@@ -77,10 +76,9 @@ function SuggestionCard({
           </View>
         </View>
         <View
-          className={`mt-3 rounded-2xl px-3.5 py-3 ${dark ? 'bg-night-elevated' : 'bg-cream-100'}`}>
-          <Text
-            className={`text-sm leading-5 ${dark ? 'text-night-text' : 'text-charcoal'}`}
-            numberOfLines={3}>
+          className='mt-3 rounded-2xl px-3.5 py-3'
+          style={{ backgroundColor: colors.elevated }}>
+          <Text className='text-sm leading-5' numberOfLines={3} style={{ color: colors.textBody }}>
             {ticket.lastMessage?.body || 'Votre suggestion a été transmise à la mairie.'}
           </Text>
         </View>
@@ -91,9 +89,8 @@ function SuggestionCard({
             color={lastFromAgent ? semanticColors.info : primaryColor}
           />
           <Text
-            className={`text-xs font-semibold ${
-              lastFromAgent ? 'text-info' : dark ? 'text-night-muted' : 'text-muted'
-            }`}>
+            className='text-xs font-semibold'
+            style={{ color: lastFromAgent ? semanticColors.info : colors.textSecondary }}>
             {lastFromAgent ? 'Suivi mairie — réponse à lire' : 'Suivi de votre suggestion'}
           </Text>
         </View>
@@ -103,7 +100,7 @@ function SuggestionCard({
 }
 
 const ContactScreen: React.FC = () => {
-  const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles, typeStyles } = useAppTheme();
   const { config } = useCity();
   const { isAuthenticated } = useAuth();
   const { needsPartnerCity } = useCityServicesAccess();
@@ -248,20 +245,20 @@ const ContactScreen: React.FC = () => {
             />
           }>
           <View className='mb-8'>
-            <Text className={classes.eyebrow}>Assistance</Text>
-            <Text className={classes.title}>Contact</Text>
+            <Text className={classes.eyebrow} style={typeStyles.eyebrow}>Assistance</Text>
+            <Text className={classes.title} style={typeStyles.title}>Contact</Text>
           </View>
 
           {needsPartnerCity ? (
             <NoPartnerCityBanner />
           ) : (
             <>
-          <View className={`mb-8 p-6 ${classes.cardRounded}`}>
+          <View className={`mb-8 p-6 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
             <Text
-              className={`mb-2 text-lg font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`mb-2 text-lg font-bold`} style={{ color: colors.textPrimary }}>
               Besoin d&apos;aide ?
             </Text>
-            <Text className={`mb-6 text-sm leading-5 ${classes.body}`}>{helpText}</Text>
+            <Text className={`mb-6 text-sm leading-5 ${classes.body}`} style={typeStyles.body}>{helpText}</Text>
             <TouchableOpacity
               onPress={openEmail}
               disabled={!contactEmail}
@@ -272,7 +269,7 @@ const ContactScreen: React.FC = () => {
               }>
               <Ionicons name='mail-outline' size={20} color={primaryColor} />
               <Text
-                className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`ml-3 flex-1 text-sm font-semibold`} style={{ color: colors.textPrimary }}>
                 {contactEmail || 'E-mail non renseigné'}
               </Text>
             </TouchableOpacity>
@@ -286,14 +283,14 @@ const ContactScreen: React.FC = () => {
               }>
               <Ionicons name='call-outline' size={20} color={primaryColor} />
               <Text
-                className={`ml-3 flex-1 text-sm font-semibold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`ml-3 flex-1 text-sm font-semibold`} style={{ color: colors.textPrimary }}>
                 {contactPhone || 'Téléphone non renseigné'}
               </Text>
             </TouchableOpacity>
           </View>
 
           <View className='mb-4 flex-row items-center justify-between'>
-            <Text className={classes.sectionTitle}>Écrire à la mairie</Text>
+            <Text className={classes.sectionTitle} style={typeStyles.sectionTitle}>Écrire à la mairie</Text>
             {isAuthenticated && (
               <TouchableOpacity
                 onPress={() => setShowNew((v) => !v)}
@@ -309,9 +306,9 @@ const ContactScreen: React.FC = () => {
           </View>
 
           {showNew && isAuthenticated && (
-            <View className={`mb-6 p-4 ${classes.cardRounded}`}>
+            <View className={`mb-6 p-4 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
               <Text
-                className={`mb-3 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`mb-3 text-sm font-bold`} style={{ color: colors.textPrimary }}>
                 Type de demande
               </Text>
               <View style={styles.typeRow}>
@@ -350,11 +347,11 @@ const ContactScreen: React.FC = () => {
                         color={active ? primaryColor : colors.iconMuted}
                       />
                       <Text
-                        className={`mt-2 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`mt-2 text-sm font-bold`} style={{ color: colors.textPrimary }}>
                         {opt.label}
                       </Text>
                       <Text
-                        className={`mt-0.5 text-[10px] ${dark ? 'text-night-muted' : 'text-muted'}`}>
+ className={`mt-0.5 text-[10px]`} style={{ color: colors.textSecondary }}>
                         {opt.hint}
                       </Text>
                     </TouchableOpacity>
@@ -385,7 +382,7 @@ const ContactScreen: React.FC = () => {
               />
               {newType === 'suggestion' && (
                 <Text
-                  className={`mb-3 text-xs leading-5 ${dark ? 'text-night-muted' : 'text-muted'}`}>
+ className={`mb-3 text-xs leading-5`} style={{ color: colors.textSecondary }}>
                   Votre suggestion sera suivie comme un dossier : la mairie pourra vous répondre et
                   vous informer des avancées.
                 </Text>
@@ -407,8 +404,8 @@ const ContactScreen: React.FC = () => {
           )}
 
           {!isAuthenticated ? (
-            <View className={`items-center p-8 ${classes.cardRounded}`}>
-              <Text className={`text-center text-sm ${classes.body}`}>
+            <View className={`items-center p-8 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
+              <Text className={`text-center text-sm ${classes.body}`} style={typeStyles.body}>
                 Connectez-vous pour échanger avec la mairie.
               </Text>
               <TouchableOpacity
@@ -423,8 +420,8 @@ const ContactScreen: React.FC = () => {
           ) : loading ? (
             <ActivityIndicator className='my-8' color={primaryColor} />
           ) : tickets.length === 0 ? (
-            <View className={`items-center p-8 ${classes.cardRounded}`}>
-              <Text className={`text-sm ${dark ? 'text-night-muted' : 'text-muted'}`}>
+            <View className={`items-center p-8 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
+              <Text className={`text-sm`} style={{ color: colors.textSecondary }}>
                 Aucune conversation. Posez une question ou partagez une suggestion.
               </Text>
             </View>
@@ -433,15 +430,15 @@ const ContactScreen: React.FC = () => {
               {openSuggestions.length > 0 && (
                 <View className='mb-6'>
                   <Text
-                    className={`mb-3 text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`mb-3 text-sm font-bold`} style={{ color: colors.textPrimary }}>
                     Mes suggestions
                   </Text>
                   {openSuggestions.map((ticket) => (
                     <SuggestionCard
                       key={ticket.id}
                       ticket={ticket}
-                      dark={dark}
                       primaryColor={primaryColor}
+                      colors={colors}
                       onPress={() => openChat(ticket.id)}
                     />
                   ))}
@@ -449,11 +446,11 @@ const ContactScreen: React.FC = () => {
               )}
 
               {openQuestions.length > 0 && (
-                <View className={`mb-6 ${classes.cardRounded}`}>
+                <View className={`mb-6 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
                   <View
                     className={`border-b px-4 py-3 ${dark ? 'border-night-border' : 'border-cream-200'}`}>
                     <Text
-                      className={`text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`text-sm font-bold`} style={{ color: colors.textPrimary }}>
                       Questions
                     </Text>
                   </View>
@@ -473,13 +470,13 @@ const ContactScreen: React.FC = () => {
                       </View>
                       <View className='mr-2 flex-1'>
                         <Text
-                          numberOfLines={1}
-                          className={`text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ numberOfLines={1}
+ className={`text-sm font-bold`} style={{ color: colors.textPrimary }}>
                           {ticket.subject}
                         </Text>
                         <Text
-                          numberOfLines={1}
-                          className={`mt-0.5 text-[11px] ${dark ? 'text-night-muted' : 'text-muted'}`}>
+ numberOfLines={1}
+ className={`mt-0.5 text-[11px]`} style={{ color: colors.textSecondary }}>
                           {ticket.lastMessage?.body || 'Nouvelle question'}
                         </Text>
                       </View>
@@ -494,16 +491,14 @@ const ContactScreen: React.FC = () => {
                   <TouchableOpacity
                     onPress={() => setShowArchives((v) => !v)}
                     activeOpacity={0.8}
-                    className={`mb-3 flex-row items-center justify-between rounded-2xl px-4 py-3 ${
-                      dark ? 'bg-night-surface' : 'bg-cream-100'
-                    }`}
+                    className={`mb-3 flex-row items-center justify-between rounded-2xl px-4 py-3 ${ dark ? 'bg-night-surface' : 'bg-cream-100' }`}
                     accessibilityRole='button'
                     accessibilityLabel={
                       showArchives ? 'Masquer les archives' : 'Afficher les archives'
                     }>
                     <View className='flex-row items-center gap-2'>
                       <Ionicons name='archive-outline' size={18} color={colors.iconMuted} />
-                      <Text className={classes.eyebrow}>Archives ({archivedTickets.length})</Text>
+                      <Text className={classes.eyebrow} style={typeStyles.eyebrow}>Archives ({archivedTickets.length})</Text>
                     </View>
                     <Ionicons
                       name={showArchives ? 'chevron-up' : 'chevron-down'}
@@ -512,7 +507,7 @@ const ContactScreen: React.FC = () => {
                     />
                   </TouchableOpacity>
                   {showArchives && (
-                    <View className={`opacity-75 ${classes.cardRounded}`}>
+                    <View className={`opacity-75 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
                       {archivedTickets.map((ticket, i) => (
                         <TouchableOpacity
                           key={ticket.id}
@@ -524,12 +519,12 @@ const ContactScreen: React.FC = () => {
                           </View>
                           <View className='flex-1'>
                             <Text
-                              numberOfLines={1}
-                              className={`text-sm font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ numberOfLines={1}
+ className={`text-sm font-bold`} style={{ color: colors.textPrimary }}>
                               {ticket.subject}
                             </Text>
                             <Text
-                              className={`text-[10px] ${dark ? 'text-night-muted' : 'text-muted'}`}>
+ className={`text-[10px]`} style={{ color: colors.textSecondary }}>
                               {ticket.ticketType === 'suggestion' ? 'Suggestion' : 'Question'} ·
                               Clôturé
                             </Text>

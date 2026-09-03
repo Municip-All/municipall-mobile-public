@@ -16,7 +16,6 @@ import { useCity } from '@context/citycontext';
 import { useAuth } from '@context/authcontext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { authService } from '../services/authService';
-import { cityService } from '../services/cityService';
 import { getPartnerCitiesCached } from '../services/partnerCitiesCache';
 import { cityDisplayName } from '../lib/cityDisplay';
 import ConvinceMayorModal from '@components/ConvinceMayorModal';
@@ -32,7 +31,7 @@ import { recordLegalConsent } from '../services/legalConsent';
 const SCROLL_PADDING_X = 28;
 
 export default function SignupScreen() {
-  const { dark, primaryColor, classes, colors, brand, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, brand, layoutStyles, typeStyles } = useAppTheme();
   const { config } = useCity();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -179,19 +178,21 @@ export default function SignupScreen() {
                 mode='contain'
               />
             </View>
-            <Text className={classes.eyebrow}>{communeName}</Text>
+            <Text className={classes.eyebrow} style={typeStyles.eyebrow}>{communeName}</Text>
             <Text
-              className={`mt-2 text-center text-3xl font-black tracking-tight ${dark ? 'text-white' : 'text-zinc-900'}`}>
+              className='mt-2 text-center text-3xl font-black tracking-tight'
+              style={{ color: colors.textPrimary }}>
               Créer un compte
             </Text>
             <Text
-              className={`mt-2 px-4 text-center text-base leading-6 ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              className='mt-2 px-4 text-center text-base leading-6'
+              style={{ color: colors.textSecondary }}>
               Rejoignez {appName}
             </Text>
           </View>
 
           {/* Formulaire */}
-          <View className={`px-7 py-8 ${classes.cardRoundedLg}`}>
+          <View className={`px-7 py-8 ${classes.cardRoundedLg}`} style={layoutStyles.cardRoundedLg}>
             <AuthField
               label='Identifiant'
               icon='person-outline'
@@ -201,6 +202,7 @@ export default function SignupScreen() {
               dark={dark}
               colors={colors}
               classes={classes}
+              typeStyles={typeStyles}
             />
 
             <AuthField
@@ -213,6 +215,7 @@ export default function SignupScreen() {
               dark={dark}
               colors={colors}
               classes={classes}
+              typeStyles={typeStyles}
             />
 
             <AuthField
@@ -228,6 +231,7 @@ export default function SignupScreen() {
               dark={dark}
               colors={colors}
               classes={classes}
+              typeStyles={typeStyles}
             />
 
             <AuthField
@@ -240,13 +244,14 @@ export default function SignupScreen() {
               dark={dark}
               colors={colors}
               classes={classes}
+              typeStyles={typeStyles}
             />
 
             <View className='mb-6'>
-              <Text className={classes.formLabel}>Ma ville de résidence</Text>
+              <Text className={classes.formLabel} style={typeStyles.formLabel}>Ma ville de résidence</Text>
               {citiesError ? (
                 <View className='items-center py-2'>
-                  <Text className={`text-sm ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  <Text className='text-sm' style={{ color: colors.textSecondary }}>
                     Impossible de charger les villes.
                   </Text>
                   <TouchableOpacity
@@ -313,8 +318,7 @@ export default function SignupScreen() {
                 </View>
               )}
               {residenceNotListed ? (
-                <Text
-                  className={`mt-3 text-xs leading-5 ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                <Text className='mt-3 text-xs leading-5' style={{ color: colors.textSecondary }}>
                   Vous pourrez utiliser Municip&apos;All dès que votre commune sera partenaire. En
                   attendant, invitez votre mairie ou choisissez votre commune si elle apparaît dans
                   la liste.
@@ -357,7 +361,7 @@ export default function SignupScreen() {
             className='mt-6 items-center py-3'
             accessibilityRole='button'
             accessibilityLabel='Se connecter'>
-            <Text className={`text-sm ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+            <Text className='text-sm' style={{ color: colors.textSecondary }}>
               Vous avez déjà un compte ?{' '}
               <Text className='font-bold' style={{ color: primaryColor }}>Se connecter</Text>
             </Text>

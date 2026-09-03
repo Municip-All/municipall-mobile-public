@@ -21,6 +21,7 @@ import {
   type TransportLineDisruption,
   type TransportMode,
 } from '../services/transportService';
+import { decodeHtmlEntities } from '../utils/decodeHtmlEntities';
 
 function modeIcon(mode: TransportMode): keyof typeof Ionicons.glyphMap {
   switch (mode) {
@@ -56,51 +57,51 @@ function modeLabel(mode: TransportMode): string {
 }
 
 function LineCard({ line }: { line: TransportLineDisruption }) {
-  const { dark, classes, colors } = useAppTheme();
+  const { dark, classes, colors, typeStyles, layoutStyles } = useAppTheme();
   const disrupted = line.status === 'disrupted';
-  const statusColor = disrupted ? colors.warning : colors.success;
-  const statusLabel = disrupted ? 'Perturbation' : 'Trafic normal';
+  const accent = disrupted ? colors.warning : colors.success;
+  /** Badge plein : texte sombre sur ambre / vert clair → lisible en mode sombre */
+  const badgeBg = disrupted ? '#FBBF24' : dark ? '#A3C98F' : colors.success;
+  const badgeFg = disrupted || dark ? '#111827' : '#FFFFFF';
 
   return (
-    <View className={`shadow-soft mb-4 ${classes.cardRounded}`}>
+    <View className={`mb-4 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
       <View className='flex-row items-start p-5'>
         <View
           className='mr-4 h-12 w-12 items-center justify-center rounded-2xl'
-          style={{ backgroundColor: `${statusColor}22` }}>
-          <Ionicons name={modeIcon(line.mode)} size={24} color={statusColor} />
+          style={{ backgroundColor: dark ? colors.elevated : `${accent}22` }}>
+          <Ionicons name={modeIcon(line.mode)} size={24} color={accent} />
         </View>
         <View className='flex-1'>
           <View className='flex-row items-center justify-between gap-2'>
             <Text
-              className={`flex-1 text-base font-bold ${
-                dark ? 'text-night-text' : 'text-matcha-900'
-              }`}>
+              className='flex-1 text-base font-bold'
+              style={{ color: colors.textPrimary }}
+              numberOfLines={2}>
               {line.lineName}
             </Text>
-            <View
-              className='rounded-full px-3 py-1'
-              style={{ backgroundColor: `${statusColor}18` }}>
-              <Text style={{ color: statusColor, fontSize: 10, fontWeight: '800' }}>
-                {statusLabel.toUpperCase()}
+            <View className='rounded-full px-3 py-1.5' style={{ backgroundColor: badgeBg }}>
+              <Text style={{ color: badgeFg, fontSize: 10, fontWeight: '800', letterSpacing: 0.3 }}>
+                {disrupted ? 'PERTURBATION' : 'NORMAL'}
               </Text>
             </View>
           </View>
-          <Text
-            className={`mt-1 text-xs font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`}>
+          <Text className='mt-1 text-xs font-semibold' style={{ color: colors.textSecondary }}>
             {modeLabel(line.mode)}
           </Text>
           {line.messages.length > 0 ? (
-            <View className='mt-3'>
+            <View className='mt-3 gap-2'>
               {line.messages.map((msg, i) => (
                 <Text
                   key={`${line.lineId}-${i}`}
-                  className={`text-sm leading-5 ${dark ? 'text-night-text' : 'text-charcoal'}`}>
-                  {msg}
+                  className='text-sm leading-5'
+                  style={{ color: colors.textBody }}>
+                  {decodeHtmlEntities(msg)}
                 </Text>
               ))}
             </View>
           ) : (
-            <Text className={`mt-3 ${classes.subtitle}`}>
+            <Text className={`mt-3 ${classes.subtitle}`} style={typeStyles.subtitle}>
               Circulation normale sur cette ligne à proximité.
             </Text>
           )}
@@ -113,7 +114,7 @@ function LineCard({ line }: { line: TransportLineDisruption }) {
 export default function TransportScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { primaryColor, classes, layoutStyles } = useAppTheme();
+  const { primaryColor, classes, layoutStyles, typeStyles } = useAppTheme();
   const { config, tenantId } = useCity();
 
   const transportEnabled =
@@ -184,7 +185,7 @@ export default function TransportScreen() {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
         <Ionicons name='bus-outline' size={48} color={primaryColor} />
-        <Text className={`mt-4 text-center ${classes.body}`}>
+        <Text className={`mt-4 text-center ${classes.body}`} style={typeStyles.body}>
           Le module transports n&apos;est pas activé pour votre commune.
         </Text>
         <TouchableOpacity onPress={() => router.back()} className='mt-6'>
@@ -215,26 +216,26 @@ export default function TransportScreen() {
           <Text style={{ color: primaryColor, fontWeight: '700', marginLeft: 4 }}>Retour</Text>
         </TouchableOpacity>
 
-        <Text className={classes.title}>Transports</Text>
-        <Text className={`mt-2 ${classes.subtitle}`}>
+        <Text className={classes.title} style={typeStyles.title}>Transports</Text>
+        <Text className={`mt-2 ${classes.subtitle}`} style={typeStyles.subtitle}>
           Perturbations en temps réel autour de vous (IDFM)
         </Text>
 
         {loading ? (
           <View className='items-center py-16'>
             <ActivityIndicator color={primaryColor} size='large' />
-            <Text className={`mt-4 ${classes.body}`}>Recherche des lignes à proximité…</Text>
+            <Text className={`mt-4 ${classes.body}`} style={typeStyles.body}>Recherche des lignes à proximité…</Text>
           </View>
         ) : error ? (
-          <View className={`mt-6 p-5 ${classes.cardRounded}`}>
-            <Text className={classes.body}>{error}</Text>
+          <View className={`mt-6 p-5 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
+            <Text className={classes.body} style={typeStyles.body}>{error}</Text>
             <TouchableOpacity onPress={onRefresh} className='mt-4'>
               <Text style={{ color: primaryColor, fontWeight: '700' }}>Réessayer</Text>
             </TouchableOpacity>
           </View>
         ) : lines.length === 0 ? (
-          <View className={`mt-6 p-5 ${classes.cardRounded}`}>
-            <Text className={classes.body}>
+          <View className={`mt-6 p-5 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
+            <Text className={classes.body} style={typeStyles.body}>
               Aucune ligne trouvée à proximité. Déplacez-vous ou réessayez plus tard.
             </Text>
           </View>

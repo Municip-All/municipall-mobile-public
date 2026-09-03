@@ -22,7 +22,7 @@ export default function LegalConsentBlock({
   onPrivacyChange,
   onAgeChange,
 }: Props) {
-  const { dark, primaryColor, classes } = useAppTheme();
+  const { primaryColor, classes, typeStyles, colors } = useAppTheme();
   const router = useRouter();
 
   const row = (checked: boolean, onChange: (v: boolean) => void, label: React.ReactNode) => (
@@ -33,7 +33,7 @@ export default function LegalConsentBlock({
         color={checked ? primaryColor : undefined}
         style={{ marginTop: 2, marginRight: 10 }}
       />
-      <Text className={`flex-1 text-xs leading-5 ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+      <Text className={`flex-1 text-xs leading-5`} style={{ color: colors.textBody }}>
         {label}
       </Text>
     </View>
@@ -50,8 +50,9 @@ export default function LegalConsentBlock({
 
   return (
     <View
-      className={`mt-2 rounded-2xl border p-4 ${dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'}`}>
-      <Text className={`mb-3 text-xs font-bold tracking-wide uppercase ${classes.meta}`}>
+      className='mt-2 rounded-2xl border p-4'
+      style={{ borderColor: colors.border, backgroundColor: colors.card }}>
+      <Text className={`mb-3 text-xs font-bold tracking-wide uppercase ${classes.meta}`} style={typeStyles.meta}>
         Consentements obligatoires
       </Text>
       {row(
@@ -76,7 +77,7 @@ export default function LegalConsentBlock({
         </>
       )}
       <TouchableOpacity onPress={() => router.push('/legal')} className='mt-1'>
-        <Text className={`text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
+        <Text className={`text-xs`} style={{ color: colors.textSecondary }}>
           Voir tous les documents légaux →
         </Text>
       </TouchableOpacity>

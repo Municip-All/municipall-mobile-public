@@ -1,2 +1,32 @@
 @import 'tailwindcss';
 @import 'nativewind/theme';
+@config './tailwind.config.js';
+
+/*
+  Tailwind v4 lit surtout @theme. Sans ces variables, text-night-text /
+  text-matcha-900 etc. sont ignorés → texte noir par défaut (illisible en sombre).
+*/
+@theme {
+  --color-matcha-100: #e6f1dc;
+  --color-matcha-300: #a3c98f;
+  --color-matcha-500: #5c9a4e;
+  --color-matcha-700: #3d6b2f;
+  --color-matcha-900: #24391c;
+
+  --color-cream-50: #fefdfb;
+  --color-cream-100: #f8f6ef;
+  --color-cream-200: #ebe6d9;
+
+  --color-charcoal: #313b2b;
+  --color-muted: #5c6654;
+  --color-sake: #d2543f;
+  --color-amber: #e09a2d;
+  --color-info: #5b87b0;
+
+  --color-night-bg: #09090b;
+  --color-night-surface: #18181b;
+  --color-night-elevated: #27272a;
+  --color-night-border: #3f3f46;
+  --color-night-text: #fafafa;
+  --color-night-muted: #a1a1aa;
+}

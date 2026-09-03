@@ -61,15 +61,17 @@ const BottomBar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { colorScheme } = useTheme();
-  const { primaryColor, colors, brand } = useAppTheme();
+  const { primaryColor, brand, colors } = useAppTheme();
   const { isAuthenticated } = useAuth();
   const { cityServicesEnabled } = useCityServicesAccess();
   const insets = useSafeAreaInsets();
   const dark = colorScheme === 'dark';
 
   const totalHeight = TAB_BAR_HEIGHT + insets.bottom;
-  const surfaceColor = dark ? '#18181B' : '#FFFFFF';
-  const inactiveColor = dark ? '#71717A' : '#6B7280';
+  const surfaceColor = dark ? colors.card : '#FFFFFF';
+  /** Primary marque souvent sombre (ex. bleu marine) → illisible sur fond sombre */
+  const activeColor = dark ? colors.textPrimary : primaryColor;
+  const inactiveColor = dark ? colors.palette.nightMuted : '#6B7280';
   const borderColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
   const tabBarPath = buildTabBarPath(SCREEN_WIDTH, totalHeight);
   const isCarteActive = pathname === '/carte';
@@ -145,13 +147,13 @@ const BottomBar: React.FC = () => {
                     backgroundColor: dark ? 'rgba(255,255,255,0.08)' : `${primaryColor}14`,
                   },
                 ]}>
-                <Ionicons name={iconName} size={22} color={active ? primaryColor : inactiveColor} />
+                <Ionicons name={iconName} size={22} color={active ? activeColor : inactiveColor} />
               </View>
               <Text
                 style={[
                   styles.label,
                   active
-                    ? { color: primaryColor, fontFamily: 'Inter_700Bold' }
+                    ? { color: activeColor, fontFamily: 'Inter_700Bold' }
                     : { color: inactiveColor },
                 ]}
                 numberOfLines={1}>
@@ -187,7 +189,7 @@ const BottomBar: React.FC = () => {
           style={[
             styles.centerLabel,
             {
-              color: isCarteActive || !dark ? primaryColor : '#FFFFFF',
+              color: isCarteActive || !dark ? activeColor : '#FFFFFF',
               fontFamily: isCarteActive ? 'Inter_700Bold' : 'Inter_600SemiBold',
             },
           ]}>

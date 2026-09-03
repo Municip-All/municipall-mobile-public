@@ -24,12 +24,12 @@ module.exports = {
         amber: '#E09A2D',
         info: '#5B87B0',
         night: {
-          bg: '#161D10',
-          surface: '#1E2715',
-          elevated: '#26301C',
-          border: '#36422B',
-          text: '#EDF3E3',
-          muted: '#A6B397',
+          bg: '#09090B',
+          surface: '#18181B',
+          elevated: '#27272A',
+          border: '#3F3F46',
+          text: '#FAFAFA',
+          muted: '#A1A1AA',
         },
       },
       boxShadow: {

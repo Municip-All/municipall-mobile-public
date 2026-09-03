@@ -15,12 +15,12 @@ export const palette = {
   sake400: '#D2543F',
   amber400: '#E09A2D',
   info400: '#5B87B0',
-  nightBg: '#161D10',
-  nightSurface: '#1E2715',
-  nightElevated: '#26301C',
-  nightBorder: '#36422B',
-  nightText: '#EDF3E3',
-  nightMuted: '#A6B397',
+  nightBg: '#09090B',
+  nightSurface: '#18181B',
+  nightElevated: '#27272A',
+  nightBorder: '#3F3F46',
+  nightText: '#FAFAFA',
+  nightMuted: '#A1A1AA',
 } as const;
 
 export const DEFAULT_PRIMARY = palette.matcha700;
@@ -48,7 +48,7 @@ export const semanticColors = {
   accent: { light: palette.matcha700, dark: palette.matcha300 },
   points: palette.amber400,
   muted: { light: palette.muted, dark: palette.nightMuted },
-  label: { light: '#4D5743', dark: '#CFDAC4' },
+  label: { light: '#4D5743', dark: '#D4D4D8' },
   secondary: { light: palette.charcoal, dark: palette.nightText },
   tertiary: { light: palette.muted, dark: palette.nightMuted },
 } as const;

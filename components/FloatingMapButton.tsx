@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useAppTheme } from '@hooks/useAppTheme';
 
 const FloatingMapButton: React.FC = () => {
-  const { primaryColor, colors } = useAppTheme();
+  const { dark, primaryColor, colors } = useAppTheme();
   const router = useRouter();
 
   return (
@@ -22,7 +22,7 @@ const FloatingMapButton: React.FC = () => {
         },
         colors.softShadow,
       ]}>
-      <Ionicons name='map' size={24} color={primaryColor} />
+      <Ionicons name='map' size={24} color={dark ? colors.textPrimary : primaryColor} />
     </TouchableOpacity>
   );
 };

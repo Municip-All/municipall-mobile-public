@@ -36,7 +36,7 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
   function ReportSignalementSheet(_props, ref) {
     const modalizeRef = useRef<Modalize>(null);
     const allowCloseRef = useRef(false);
-    const { dark, primaryColor, classes, colors } = useAppTheme();
+    const { primaryColor, classes, colors, typeStyles } = useAppTheme();
     const { isAuthenticated, user } = useAuth();
     const { cityServicesEnabled } = useCityServicesAccess();
     const router = useRouter();
@@ -242,7 +242,7 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
         HeaderComponent={
           <View style={{ paddingHorizontal: formPaddingX, paddingTop: 40, paddingBottom: 12 }}>
             <Text
-              className={`text-3xl font-extrabold tracking-tight ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ className={`text-3xl font-extrabold tracking-tight`} style={{ color: colors.textPrimary }}>
               Nouveau Signalement
             </Text>
           </View>
@@ -252,7 +252,7 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
             showsVerticalScrollIndicator={false}
             contentContainerStyle={formContentStyle}
             keyboardShouldPersistTaps='handled'>
-            <Text className={classes.formLabel}>Catégorie</Text>
+            <Text className={classes.formLabel} style={typeStyles.formLabel}>Catégorie</Text>
             <View style={styles.categoryGrid}>
               {CATEGORIES.map((cat) => {
                 const isSelected = category === cat;
@@ -284,7 +284,7 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
               })}
             </View>
 
-            <Text className={classes.formLabel}>Localisation</Text>
+            <Text className={classes.formLabel} style={typeStyles.formLabel}>Localisation</Text>
             <View
               className={`mb-6 flex-row items-center ${classes.formField}`}
               style={fieldInnerPadding}>
@@ -311,7 +311,7 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
               </TouchableOpacity>
             </View>
 
-            <Text className={classes.formLabel}>Photo</Text>
+            <Text className={classes.formLabel} style={typeStyles.formLabel}>Photo</Text>
             <TouchableOpacity
               onPress={pickImage}
               accessibilityLabel='Ajouter une photo'
@@ -329,12 +329,12 @@ const ReportSignalementSheet = forwardRef<ReportSignalementSheetRef>(
               ) : (
                 <View className='items-center'>
                   <Ionicons name='camera' size={36} color={colors.iconMuted} />
-                  <Text className={classes.photoHint}>Photo ou galerie</Text>
+                  <Text className={classes.photoHint} style={typeStyles.photoHint}>Photo ou galerie</Text>
                 </View>
               )}
             </TouchableOpacity>
 
-            <Text className={classes.formLabel}>Commentaire</Text>
+            <Text className={classes.formLabel} style={typeStyles.formLabel}>Commentaire</Text>
             <TextInput
               value={comments}
               onChangeText={setComments}

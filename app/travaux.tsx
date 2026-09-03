@@ -17,7 +17,7 @@ import { useCityServicesAccess } from '@hooks/useCityServicesAccess';
 import NoPartnerCityBanner from '@components/NoPartnerCityBanner';
 
 export default function Travaux() {
-  const { dark, primaryColor, classes, colors, tintColor, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, tintColor, layoutStyles, typeStyles } = useAppTheme();
   const { needsPartnerCity, cityServicesEnabled } = useCityServicesAccess();
   const insets = useSafeAreaInsets();
 
@@ -78,13 +78,13 @@ export default function Travaux() {
             paddingHorizontal: 20,
           }}>
           <View className='mb-8'>
-            <Text className={classes.eyebrow}>Infrastructure</Text>
-            <Text className={classes.title}>Travaux</Text>
+            <Text className={classes.eyebrow} style={typeStyles.eyebrow}>Infrastructure</Text>
+            <Text className={classes.title} style={typeStyles.title}>Travaux</Text>
           </View>
           {needsPartnerCity ? (
             <NoPartnerCityBanner />
           ) : (
-            <Text className={classes.body}>
+            <Text className={classes.body} style={typeStyles.body}>
               Les informations sur les travaux ne sont pas disponibles pour cette commune.
             </Text>
           )}
@@ -107,8 +107,8 @@ export default function Travaux() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
         }>
         <View className='mb-8'>
-          <Text className={classes.eyebrow}>Infrastructure</Text>
-          <Text className={classes.title}>Travaux</Text>
+          <Text className={classes.eyebrow} style={typeStyles.eyebrow}>Infrastructure</Text>
+          <Text className={classes.title} style={typeStyles.title}>Travaux</Text>
         </View>
 
         <View className='space-y-4'>
@@ -117,7 +117,7 @@ export default function Travaux() {
           ) : error ? (
             <View className='items-center py-20'>
               <Ionicons name='alert-circle-outline' size={48} color={colors.handle} />
-              <Text className={`mt-4 text-center ${classes.subtitle}`}>{error}</Text>
+              <Text className={`mt-4 text-center ${classes.subtitle}`} style={typeStyles.subtitle}>{error}</Text>
               <TouchableOpacity
                 onPress={() => loadWorks()}
                 className='mt-4'
@@ -131,11 +131,11 @@ export default function Travaux() {
           ) : works.length === 0 ? (
             <View className='items-center py-20'>
               <Ionicons name='hammer-outline' size={48} color={colors.handle} />
-              <Text className={`mt-4 ${classes.subtitle}`}>Aucun chantier signalé</Text>
+              <Text className={`mt-4 ${classes.subtitle}`} style={typeStyles.subtitle}>Aucun chantier signalé</Text>
             </View>
           ) : (
             works.map((item, i) => (
-              <TouchableOpacity key={i} className={`shadow-soft mb-4 ${classes.cardRounded}`}>
+              <TouchableOpacity key={i} className={`shadow-soft mb-4 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
                 <View className='p-6'>
                   <View className='mb-4 flex-row items-center'>
                     <View
@@ -145,12 +145,10 @@ export default function Travaux() {
                     </View>
                     <View className='flex-1'>
                       <Text
-                        className={`text-xl font-bold ${
-                          dark ? 'text-night-text' : 'text-matcha-900'
-                        }`}>
+ className={`text-xl font-bold`} style={{ color: colors.textPrimary }}>
                         {item.title}
                       </Text>
-                      <Text className={classes.subtitle}>
+                      <Text className={classes.subtitle} style={typeStyles.subtitle}>
                         {item.impactType || 'Travaux de voirie'}
                       </Text>
                     </View>
@@ -159,7 +157,7 @@ export default function Travaux() {
                   <View
                     className={`rounded-2xl p-4 ${dark ? 'bg-night-elevated' : 'bg-cream-100'}`}>
                     <View className='mb-2 flex-row items-center justify-between'>
-                      <Text className={classes.eyebrow}>STATUT</Text>
+                      <Text className={classes.eyebrow} style={typeStyles.eyebrow}>STATUT</Text>
                       <Text
                         className='text-xs font-extrabold uppercase'
                         style={{ color: getStatusColor(item.status) }}>
@@ -167,11 +165,9 @@ export default function Travaux() {
                       </Text>
                     </View>
                     <View className='flex-row items-center justify-between'>
-                      <Text className={classes.eyebrow}>PÉRIODE</Text>
+                      <Text className={classes.eyebrow} style={typeStyles.eyebrow}>PÉRIODE</Text>
                       <Text
-                        className={`text-xs font-bold ${
-                          dark ? 'text-night-text' : 'text-charcoal'
-                        }`}>
+ className={`text-xs font-bold`} style={{ color: colors.textBody }}>
                         Du {new Date(item.startDate).toLocaleDateString()} au{' '}
                         {new Date(item.endDate).toLocaleDateString()}
                       </Text>
@@ -184,11 +180,9 @@ export default function Travaux() {
         </View>
 
         <View
-          className={`mt-8 rounded-[20px] border border-dashed p-6 ${
-            dark ? 'border-night-border' : 'border-cream-200'
-          }`}>
+          className={`mt-8 rounded-[20px] border border-dashed p-6 ${ dark ? 'border-night-border' : 'border-cream-200' }`}>
           <Text
-            className={`text-center text-xs leading-5 ${dark ? 'text-night-muted' : 'text-muted'}`}>
+ className={`text-center text-xs leading-5`} style={{ color: colors.textSecondary }}>
             Ces informations sont fournies à titre indicatif par les services techniques de la
             ville. Les dates peuvent varier selon les conditions météorologiques.
           </Text>

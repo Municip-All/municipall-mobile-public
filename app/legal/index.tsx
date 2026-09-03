@@ -11,7 +11,7 @@ import { useCityLegalContext } from '@hooks/useCityLegalContext';
 import type { RouteHref } from '../../lib/types';
 
 export default function LegalHubScreen() {
-  const { dark, classes, colors, layoutStyles } = useAppTheme();
+  const { dark, classes, colors, layoutStyles, typeStyles } = useAppTheme();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -36,7 +36,7 @@ export default function LegalHubScreen() {
           paddingBottom: insets.bottom + 32,
           paddingTop: 8,
         }}>
-        <Text className={`mb-4 ${classes.body}`}>
+        <Text className={`mb-4 ${classes.body}`} style={typeStyles.body}>
           Transparence sur l&apos;utilisation de {LEGAL_ENTITY.appName} : documents contractuels,
           protection des données (RGPD) et exercice de vos droits. Responsable de traitement :{' '}
           {LEGAL_ENTITY.legalName}.
@@ -44,8 +44,8 @@ export default function LegalHubScreen() {
         {cityLegal.cityName ? (
           <View
             className={`mb-6 rounded-2xl border p-4 ${dark ? 'border-night-border bg-night-surface' : 'border-cream-200 bg-cream-50'}`}>
-            <Text className={classes.meta}>Votre commune — {cityLegal.cityName}</Text>
-            <Text className={`mt-2 text-xs leading-5 ${classes.body}`}>
+            <Text className={classes.meta} style={typeStyles.meta}>Votre commune — {cityLegal.cityName}</Text>
+            <Text className={`mt-2 text-xs leading-5 ${classes.body}`} style={typeStyles.body}>
               {cityLegal.dataRetentionPolicy?.trim() ||
                 "Durées spécifiques non renseignées : les durées par défaut Municipall s'appliquent (voir politique de confidentialité, section 5)."}
             </Text>
@@ -69,10 +69,10 @@ export default function LegalHubScreen() {
                 </View>
                 <View className='flex-1'>
                   <Text
-                    className={`text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+ className={`text-sm font-semibold`} style={{ color: colors.textBody }}>
                     {item.label}
                   </Text>
-                  <Text className={`mt-0.5 text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
+                  <Text className={`mt-0.5 text-xs`} style={{ color: colors.textSecondary }}>
                     {item.description}
                   </Text>
                 </View>
@@ -83,7 +83,7 @@ export default function LegalHubScreen() {
         </View>
 
         <Text
-          className={`mt-6 text-center text-[11px] leading-4 ${dark ? 'text-night-muted' : 'text-muted'}`}>
+ className={`mt-6 text-center text-[11px] leading-4`} style={{ color: colors.textSecondary }}>
           Version {LEGAL_ENTITY.documentVersion} — {LEGAL_ENTITY.lastUpdated}
           {'\n'}
           {LEGAL_ENTITY.privacyEmail}

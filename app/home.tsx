@@ -14,7 +14,6 @@ import { BlurView } from 'expo-blur';
 import { useAppTheme } from '@hooks/useAppTheme';
 import { useCity } from '@context/citycontext';
 import { useHomeHighlights } from '@hooks/useHomeHighlights';
-import type { HomeHighlight } from '../services/homeHighlights';
 import BottomBar from '@components/BottomBar';
 import BrandedLogo from '@components/BrandedLogo';
 import FloatingMapButton from '@components/FloatingMapButton';
@@ -24,10 +23,11 @@ import { useAuth } from '@context/authcontext';
 import { ensureCanReport } from '../lib/requireAuthForReport';
 import { useCityServicesAccess } from '@hooks/useCityServicesAccess';
 import NoPartnerCityBanner from '@components/NoPartnerCityBanner';
+import { cityDisplayName } from '../lib/cityDisplay';
 import type { IconName, RouteHref } from '../lib/types';
 
 export default function Home() {
-  const { dark, primaryColor, classes, colors, brand, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, brand, layoutStyles, typeStyles } = useAppTheme();
   const { config, weatherData, weatherLoading, weatherError, fetchWeather, refreshConfig } =
     useCity();
   const { cityServicesEnabled, needsPartnerCity } = useCityServicesAccess();
@@ -52,22 +52,7 @@ export default function Home() {
     }, [refreshHighlights, refreshConfig])
   );
 
-  const iconBg = (item: HomeHighlight) => {
-    switch (item.type) {
-      case 'waste':
-        return dark ? 'bg-night-elevated' : 'bg-matcha-100';
-      case 'work':
-        return item.iconColor === '#FF9500'
-          ? dark
-            ? 'bg-night-elevated'
-            : 'bg-matcha-100'
-          : dark
-            ? 'bg-night-elevated'
-            : 'bg-matcha-100';
-      case 'event':
-        return dark ? 'bg-night-elevated' : 'bg-matcha-100';
-    }
-  };
+  const iconBgColor = dark ? colors.elevated : colors.palette.matcha100;
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isAuthenticated } = useAuth();
@@ -82,7 +67,8 @@ export default function Home() {
     cityServicesEnabled &&
     ((config?.isTransportFeatureAllowed && config?.isTransportFeatureEnabled) ?? false);
 
-  const appDisplayName = brand.appName;
+  /** Nom de commune (pas le libellé marque blanche type « Municip'All — … ») */
+  const homeTitle = config ? cityDisplayName(config) : brand.appName;
   const weatherLocation = weatherData?.city;
 
   return (
@@ -97,23 +83,39 @@ export default function Home() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
         }>
-        <View className='mb-8 flex-row items-end justify-between'>
-          <View>
-            <Text className={classes.eyebrow}>
+        <View className='mb-8 flex-row items-end justify-between gap-3'>
+          <View className='min-w-0 flex-1 pr-2'>
+            <Text className={classes.eyebrow} style={typeStyles.eyebrow}>
               {new Date().toLocaleDateString('fr-FR', {
                 weekday: 'long',
                 day: 'numeric',
                 month: 'long',
               })}
             </Text>
-            <Text className={classes.title}>{appDisplayName}</Text>
+            <Text className={classes.title} numberOfLines={2} style={typeStyles.title}>
+              {homeTitle}
+            </Text>
           </View>
           <TouchableOpacity
             onPress={() => router.push('/ma-commune')}
             activeOpacity={0.85}
             accessibilityRole='button'
-            accessibilityLabel='Ma commune'>
-            <BrandedLogo size={48} radius={24} mode='contain' />
+            accessibilityLabel='Ma commune'
+            className='shrink-0'>
+            <BrandedLogo
+              size={48}
+              radius={24}
+              mode='contain'
+              backgroundColor={dark ? colors.palette.nightElevated : '#FFFFFF'}
+              style={
+                dark
+                  ? undefined
+                  : {
+                      borderWidth: 1,
+                      borderColor: colors.palette.cream200,
+                    }
+              }
+            />
           </TouchableOpacity>
         </View>
 
@@ -162,16 +164,20 @@ export default function Home() {
             <BlurView
               intensity={dark ? 40 : 80}
               tint={dark ? 'dark' : 'light'}
-              className='border-cream-200 dark:border-night-border overflow-hidden rounded-[20px] border'>
+              className='overflow-hidden rounded-[20px] border'
+              style={{
+                borderColor: colors.border,
+                backgroundColor: dark ? colors.card : 'rgba(255,255,255,0.72)',
+              }}>
               <View className='flex-row items-center justify-between p-6' pointerEvents='none'>
                 <View className='flex-1 pr-4'>
-                  <Text className={classes.subtitle}>Météo</Text>
-                  <Text
-                    className={`mt-1 text-3xl font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+                  <Text className={classes.subtitle} style={typeStyles.subtitle}>
+                    Météo
+                  </Text>
+                  <Text className='mt-1 text-3xl font-bold' style={{ color: colors.textPrimary }}>
                     {weatherLoading ? '...' : weatherData ? `${weatherData.temp}°` : '--°'}
                   </Text>
-                  <Text
-                    className={`text-sm font-medium ${dark ? 'text-night-muted' : 'text-muted'}`}>
+                  <Text className='text-sm font-medium' style={{ color: colors.textSecondary }}>
                     {weatherLoading
                       ? 'Actualisation…'
                       : weatherError
@@ -179,9 +185,10 @@ export default function Home() {
                         : weatherData?.description || 'Appuyez pour actualiser'}
                   </Text>
                   {weatherLocation &&
-                    weatherLocation.toLowerCase() !== appDisplayName.toLowerCase() && (
+                    weatherLocation.toLowerCase() !== homeTitle.toLowerCase() && (
                       <Text
-                        className={`mt-1 text-xs font-medium ${dark ? 'text-night-muted' : 'text-muted'}`}>
+                        className='mt-1 text-xs font-medium'
+                        style={{ color: colors.textSecondary }}>
                         {weatherLocation}
                       </Text>
                     )}
@@ -192,7 +199,7 @@ export default function Home() {
                       weatherLoading ? 'refresh' : weatherData ? 'cloud-outline' : 'partly-sunny'
                     }
                     size={48}
-                    color={primaryColor}
+                    color={dark ? colors.palette.nightText : primaryColor}
                   />
                 </View>
               </View>
@@ -223,20 +230,27 @@ export default function Home() {
               accessibilityRole='button'
               accessibilityLabel={item.label}>
               <View
-                className='shadow-soft mb-2 h-16 w-16 items-center justify-center rounded-2xl'
+                className='mb-2 h-16 w-16 items-center justify-center rounded-2xl'
                 style={{
-                  backgroundColor: dark ? colors.palette.nightElevated : colors.palette.cream50,
+                  backgroundColor: dark ? colors.elevated : colors.palette.cream50,
+                  borderWidth: dark ? 1 : 0,
+                  borderColor: colors.border,
                 }}>
                 <Ionicons name={item.icon as IconName} size={28} color={item.color} />
               </View>
-              <Text className={classes.caption}>{item.label}</Text>
+              <Text
+                className='text-center text-[11px] font-semibold'
+                style={{ color: colors.textPrimary }}
+                numberOfLines={1}>
+                {item.label}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
         ) : null}
 
         {cityServicesEnabled ? (
-        <Text className={`mb-4 ${classes.sectionTitle}`}>À ne pas manquer</Text>
+        <Text className={`mb-4 ${classes.sectionTitle}`} style={typeStyles.sectionTitle}>À ne pas manquer</Text>
         ) : null}
 
         {cityServicesEnabled ? (
@@ -245,8 +259,8 @@ export default function Home() {
             <ActivityIndicator color={primaryColor} />
           </View>
         ) : highlights.length === 0 ? (
-          <View className={`mb-4 p-5 ${classes.cardRounded}`}>
-            <Text className={classes.body}>
+          <View className={`mb-4 p-5 ${classes.cardRounded}`} style={layoutStyles.cardRounded}>
+            <Text className={classes.body} style={typeStyles.body}>
               Rien à signaler pour le moment. Consultez les travaux, la collecte ou les événements
               de votre ville.
             </Text>
@@ -256,19 +270,24 @@ export default function Home() {
             <TouchableOpacity
               key={item.id}
               onPress={() => router.push(item.path as RouteHref)}
-              className={`mb-4 ${classes.cardRounded}`}>
+              className={`mb-4 ${classes.cardRounded}`}
+              style={layoutStyles.cardRounded}>
               <View className='flex-row p-5'>
                 <View
-                  className={`mr-4 h-12 w-12 items-center justify-center rounded-full ${iconBg(item)}`}>
+                  className='mr-4 h-12 w-12 items-center justify-center rounded-full'
+                  style={{ backgroundColor: iconBgColor }}>
                   <Ionicons name={item.icon} size={24} color={item.iconColor} />
                 </View>
                 <View className='flex-1'>
-                  <Text
-                    className={`text-base font-bold ${dark ? 'text-night-text' : 'text-charcoal'}`}>
+                  <Text className='text-base font-bold' style={{ color: colors.textPrimary }}>
                     {item.title}
                   </Text>
-                  <Text className={`mt-1 ${classes.body}`}>{item.body}</Text>
-                  <Text className={`mt-3 ${classes.meta}`}>{item.meta}</Text>
+                  <Text className={`mt-1 ${classes.body}`} style={typeStyles.body}>
+                    {item.body}
+                  </Text>
+                  <Text className={`mt-3 ${classes.meta}`} style={typeStyles.meta}>
+                    {item.meta}
+                  </Text>
                 </View>
               </View>
             </TouchableOpacity>

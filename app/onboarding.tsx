@@ -28,7 +28,7 @@ const steps = [
 
 export default function Onboarding() {
   const router = useRouter();
-  const { dark, primaryColor, classes, colors, tintColor, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, tintColor, layoutStyles, typeStyles } = useAppTheme();
   const [index, setIndex] = useState(0);
   const [completing, setCompleting] = useState(false);
   const total = steps.length;
@@ -68,8 +68,8 @@ export default function Onboarding() {
           style={{ backgroundColor: tintColor(stepColors[index], '20') }}>
           <Ionicons name={steps[index].icon} size={28} color={stepColors[index]} />
         </View>
-        <Text className={`text-center ${classes.sectionTitle}`}>{steps[index].title}</Text>
-        <Text className={`mt-3 text-center text-sm leading-6 ${classes.body}`}>
+        <Text className={`text-center ${classes.sectionTitle}`} style={typeStyles.sectionTitle}>{steps[index].title}</Text>
+        <Text className={`mt-3 text-center text-sm leading-6 ${classes.body}`} style={typeStyles.body}>
           {steps[index].desc}
         </Text>
       </View>
@@ -86,7 +86,7 @@ export default function Onboarding() {
         </View>
         <View className='w-full flex-row items-center justify-between'>
           <TouchableOpacity onPress={onSkip} accessibilityRole='button' accessibilityLabel='Passer'>
-            <Text className={`text-sm ${dark ? 'text-night-muted' : 'text-muted'}`}>Passer</Text>
+            <Text className={`text-sm`} style={{ color: colors.textSecondary }}>Passer</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={onNext}

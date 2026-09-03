@@ -27,7 +27,7 @@ export default function ContactChatScreen() {
   const ticketId = Number(id);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { dark, primaryColor, classes, colors, layoutStyles } = useAppTheme();
+  const { dark, primaryColor, classes, colors, layoutStyles, typeStyles } = useAppTheme();
   const { user } = useAuth();
 
   const [ticket, setTicket] = useState<ContactTicketDetail | null>(null);
@@ -112,7 +112,7 @@ export default function ContactChatScreen() {
   if (!ticket) {
     return (
       <View style={layoutStyles.page} className='items-center justify-center px-6'>
-        <Text className={classes.body}>Conversation introuvable.</Text>
+        <Text className={classes.body} style={typeStyles.body}>Conversation introuvable.</Text>
         <TouchableOpacity
           onPress={() => router.back()}
           className='mt-4'
@@ -143,11 +143,11 @@ export default function ContactChatScreen() {
           </TouchableOpacity>
           <View className='flex-1'>
             <Text
-              numberOfLines={1}
-              className={`text-base font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`}>
+ numberOfLines={1}
+ className={`text-base font-bold`} style={{ color: colors.textPrimary }}>
               {ticket.subject}
             </Text>
-            <Text className={`text-xs ${dark ? 'text-night-muted' : 'text-muted'}`}>
+            <Text className={`text-xs`} style={{ color: colors.textSecondary }}>
               {ticket.ticketType === 'suggestion' ? 'Suggestion · ' : 'Question · '}
               {ticket.status}
               {isClosed ? ' · Archivée' : ''}
@@ -258,7 +258,7 @@ export default function ContactChatScreen() {
             <View
               style={{ paddingBottom: insets.bottom + 8 }}
               className={`px-4 pb-2 ${dark ? 'bg-night-bg' : 'bg-cream-50'}`}>
-              <Text className={`text-center text-xs ${classes.body}`}>
+              <Text className={`text-center text-xs ${classes.body}`} style={typeStyles.body}>
                 Cette conversation est terminée. Vous ne pouvez plus envoyer de messages.
               </Text>
             </View>

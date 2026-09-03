@@ -1,10 +1,14 @@
 import { useMemo } from 'react';
-import { type ViewStyle } from 'react-native';
+import { type TextStyle, type ViewStyle } from 'react-native';
 import { useTheme } from '@context/themecontext';
 import { useCity } from '@context/citycontext';
 import { DEFAULT_PRIMARY, palette, semanticColors, softShadow, tintColor } from '@constants/design';
 import { buildBrandTheme } from '@constants/brand';
 
+/**
+ * Couleurs de texte / surfaces via StyleSheet — NativeWind + TW4 n'applique pas
+ * de façon fiable les tokens custom (text-night-text, bg-night-surface, …).
+ */
 export function useAppTheme() {
   const { colorScheme, theme, setTheme } = useTheme();
   const { config } = useCity();
@@ -24,56 +28,90 @@ export function useAppTheme() {
     ? (brand.backgroundColorDark ?? semanticColors.surfaceAuth.dark)
     : (brand.backgroundColorLight ?? semanticColors.surfaceAuth.light);
 
+  const textPrimary = dark ? palette.nightText : palette.matcha900;
+  const textBody = dark ? '#F4F4F5' : palette.charcoal;
+  /** Secondaire lisible sur fond sombre (évite le muted trop bas) */
+  const textSecondary = dark ? '#D4D4D8' : palette.muted;
+  const cardBg = dark ? palette.nightSurface : palette.cream50;
+  const cardBorder = dark ? palette.nightBorder : palette.cream200;
+  const elevatedBg = dark ? palette.nightElevated : palette.cream100;
+
   const layoutStyles = useMemo(
     () => ({
       page: { flex: 1, backgroundColor: pageBackground } satisfies ViewStyle,
       pageAuth: { flex: 1, backgroundColor: pageAuthBackground } satisfies ViewStyle,
+      card: {
+        backgroundColor: cardBg,
+        borderColor: cardBorder,
+        borderWidth: 1,
+        borderRadius: 16,
+      } satisfies ViewStyle,
+      cardRounded: {
+        backgroundColor: cardBg,
+        borderColor: cardBorder,
+        borderWidth: 1,
+        borderRadius: 20,
+        overflow: 'hidden',
+      } satisfies ViewStyle,
+      cardRoundedLg: {
+        backgroundColor: cardBg,
+        borderColor: cardBorder,
+        borderWidth: 1,
+        borderRadius: 20,
+        overflow: 'hidden',
+      } satisfies ViewStyle,
     }),
-    [pageBackground, pageAuthBackground]
+    [pageBackground, pageAuthBackground, cardBg, cardBorder]
   );
 
+  /** Typo sans couleur (NativeWind) — toujours coupler avec typeStyles.* */
   const classes = useMemo(
     () => ({
-      card: dark
-        ? 'rounded-2xl border border-night-border bg-night-surface'
-        : 'rounded-2xl border border-cream-200 bg-cream-50',
-      cardRounded: dark
-        ? 'overflow-hidden rounded-[20px] border border-night-border bg-night-surface'
-        : 'overflow-hidden rounded-[20px] border border-cream-200 bg-cream-50',
-      cardRoundedLg: dark
-        ? 'overflow-hidden rounded-[20px] border border-night-border bg-night-surface'
-        : 'overflow-hidden rounded-[20px] border border-cream-200 bg-cream-50',
-      listGroup: dark
-        ? 'overflow-hidden rounded-2xl border border-night-border bg-night-surface'
-        : 'overflow-hidden rounded-2xl border border-cream-200 bg-cream-50',
-      eyebrow: `text-xs font-semibold tracking-widest uppercase ${dark ? 'text-night-muted' : 'text-muted'}`,
-      title: `text-4xl font-extrabold tracking-tight ${dark ? 'text-night-text' : 'text-matcha-900'}`,
-      sectionTitle: `text-2xl font-bold ${dark ? 'text-night-text' : 'text-matcha-900'}`,
-      subtitle: `text-sm font-medium ${dark ? 'text-night-muted' : 'text-muted'}`,
-      body: `text-sm leading-5 ${dark ? 'text-night-text' : 'text-charcoal'}`,
-      meta: `text-[11px] font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`,
-      caption: `text-[10px] font-semibold ${dark ? 'text-night-muted' : 'text-muted'}`,
-      chipInactive: dark
-        ? 'border border-night-border bg-transparent'
-        : 'border border-cream-200 bg-transparent',
-      input: dark
-        ? 'rounded-xl border border-night-border bg-night-surface text-night-text'
-        : 'rounded-xl border border-cream-200 bg-cream-100 text-matcha-900',
-      formLabel: `mb-3 mt-1 text-xs font-semibold tracking-widest uppercase ${dark ? 'text-night-muted' : 'text-muted'}`,
-      formField: dark
-        ? 'rounded-xl border border-night-border bg-night-surface'
-        : 'rounded-xl border border-cream-200 bg-cream-100',
-      formFieldText: `text-base font-medium ${dark ? 'text-night-text' : 'text-matcha-900'}`,
-      chipUnselected: dark
-        ? 'rounded-xl border border-night-border bg-night-surface px-6 py-3'
-        : 'rounded-xl border border-cream-200 bg-cream-50 px-6 py-3',
-      chipUnselectedText: `text-sm font-semibold ${dark ? 'text-night-text' : 'text-charcoal'}`,
-      photoDropzone: dark
-        ? 'rounded-2xl border-2 border-dashed border-night-border bg-night-surface'
-        : 'rounded-2xl border-2 border-dashed border-cream-200 bg-cream-50',
-      photoHint: `mt-2 text-sm font-medium ${dark ? 'text-night-muted' : 'text-muted'}`,
+      card: 'rounded-2xl border',
+      cardRounded: 'overflow-hidden rounded-[20px] border',
+      cardRoundedLg: 'overflow-hidden rounded-[20px] border',
+      listGroup: 'overflow-hidden rounded-2xl border',
+      eyebrow: 'text-xs font-semibold tracking-widest uppercase',
+      title: 'text-4xl font-extrabold tracking-tight',
+      sectionTitle: 'text-2xl font-bold',
+      subtitle: 'text-sm font-medium',
+      body: 'text-sm leading-5',
+      meta: 'text-[11px] font-semibold',
+      caption: 'text-[10px] font-semibold',
+      chipInactive: 'border bg-transparent',
+      input: 'rounded-xl border',
+      formLabel: 'mb-3 mt-1 text-xs font-semibold tracking-widest uppercase',
+      formField: 'rounded-xl border',
+      formFieldText: 'text-base font-medium',
+      chipUnselected: 'rounded-xl border px-6 py-3',
+      chipUnselectedText: 'text-sm font-semibold',
+      photoDropzone: 'rounded-2xl border-2 border-dashed',
+      photoHint: 'mt-2 text-sm font-medium',
     }),
-    [dark]
+    []
+  );
+
+  const typeStyles = useMemo(
+    () =>
+      ({
+        eyebrow: { color: textSecondary } satisfies TextStyle,
+        title: { color: textPrimary } satisfies TextStyle,
+        sectionTitle: { color: textPrimary } satisfies TextStyle,
+        subtitle: { color: textSecondary } satisfies TextStyle,
+        body: { color: textBody } satisfies TextStyle,
+        meta: { color: textSecondary } satisfies TextStyle,
+        caption: { color: textSecondary } satisfies TextStyle,
+        formLabel: { color: textSecondary } satisfies TextStyle,
+        formFieldText: { color: textPrimary } satisfies TextStyle,
+        chipUnselectedText: { color: textBody } satisfies TextStyle,
+        photoHint: { color: textSecondary } satisfies TextStyle,
+        input: {
+          color: textPrimary,
+          borderColor: cardBorder,
+          backgroundColor: cardBg,
+        } satisfies TextStyle,
+      }) as const,
+    [textPrimary, textBody, textSecondary, cardBorder, cardBg]
   );
 
   const colors = useMemo(
@@ -84,15 +122,18 @@ export function useAppTheme() {
       onPrimary: brand.onPrimary,
       primarySoft: brand.primarySoft,
       primaryTint: tintColor(primaryColor),
-      iconMuted: dark ? semanticColors.muted.dark : semanticColors.muted.light,
-      chevron: dark ? semanticColors.muted.dark : semanticColors.muted.light,
-      text: dark ? semanticColors.secondary.dark : semanticColors.secondary.light,
+      textPrimary,
+      textBody,
+      textSecondary,
+      iconMuted: textSecondary,
+      chevron: textSecondary,
+      text: textBody,
       surface: pageBackground,
-      card: dark ? semanticColors.card.dark : semanticColors.card.light,
-      elevated: dark ? semanticColors.elevated.dark : semanticColors.elevated.light,
-      border: dark ? semanticColors.border.dark : semanticColors.border.light,
+      card: cardBg,
+      elevated: elevatedBg,
+      border: cardBorder,
       tabBar: dark ? palette.nightBg : palette.cream50,
-      fabBorder: dark ? palette.nightBorder : palette.cream200,
+      fabBorder: cardBorder,
       softShadow,
       destructive: semanticColors.destructive,
       info: semanticColors.info,
@@ -100,11 +141,23 @@ export function useAppTheme() {
       warning: semanticColors.warning,
       accent: dark ? semanticColors.accent.dark : semanticColors.accent.light,
       points: semanticColors.points,
-      placeholder: dark ? palette.nightMuted : palette.muted,
-      modalSheet: dark ? semanticColors.card.dark : semanticColors.card.light,
-      handle: dark ? palette.nightBorder : palette.cream200,
+      placeholder: textSecondary,
+      modalSheet: cardBg,
+      handle: cardBorder,
     }),
-    [dark, primaryColor, brand.onPrimary, brand.primarySoft, pageBackground]
+    [
+      dark,
+      primaryColor,
+      brand.onPrimary,
+      brand.primarySoft,
+      pageBackground,
+      textPrimary,
+      textBody,
+      textSecondary,
+      cardBg,
+      cardBorder,
+      elevatedBg,
+    ]
   );
 
   return {
@@ -115,6 +168,7 @@ export function useAppTheme() {
     primaryColor,
     brand,
     classes,
+    typeStyles,
     layoutStyles,
     colors,
     tintColor,

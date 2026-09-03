@@ -18,7 +18,7 @@ import ProfileScreenHeader from '@components/ProfileScreenHeader';
 import { updateUserProfile } from '../services/userProfileService';
 
 export default function ProfilePersonalInfoScreen() {
-  const { classes, primaryColor, colors, layoutStyles } = useAppTheme();
+  const { classes, primaryColor, colors, layoutStyles, typeStyles } = useAppTheme();
   const { user, updateUser, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -110,7 +110,7 @@ export default function ProfilePersonalInfoScreen() {
             { label: 'Quartier', value: neighborhood, onChange: setNeighborhood },
           ].map((field, index) => (
             <View key={field.label} className={index > 0 ? 'mt-4' : ''}>
-              <Text className={classes.meta}>{field.label}</Text>
+              <Text className={classes.meta} style={typeStyles.meta}>{field.label}</Text>
               <TextInput
                 value={field.value}
                 onChangeText={field.onChange}
